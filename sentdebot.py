@@ -344,7 +344,7 @@ async def on_message(message):
        contents = message.content.strip().lower()
        for words in filterwords:
            if words in contents:
-              await client.get_user(324953561416859658).send(f"{message.author.mention} wrote {words}.\nMessage Link -> {message.jump_url}")
+              await client.get_user(324953561416859658).send(f"{message.author} wrote {words}.\nMessage Link -> {message.jump_url}")
     
     else:
         query = search_term(message.content)
