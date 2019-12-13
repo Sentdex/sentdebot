@@ -40,6 +40,10 @@ DISCORD_BG_COLOR = '#36393E'
 client = discord.Client()
 token = open(f"{path}/token.txt", "r").read().split('\n')[0]
 
+# Opening Chat Filter Words
+with open("chatfilterwords.txt", "r") as f:
+    filterwords = f.read().split('\n')
+
 commands_available = """```py
 def commands():
     return {
@@ -334,8 +338,14 @@ async def on_message(message):
             if message.author.id == 324953561416859658:
                 with open(f"{path}/history_out.csv", "a") as f:
                     f.write(f"{message.created_at},1\n")
-
-
+    
+    # Sending Sentdex Message Notifying the Slur Used
+    elif message.author != client.user:
+       contents = message.content.strip().lower()
+       for words in filterwords:
+           if words in contents:
+              await client.get_user(324953561416859658).send(f"{message.author.mention} wrote {words}.\nMessage Link -> {message.jump_url}")
+    
     else:
         query = search_term(message.content)
         if query:
@@ -360,6 +370,7 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 NotFoundError: {query} not found```""")
 
+    await client.process_commands(message) #Essential For Making sure Other Commands Work DO NOt DELETE
 
 client.loop.create_task(user_metrics_background_task())
 client.run(token, reconnect=True)
