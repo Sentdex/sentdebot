@@ -68,8 +68,13 @@ chatbots = [405511726050574336,
             414630095911780353,
             500507500962119681]
 
+guild_id = 405403391410438165
 admin_id = 405506750654054401
 mod_id = 405520180974714891
+cmn_role = 
+
+rule_msg = 477979187559268354
+init_channel_id = 476473718479257620
 
 admins_mods_ids = [admin_id, mod_id]
 # condition to restrict a command to admins/mods: len([r for r in author_roles if r.id in admins_mods_ids]) > 0
@@ -264,7 +269,19 @@ async def user_metrics_background_task():
 async def on_ready():
     print(f"We have logged in as {client.user}")
     await client.change_presence(status = discord.Status.online, activity = discord.Game('help(sentdebot)'))  # added by https://www.gitlab.com/cynthiusstudios
-
+    
+    #Bot Offline Role Resolver
+    guild = client.get_guild(guild_id)
+    channel = client.get_channel(init_channel_id)
+    message = await channel.fetch_message(rule_msg)
+    reactions = message.reactions
+    role = discord.utils.get(guild.roles, id = cmn_role)
+    for reaction in reactions:
+        users = await reaction.users().flatten()
+        for user in users:  
+            if isinstance(user, discord.Member):
+                if not role in user.roles:
+                    await user.add_roles(role)
 
 @client.event
 async def on_message(message):
@@ -372,5 +389,30 @@ NotFoundError: {query} not found```""")
 
     await client.process_commands(message) #Essential For Making sure Other Commands Work DO NOt DELETE
 
+@client.event
+async def on_member_join(member):
+    embed = discord.Embed(colour = discord.Colour.red(), title = "***Welcome To Sentdex's Discord!***", description = "Welcome to Our Discord Channel! We are Pleased to Have You!\n\nHowever, right now you are restricted from sending any types of messages to all the channels. To REMOVE this restriction head over to our #\__init__ channel and read all the rules properly, then react that very post with any emoji!\n\n:heart::blue_heart::white_heart: _Enjoy Your Stay!!_ :purple_heart::orange_heart::yellow_heart:" )
+    embed.set_author(name = "Sentdebot")
+    embed.set_thumbnail(url = "https://yt3.ggpht.com/a/AGF-l7_NTtkvR0TUvbiz3MiqvYPL7WB-63g0DwPNDw=s900-c-k-c0xffffffff-no-rj-mo")
+    await member.send(embed = embed)
+        
+@client.event
+async def on_raw_reaction_add(payload):
+    message_id = payload.message_id
+        
+    if message_id == rule_msg:
+        guild = client.get_guild(guild_id)
+        role = discord.utils.get(guild.roles, id = cmn_role)
+        if role is not None:
+            member = discord.utils.find(lambda m: m.id == payload.user.id, guild.members)
+            if member is not None:
+                await member.add_roles(role)
+                print("done")
+            else:
+                print('Member not found')
+        else:
+            print('Role Not Found')
+            
+    
 client.loop.create_task(user_metrics_background_task())
 client.run(token, reconnect=True)
