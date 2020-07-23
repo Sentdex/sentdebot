@@ -15,9 +15,11 @@ import os
 import numpy as np
 style.use("dark_background")
 
+
 path = '/sentdebot/'
 
-# days of history to work with for images.
+
+# days of history to work with
 DAYS_BACK = 21
 RESAMPLE = "60min"
 # when doing counters of activity, top n users.
@@ -26,6 +28,10 @@ MOST_COMMON_INT = 10
 COMMUNITY_BASED_CHANNELS = ["__main__",
                             "main",
                             "help",
+                            "help_0",
+                            "help_1",
+                            "help_2",
+                            "help_3",
                             "voice-channel-text",
                             "__init__",
                             "hello_technical_questions",
@@ -33,9 +39,14 @@ COMMUNITY_BASED_CHANNELS = ["__main__",
 
 HELP_CHANNELS = ["help",
                  "hello_technical_questions",
+                 "help_0",
+                 "help_1",
+                 "help_2",
+                 "help_3",
                  "help_overflow"]
 
 DISCORD_BG_COLOR = '#36393E'
+
 
 client = discord.Client()
 token = open(f"{path}/token.txt", "r").read().split('\n')[0]
@@ -59,10 +70,12 @@ image_chan_ids = [408713676095488000,
                   484406428233367562,
                   ]
 
+
 chatbots = [405511726050574336,
             428904098985803776,
             414630095911780353,
             500507500962119681]
+
 
 admin_id = 405506750654054401
 mod_id = 405520180974714891
@@ -135,11 +148,13 @@ async def user_metrics_background_task():
             df_msgs.drop("time", 1,  inplace=True)
             df_msgs.set_index("date", inplace=True)
 
+
             df_no_dup = df_msgs.copy()
             df_no_dup['uid2'] = df_no_dup['uid'].shift(-1)
             df_no_dup['uid_rm_dups'] = list(map(df_match, df_no_dup['uid'], df_no_dup['uid2']))
 
             df_no_dup.dropna(inplace=True)
+
 
             message_volume = df_msgs["count"].resample(RESAMPLE).sum()
 
@@ -198,6 +213,7 @@ async def user_metrics_background_task():
             plt.savefig(f"{path}/online.png", facecolor = fig.get_facecolor())
             plt.clf()
 
+
             fig = plt.figure(facecolor=DISCORD_BG_COLOR)
             ax1 = plt.subplot2grid((2, 1), (0, 0))
 
@@ -210,8 +226,6 @@ async def user_metrics_background_task():
             for pair in user_id_counts_overall[::-1]:
                 try:
                     users.append(sentdex_guild.get_member(pair[0]).name)  # get member name from here
-
-                    # Example for trolling people who spam messages for rank. Not the cleanest, but it works :)
                     if "Dhanos" in sentdex_guild.get_member(pair[0]).name:
                         msgs.append(pair[1]/1.0)
                     else:
@@ -245,9 +259,11 @@ async def user_metrics_background_task():
             ax2.barh(y_pos, msgs, align='center', alpha=0.5)
             plt.yticks(y_pos, users)
 
+
             plt.subplots_adjust(left=0.30, bottom=0.15, right=0.99, top=0.95, wspace=0.2, hspace=0.55)
             plt.savefig(f"{path}/activity.png", facecolor=fig.get_facecolor())
             plt.clf()
+
 
             await asyncio.sleep(300)
 
@@ -259,7 +275,7 @@ async def user_metrics_background_task():
 @client.event  # event decorator/wrapper
 async def on_ready():
     print(f"We have logged in as {client.user}")
-    await client.change_presence(status = discord.Status.online, activity = discord.Game('help(sentdebot)'))  # added by https://www.gitlab.com/cynthiusstudios
+    await client.change_presence(status = discord.Status.online, activity = discord.Game('help(sentdebot)'))
 
 
 @client.event
@@ -269,6 +285,8 @@ async def on_message(message):
     author_roles = message.author.roles
     #print(author_roles)
     #author_role_ids = [r.id for r in author_roles]
+
+
 
     if random.choice(range(500)) == 30:
         matches = [r for r in author_roles if r.id in vanity_role_ids]
@@ -301,6 +319,7 @@ async def on_message(message):
         await message.channel.send(f"```py\n{sentdex_guild.member_count}```")
 
 
+
     elif "sentdebot.community_report()" == message.content.lower() and message.channel.id in image_chan_ids:
         online, idle, offline = community_report(sentdex_guild)
 
@@ -308,12 +327,18 @@ async def on_message(message):
         await message.channel.send("", file=file)
 
         await message.channel.send(f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')
+    
+    elif "sentdebot.p6()" == message.content.lower():
+        await message.channel.send(f"```\nThe Neural Networks from Scratch video series will resume when the NNFS book is completed. This means the videos will resume around Sept or Oct 2020.\n\nIf you are itching for the content, you can buy the book and get access to the draft now. The draft is over 500 pages, covering forward pass, activation functions, loss calcs, backward pass, optimization, train/test/validation for classification and regression. You can pre-order the book and get access to the draft via https://nnfs.io```")
+
 
     elif "sentdebot.user_activity()" == message.content.lower() and message.channel.id in image_chan_ids:  # and len([r for r in author_roles if r.id in admins_mods_ids]) > 0:
 
         file = discord.File(f"{path}/activity.png", filename=f"{path}/activity.png")
         await message.channel.send("", file=file)
+
         #await message.channel.send(f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')
+
 
 
     elif "help(sentdebot)" == message.content.lower() or "sentdebot.commands()" == message.content.lower():
@@ -341,6 +366,7 @@ async def on_message(message):
         if query:
             #query = match.group(1)
             print(query)
+
 
             qsearch = query.replace(" ","%20")
             full_link = f"https://pythonprogramming.net/search/?q={qsearch}"
