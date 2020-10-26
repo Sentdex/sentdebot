@@ -1,0 +1,20 @@
+File structure
+==============
+
+bot/
+    files/ - The files needed for the bot to function, all files in this
+            folder are gitignored
+    patches/ - Python package for integration with discord.ext.commands
+    cogs/ - Python package, which is discord.py extension. it contains all
+            the commands
+    sentde.py - The file containing the final bot class and any necessary
+                config helpers.
+    meta.info - The file containing any info about the project, written
+                in a ReStructured Text like format.
+
+Intents
+=======
+
+(WizzyGeek) I have disabled many intents so that the bot can not be [D]DOSed
+This was done by disabling useless intents, even so many unrequired intents are
+available, this is because these intents are not so spammy.
