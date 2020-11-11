@@ -1,23 +1,24 @@
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import matplotlib.dates as mdates
+import asyncio
 import discord
+import pandas as pd
+import random
+import numpy as np
+import time
+import os
+import re
+
 # py -3.6 -m pip install --upgrade requests-html
 from requests_html import HTMLSession
-import re
-import time
-import asyncio
-import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib import style
-import random
 from collections import Counter
-import matplotlib.dates as mdates
-import matplotlib.ticker as mticker
-import os
-import numpy as np
+from matplotlib import style
+
 style.use("dark_background")
 
 
 path = '/sentdebot/'
-
 
 # days of history to work with
 DAYS_BACK = 21
@@ -47,8 +48,10 @@ HELP_CHANNELS = ["help",
 
 DISCORD_BG_COLOR = '#36393E'
 
+intents = discord.Intents.all()
 
-client = discord.Client()
+client = discord.Client(intents=intents)
+
 token = open(f"{path}/token.txt", "r").read().split('\n')[0]
 
 commands_available = """```py
@@ -93,6 +96,7 @@ vanity_role_ids = [479433667576332289,
 
 channel_ids = [408713676095488000,  # main
                412620789133606914]  # help
+
 
 def search_term(message):
     try:
@@ -258,7 +262,6 @@ async def user_metrics_background_task():
             y_pos = np.arange(len(users))
             ax2.barh(y_pos, msgs, align='center', alpha=0.5)
             plt.yticks(y_pos, users)
-
 
             plt.subplots_adjust(left=0.30, bottom=0.15, right=0.99, top=0.95, wspace=0.2, hspace=0.55)
             plt.savefig(f"{path}/activity.png", facecolor=fig.get_facecolor())
