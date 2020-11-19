@@ -36,7 +36,9 @@ COMMUNITY_BASED_CHANNELS = ["__main__",
                             "voice-channel-text",
                             "__init__",
                             "hello_technical_questions",
-                            "help_overflow"]
+                            "help_overflow",
+                            "dogs",
+                            "show_and_tell","politics_enter_at_own_risk"]
 
 HELP_CHANNELS = ["help",
                  "hello_technical_questions",
@@ -332,7 +334,7 @@ async def on_message(message):
         await message.channel.send(f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')
     
     elif "sentdebot.p6()" == message.content.lower():
-        await message.channel.send(f"```\nThe Neural Networks from Scratch video series will resume when the NNFS book is completed. This means the videos will resume around Sept or Oct 2020.\n\nIf you are itching for the content, you can buy the book and get access to the draft now. The draft is over 500 pages, covering forward pass, activation functions, loss calcs, backward pass, optimization, train/test/validation for classification and regression. You can pre-order the book and get access to the draft via https://nnfs.io```")
+        await message.channel.send(f"```\nThe Neural Networks from Scratch videos will resume one day. https://nnfs.io```")
 
 
     elif "sentdebot.user_activity()" == message.content.lower() and message.channel.id in image_chan_ids:  # and len([r for r in author_roles if r.id in admins_mods_ids]) > 0:
