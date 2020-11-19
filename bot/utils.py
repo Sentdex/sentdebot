@@ -1,7 +1,8 @@
-from typing import Any, Callable, NewType, Set, Awaitable, Union, SupportsInt
-from discord.ext.commands import check
-from discord.ext.commands import Context, Command as _Command
+from typing import Any, Awaitable, Callable, NewType, Set, Tuple, Union
 
+from discord import Guild
+from discord.ext.commands import Command as _Command
+from discord.ext.commands import Context, check
 
 ## Types ##
 
@@ -11,7 +12,7 @@ from discord.ext.commands import Context, Command as _Command
 Command = Union[Callable[..., Awaitable[Any]], _Command]
 Check = Callable[[Command], Command]
 
-# Dummy types for readabilty and type chcking
+# Dummy types for readability and type checking
 Id = NewType("Id", int)
 RoleId = NewType("RoleId", Id)
 UserId = NewType("UserId", Id)
@@ -47,3 +48,19 @@ def has_all_roles(roles: Set[RoleId]) -> Check:
     async def predicate(ctx: Context) -> bool:
         return set(map(lambda x: x.id, ctx.author.roles[1:])).issuperset(roles)
     return check(predicate)
+
+
+def community_report(guild: Guild) -> Tuple[int]:
+    online = 0
+    idle = 0
+    offline = 0
+
+    for m in guild.members:
+        if m.raw_status == "online":
+            online += 1
+        elif m.raw_status == "offline":
+            offline += 1
+        else:
+            idle += 1
+
+    return online, idle, offline

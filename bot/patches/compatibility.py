@@ -48,7 +48,9 @@ def clean_string(content: str, prefix: str = "sentdebot "):
     inquotes = False
     on_backslash = False
     for i in args:
-        if i in _quotes and not on_backslash and i != closer:
+        if i == "\\" and inquotes:
+            on_backslash = True
+        elif i in _quotes and not on_backslash and i != closer:
             closer = _quotes[i]
             inquotes = True
             cleaned += i
@@ -74,8 +76,8 @@ def clean_string(content: str, prefix: str = "sentdebot "):
     return cleaned.lower()
 
 # Testing the conversion layer
-# if __name__ == "__main__":
-#     while True:
-#         if not (In := input("clean_string test >>>")):
-#             break
-#         print(clean_string(In))
+if __name__ == "__main__":
+    while True:
+        if not (In := input("clean_string test >>>")):
+            break
+        print(clean_string(In))

@@ -10,14 +10,13 @@ from .utils import RoleId, ChannelId
 # Why do we need intents:
 #   <https://discordpy.readthedocs.io/en/latest/intents.html#>
 def get_intents() -> Intents:
-    intents = Intents.default()
+    intents = Intents.all()
     intents.typing = False
-    intents.dm_messages = False
-    # intents.reactions = False
     intents.dm_reactions = False
-    intents.typing = False
+    # intents.reactions = False
     # Sentdebot NEEDS MEMBERS PRIVILEGED INTENT
-    intents.members = True
+    # intents.members = True
+    # intents.presences = True
     return intents
 
 # This is the class where we introduce new features
@@ -29,6 +28,7 @@ class SentdeBot(SnekBot):
     """
     # TODO:: [May be let these ids be shelved and modified during runtime?
     #         aka let the ids be changed by commands]
+
     vanity_roles: Set[RoleId] = {
         479433667576332289,
         501115401577431050,
@@ -49,9 +49,19 @@ class SentdeBot(SnekBot):
         412620789133606914   # help
     }
 
-    image_channels = {}
+    image_channels: Set[ChannelId]= {
+        408713676095488000,
+        412620789133606914,
+        476412789184004096,
+        499945870473691146,
+        484406428233367562,
+    }
 
-    Guild_id = 405403391410438165 # Sendex (server)
+    guild_id = 405403391410438165 # Sentdex (server)
 
     def __init__(self, *a, **kw) -> None:
         super().__init__(*a, **kw)
+
+    async def on_ready(self):
+        print("SentDeBot is up and running!")
+        self.guild = self.get_guild(SentdeBot.guild_id)
