@@ -14,15 +14,22 @@ import re
 from requests_html import HTMLSession
 from collections import Counter
 from matplotlib import style
+from discord.ext.commands import Bot
 
 style.use("dark_background")
 
 
-path = '/sentdebot/'
+token_path = os.path.abspath(os.path.join('sentdebot', 'token.txt'))
+local_files_path = os.path.abspath(os.path.join('sentdebot'))
+
+SENTEX_GUILD_ID = 405403391410438165
+SENTDEX_ID = 324953561416859658
+DHAN_ID = 150409781595602946
 
 # days of history to work with
 DAYS_BACK = 21
 RESAMPLE = "60min"
+
 # when doing counters of activity, top n users.
 MOST_COMMON_INT = 10
 # names of channels where we want to count activity.
@@ -50,9 +57,9 @@ DISCORD_BG_COLOR = '#36393E'
 
 intents = discord.Intents.all()
 
-client = discord.Client(intents=intents)
+bot = Bot(command_prefix="!", ignore_case=True, intents=intents)
 
-token = open(f"{path}/token.txt", "r").read().split('\n')[0]
+token = open(f"{token_path}", "r").read().split('\n')[0]
 
 commands_available = """```py
 def commands():
@@ -66,19 +73,30 @@ def commands():
     }
 ```"""
 
-image_chan_ids = [408713676095488000,
-                  412620789133606914,
-                  476412789184004096,
-                  499945870473691146,
-                  484406428233367562,
+
+MAIN_CH_ID = 408713676095488000
+DOGS_CH_ID = 671016601440747520
+HELP_CH_ID_0 = 412620789133606914
+HELP_CH_ID_1 = 507281643606638622
+HELP_CH_ID_2 = 682674227664388146
+VOICE2TEXT_CH_ID = 484406428233367562
+HELLO_CHARLES_CH_ID = 407958260168130570
+
+image_chan_ids = [MAIN_CH_ID,
+                  HELP_CH_ID_0,
+                  HELP_CH_ID_1,
+                  HELP_CH_ID_2,
+                  476412789184004096,  # ?
+                  499945870473691146,  # ?
+                  VOICE2TEXT_CH_ID,
                   ]
 
+chatbots = [405511726050574336,  # Charles
+            428904098985803776,  # Irene
+            414630095911780353,  # Charlene (Charles' alter ego)
+            500507500962119681]  # ?
 
-chatbots = [405511726050574336,
-            428904098985803776,
-            414630095911780353,
-            500507500962119681]
-
+SENTDEBOT_ID = 499921685051342848
 
 admin_id = 405506750654054401
 mod_id = 405520180974714891
@@ -94,9 +112,6 @@ vanity_role_ids = [479433667576332289,
                    501114928854204431,
                    479433212561719296]
 
-channel_ids = [408713676095488000,  # main
-               412620789133606914]  # help
-
 
 def search_term(message):
     try:
@@ -107,7 +122,7 @@ def search_term(message):
             if match.group(2)[check.start()-1] != '\\':
                 return False
         return match.group(2)
-    except:
+    except Exception:
         return False
 
 
@@ -135,30 +150,31 @@ def df_match(c1, c2):
 
 
 async def user_metrics_background_task():
-    await client.wait_until_ready()
+    await bot.wait_until_ready()
     global sentdex_guild
-    sentdex_guild = client.get_guild(405403391410438165)
+    sentdex_guild = bot.get_guild(SENTEX_GUILD_ID)
 
-    while not client.is_closed():
+    while not bot.is_closed():
         try:
             online, idle, offline = community_report(sentdex_guild)
-            with open(f"{path}/usermetrics.csv","a") as f:
+            metrics_path = os.path.join(local_files_path, "usermetrics.csv")
+            with open(metrics_path, "a") as f:
                 f.write(f"{int(time.time())},{online},{idle},{offline}\n")
 
-            df_msgs = pd.read_csv(f'{path}/msgs.csv', names=['time', 'uid', 'channel'])
+            df_msgs = pd.read_csv(os.path.join(local_files_path, "msgs.csv"),
+                                  names=['time', 'uid', 'channel']
+                                  )
             df_msgs = df_msgs[(df_msgs['time'] > time.time()-(86400*DAYS_BACK))]
             df_msgs['count'] = 1
             df_msgs['date'] = pd.to_datetime(df_msgs['time'], unit='s')
             df_msgs.drop("time", 1,  inplace=True)
             df_msgs.set_index("date", inplace=True)
 
-
             df_no_dup = df_msgs.copy()
             df_no_dup['uid2'] = df_no_dup['uid'].shift(-1)
             df_no_dup['uid_rm_dups'] = list(map(df_match, df_no_dup['uid'], df_no_dup['uid2']))
 
             df_no_dup.dropna(inplace=True)
-
 
             message_volume = df_msgs["count"].resample(RESAMPLE).sum()
 
@@ -168,7 +184,7 @@ async def user_metrics_background_task():
             uids_in_help = Counter(df_no_dup[df_no_dup['channel'].isin(HELP_CHANNELS)]['uid'].values).most_common(MOST_COMMON_INT)
             #print(uids_in_help)
 
-            df = pd.read_csv(f"{path}/usermetrics.csv", names=['time', 'online', 'idle', 'offline'])
+            df = pd.read_csv(metrics_path, names=['time', 'online', 'idle', 'offline'])
             df = df[(df['time'] > time.time()-(86400*DAYS_BACK))]
             df['date'] = pd.to_datetime(df['time'],unit='s')
             df['total'] = df['online'] + df['offline'] + df['idle']
@@ -214,7 +230,7 @@ async def user_metrics_background_task():
             ax1v.set_ylim(0, 3*df["count"].values.max())
 
             #plt.show()
-            plt.savefig(f"{path}/online.png", facecolor = fig.get_facecolor())
+            plt.savefig(os.path.join(local_files_path, "online.png"), facecolor = fig.get_facecolor())
             plt.clf()
 
 
@@ -264,9 +280,8 @@ async def user_metrics_background_task():
             plt.yticks(y_pos, users)
 
             plt.subplots_adjust(left=0.30, bottom=0.15, right=0.99, top=0.95, wspace=0.2, hspace=0.55)
-            plt.savefig(f"{path}/activity.png", facecolor=fig.get_facecolor())
+            plt.savefig(os.path.join(local_files_path, "activity.png"), facecolor=fig.get_facecolor())
             plt.clf()
-
 
             await asyncio.sleep(300)
 
@@ -275,20 +290,19 @@ async def user_metrics_background_task():
             await asyncio.sleep(300)
 
 
-@client.event  # event decorator/wrapper
+@bot.event  # event decorator/wrapper
 async def on_ready():
-    print(f"We have logged in as {client.user}")
-    await client.change_presence(status = discord.Status.online, activity = discord.Game('help(sentdebot)'))
+    print(f"We have logged in as {bot.user}")
+    await bot.change_presence(status = discord.Status.online, activity = discord.Game('help(sentdebot)'))
 
 
-@client.event
+@bot.event
 async def on_message(message):
     print(f"{message.channel}: {message.author}: {message.author.name}: {message.content}")
-    sentdex_guild = client.get_guild(405403391410438165)
+    sentdex_guild = bot.get_guild(SENTEX_GUILD_ID)
     author_roles = message.author.roles
     #print(author_roles)
     #author_role_ids = [r.id for r in author_roles]
-
 
 
     if random.choice(range(500)) == 30:
@@ -303,45 +317,40 @@ async def on_message(message):
                 author_roles.append(actual_role_choice)
                 await message.author.edit(roles=author_roles)
             except Exception as e:
-                print('EDITING ROLES ISSUE:',str(e))
+                print('EDITING ROLES ISSUE:', str(e))
 
-
-    with open(f"{path}/msgs.csv","a") as f:
+    with open(os.path.join(local_files_path, 'msgs.csv'), "a") as f:
         if message.author.id not in chatbots:
-            f.write(f"{int(time.time())},{message.author.id},{message.channel}\n")
+            f.write(f"{int(time.time())}, {message.author.id}, {message.channel}\n")
 
-    with open(f"{path}/log.csv","a") as f:
+    with open(os.path.join(local_files_path, 'log.csv'), "a") as f:
         if message.author.id not in chatbots:
             try:
-                f.write(f"{int(time.time())},{message.author.id},{message.channel},{message.content}\n")
+                f.write(f"{int(time.time())}, {message.author.id}, {message.channel}, {message.content}\n")
             except Exception as e:
                 f.write(f"{str(e)}\n")
-
 
     if "sentdebot.member_count()" == message.content.lower():
         await message.channel.send(f"```py\n{sentdex_guild.member_count}```")
 
 
-
     elif "sentdebot.community_report()" == message.content.lower() and message.channel.id in image_chan_ids:
         online, idle, offline = community_report(sentdex_guild)
 
-        file = discord.File(f"{path}/online.png", filename=f"{path}/online.png")
+        file = discord.File(os.path.join(local_files_path, "online.png"), filename=f"online.png")
         await message.channel.send("", file=file)
 
         await message.channel.send(f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')
-    
+
     elif "sentdebot.p6()" == message.content.lower():
         await message.channel.send(f"```\nThe Neural Networks from Scratch video series will resume when the NNFS book is completed. This means the videos will resume around Sept or Oct 2020.\n\nIf you are itching for the content, you can buy the book and get access to the draft now. The draft is over 500 pages, covering forward pass, activation functions, loss calcs, backward pass, optimization, train/test/validation for classification and regression. You can pre-order the book and get access to the draft via https://nnfs.io```")
 
 
     elif "sentdebot.user_activity()" == message.content.lower() and message.channel.id in image_chan_ids:  # and len([r for r in author_roles if r.id in admins_mods_ids]) > 0:
-
-        file = discord.File(f"{path}/activity.png", filename=f"{path}/activity.png")
+        file = discord.File(os.path.join(local_files_path, "activity.png"), filename=f"activity.png")
         await message.channel.send("", file=file)
 
         #await message.channel.send(f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')
-
 
 
     elif "help(sentdebot)" == message.content.lower() or "sentdebot.commands()" == message.content.lower():
@@ -349,29 +358,29 @@ async def on_message(message):
 
     # if it doesnt work later.
     #elif "sentdebot.logout()" == message.content.lower() and message.author.id == 324953561416859658:
-    elif "sentdebot.logout()" == message.content.lower() and str(message.author).lower() == "sentdex#7777":
-        await client.close()
-    elif "sentdebot.gtfo()" == message.content.lower() and str(message.author).lower() == "sentdex#7777":
-        await client.close()
+    elif "sentdebot.logout()" == message.content.lower() and message.author.id == SENTDEX_ID:
+        await bot.close()
 
-    elif "sentdebot.get_history()" == message.content.lower() and str(message.author).lower() == "sentdex#7777":
+    elif "sentdebot.gtfo()" == message.content.lower() and message.author.id == SENTDEX_ID:
+        await bot.close()
 
-        channel = sentdex_guild.get_channel(channel_ids[0])
+    elif "sentdebot.get_history()" == message.content.lower() and message.author.id == SENTDEX_ID:
+
+        channel = sentdex_guild.get_channel(MAIN_CH_ID)
 
         async for message in channel.history(limit=999999999999999):
-            if message.author.id == 324953561416859658:
-                with open(f"{path}/history_out.csv", "a") as f:
+            if message.author.id == SENTDEX_ID:
+                with open(os.path.join(local_files_path, "history_out.csv"), "a") as f:
                     f.write(f"{message.created_at},1\n")
 
-
-    else:
+    elif message.content.lower().startswith("sentdebot.search"):
         query = search_term(message.content)
+        print(f"Query: {query}")
         if query:
             #query = match.group(1)
             print(query)
 
-
-            qsearch = query.replace(" ","%20")
+            qsearch = query.replace(" ", "%20")
             full_link = f"https://pythonprogramming.net/search/?q={qsearch}"
             session = HTMLSession()
             r = session.get(full_link)
@@ -388,7 +397,8 @@ async def on_message(message):
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 NotFoundError: {query} not found```""")
+    else:
+        await bot.process_commands(message)
 
-
-client.loop.create_task(user_metrics_background_task())
-client.run(token, reconnect=True)
+bot.loop.create_task(user_metrics_background_task())
+bot.run(token)
