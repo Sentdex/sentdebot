@@ -61,7 +61,10 @@ COMMUNITY_BASED_CHANNELS = ["__main__",
                             "voice-channel-text",
                             "__init__",
                             "hello_technical_questions",
-                            "help_overflow"]
+                            "help_overflow",
+                            "dogs",
+                            "show_and_tell",
+                            "politics_enter_at_own_risk"]
 
 HELP_CHANNELS = ["help",
                  "hello_technical_questions",
@@ -80,7 +83,7 @@ HELLO_TEXTS = ["Hello there {emote} {0}.",
                "Good day {0}. {emote}",
                "Oh {0}! Hello. {emote}",
                "Hey {emote}. {0}",
-               "Hey, do you want some coffe {0}? {emote}",
+               "Hey, do you want some coffee {0}? {emote}",
                ]
 
 intents = discord.Intents.all()
