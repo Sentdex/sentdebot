@@ -46,7 +46,6 @@ VANITY_ROLE_IDS = [479433667576332289,
                    501114928854204431,
                    479433212561719296]
 
-
 MOST_COMMON_INT = 10  # when doing counters of activity, top n users.
 DAYS_BACK = 21  # days of history to work with
 RESAMPLE = "60min"
@@ -74,5 +73,23 @@ HELP_CHANNELS = ["help",
 
 DISCORD_BG_COLOR = '#36393E'
 
+HELLO_TEXTS = ["Hello there {emote} {0}.",
+               "How is it going today {0}? {emote}",
+               "What's up {0}?", "Hey {0}. {emote}",
+               "Hi {0}, do you feel well today? {emote}",
+               "Good day {0}. {emote}",
+               "Oh {0}! Hello. {emote}",
+               "Hey {emote}. {0}",
+               "Hey, do you want some coffe {0}? {emote}",
+               ]
+
 intents = discord.Intents.all()
 bot = Bot(command_prefix="!", ignore_case=True, intents=intents)
+
+
+async def send_approve(ctx):
+    await ctx.message.add_reaction('✅')
+
+
+async def send_disapprove(ctx):
+    await ctx.message.add_reaction('❌')
