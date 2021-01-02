@@ -291,21 +291,23 @@ async def on_message(message):
     #print(author_roles)
     #author_role_ids = [r.id for r in author_roles]
 
+    # https://discordpy.readthedocs.io/en/latest/api.html#discord.Message.type
+    # Dont Give member role on join.
+    if message.type != discord.MessageType.new_member:
+        # Dont mess with Global Random instance on join
+        if random.choice(range(500)) == 30:
+            matches = [r for r in author_roles if r.id in vanity_role_ids]
+            #print(matches)
 
-
-    if random.choice(range(500)) == 30:
-        matches = [r for r in author_roles if r.id in vanity_role_ids]
-        #print(matches)
-
-        if len(matches) == 0:
-            try:
-                role_id_choice = random.choice(vanity_role_ids)
-                actual_role_choice = sentdex_guild.get_role(role_id_choice)
-                #print(type(message.author))
-                author_roles.append(actual_role_choice)
-                await message.author.edit(roles=author_roles)
-            except Exception as e:
-                print('EDITING ROLES ISSUE:',str(e))
+            if len(matches) == 0:
+                try:
+                    role_id_choice = random.choice(vanity_role_ids)
+                    actual_role_choice = sentdex_guild.get_role(role_id_choice)
+                    #print(type(message.author))
+                    author_roles.append(actual_role_choice)
+                    await message.author.edit(roles=author_roles)
+                except Exception as e:
+                    print('EDITING ROLES ISSUE:', str(e))
 
 
     with open(f"{path}/msgs.csv","a") as f:
