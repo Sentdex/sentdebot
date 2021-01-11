@@ -100,13 +100,17 @@ class SentdeBot(SnekBot):
 
     def __init__(self, *a, **kw) -> None:
         self.guild = None
-        self.path = kw.get("file_path", pathlib.Path(__file__).parent / "files")
+        self.path = kw.get("file_path", None)
+
+        if self.path is None:
+            self.path = pathlib.Path(__file__).parent / "files"
 
         # Convert to pathlib.Path or Fail
         try:
             self.path = pathlib.Path(self.path)
         except TypeError as err:
-            pass
+            logger.error(f"Invalid Argument {self.path} for argument file_path!")
+            raise err
 
         self.path.mkdir(exist_ok=True)
         self.path = self.path.resolve()
@@ -114,7 +118,7 @@ class SentdeBot(SnekBot):
         self.RESAMPLE = kw.get("resample", "60min")
         self.MOST_COMMON_INT = kw.get("top_users", 10)
         super().__init__(*a, **kw)
-        self.load_extension("cogs")
+        self.load_extension("bot.cogs")
 
     async def on_ready(self):
         logger.info("SentDeBot is up and running!")
@@ -123,5 +127,3 @@ class SentdeBot(SnekBot):
     @property
     def cmds(self) -> str:
         return commands_available
-
-#logging.basicConfig(format="%(asctime)s %(name)s:%(levelname)s: %(message)s", level=logging.INFO, datefmt="[%a, %d %B %Y %X]")

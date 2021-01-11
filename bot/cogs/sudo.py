@@ -14,7 +14,7 @@ class Sudo(Cog):
 
     def __init__(self, bot) -> None:
         self.bot = bot
-        self.gen_chat = self.guild.get_channel(self.bot.channels[0])
+        self.gen_chat = self.bot.guild.get_channel(self.bot.channels[0])
 
     # Sentdex Only (i don't know for sure wether he owns the bot)
     @command(aliases=["gtfo"])

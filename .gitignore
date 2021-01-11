@@ -305,3 +305,6 @@ $RECYCLE.BIN/
 
 ## Project Specfic ##
 bot/files/*
+
+## Sentdex's Enviroment Specific ##
+sentdebot/

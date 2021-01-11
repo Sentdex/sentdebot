@@ -10,5 +10,5 @@ from .sudo import Sudo
 def setup(bot):
     bot.add_cog(Community(bot))
     bot.add_cog(Logs(bot))
-    bot.add_cog(Cmds())
+    bot.add_cog(Cmds(bot))
     bot.add_cog(Sudo(bot))

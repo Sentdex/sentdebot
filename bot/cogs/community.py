@@ -30,7 +30,7 @@ class Community(Cog):
         self.bot = bot
         # add attributes here so that we dont have to access bot repeatedly
         self.guild = None
-        self.path = self.bot.file_path
+        self.path = self.bot.path
         self.DAYS_BACK = self.bot.DAYS_BACK
         self.RESAMPLE = self.bot.RESAMPLE
         self.MOST_COMMON_INT = self.bot.MOST_COMMON_INT

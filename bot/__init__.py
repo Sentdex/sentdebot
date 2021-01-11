@@ -1,1 +1,1 @@
-from ._bot import SentdeBot
+from ._bot import SentdeBot, get_intents
