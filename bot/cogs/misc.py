@@ -39,8 +39,9 @@ class Cmds(Cog):
                 f"```py\nTraceback (most recent call last):\n  File \"<stdin>\", line 1, in <module>\nNotFoundError: {query} not found```")
 
     @command(name="help")
-    async def _help(self, ctx: Context):
-        await ctx.send(self.bot.cmds)
+    async def _help(self, ctx: Context, text: str):
+        if text.lower() in {"sb", "sentdebot"}:
+            await ctx.send(self.bot.cmds)
 
 def setup(bot):
     bot.add_cog(Cmds(bot))

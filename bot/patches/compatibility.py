@@ -41,7 +41,7 @@ def clean_string(content: str, prefix: str = "sentdebot "):
         except ValueError:
             return content # Not a valid command
         cleaned = content[0:_argstrt].replace(".", " ") # This is the base of the command
-        if cleaned == "help":
+        if cleaned.lower() == "help":
             cleaned = prefix + cleaned
         cleaned += " "
         args = content[_argstrt:].lstrip("(").rstrip(") ") # Remaining has to be the arguments
