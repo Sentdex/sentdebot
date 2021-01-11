@@ -1,7 +1,7 @@
 """This Package contains patches
 
 The patches in this package allow us to transform
-SentdeBot Commands into an iterable string which
+SentdeBot Commands into a string which
 discord.ext.commands needs.
 """
 

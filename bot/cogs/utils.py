@@ -1,4 +1,4 @@
-from typing import Any, Awaitable, Callable, NewType, Set, Tuple, Union
+from typing import Any, Awaitable, Callable, Set, Tuple, Union
 
 from discord import Guild
 from discord.ext.commands import Command as _Command
@@ -12,12 +12,6 @@ from discord.ext.commands import Context, check
 Command = Union[Callable[..., Awaitable[Any]], _Command]
 Check = Callable[[Command], Command]
 
-# Dummy types for readability and type checking
-Id = NewType("Id", int)
-RoleId = NewType("RoleId", Id)
-UserId = NewType("UserId", Id)
-ChannelId = NewType("ChannelId", Id)
-
 ## Checks ##
 
 # All the decorators made by factories are called
@@ -26,31 +20,40 @@ ChannelId = NewType("ChannelId", Id)
 # NOTE:: [Predicate should be a coroutine function,
 #         but it works as sync function as well]
 
-def in_users(Valid: Set[UserId]) -> Check:
+def in_users(Valid: Set[int]) -> Check:
     async def predicate(ctx) -> bool:
         return ctx.author.id in Valid
     # This returns another Function
     # This is not predicate
     return check(predicate)
 
+def is_user(Valid: int) -> Check:
+    async def predicate(ctx) -> bool:
+        return ctx.author.id == Valid
+    return check(predicate)
 
-def has_role(role_id: RoleId) -> Check:
+def in_channels(chan_ids: Set[int]) -> Check:
+    async def predicate(ctx: Context) -> bool:
+        return ctx.channel.id in chan_ids
+    return check(predicate)
+
+def has_role(role_id: int) -> Check:
     async def predicate(ctx: Context) ->  bool:
         return role_id in set(map(lambda x: x.id, ctx.author.roles[1:]))
     return check(predicate)
 
-def has_any_roles(roles: Set[RoleId]) -> Check:
+def has_any_roles(roles: Set[int]) -> Check:
     async def predicate(ctx: Context) -> bool:
         return bool(roles & set(map(lambda x: x.id, ctx.author.roles[1:])))
     return check(predicate)
 
-def has_all_roles(roles: Set[RoleId]) -> Check:
+def has_all_roles(roles: Set[int]) -> Check:
     async def predicate(ctx: Context) -> bool:
         return set(map(lambda x: x.id, ctx.author.roles[1:])).issuperset(roles)
     return check(predicate)
 
-
-def community_report(guild: Guild) -> Tuple[int]:
+# MyPy says the return type is int, int, int
+def community_report(guild: Guild) -> Tuple[int, int, int]:
     online = 0
     idle = 0
     offline = 0

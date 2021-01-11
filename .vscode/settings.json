@@ -1,0 +1,13 @@
+{
+    "spellright.language": [
+        "en"
+    ],
+    "spellright.documentTypes": [
+        "markdown",
+        "latex",
+        "plaintext"
+    ],
+    "python.pythonPath": "C:\\Users\\ojass bharati\\AppData\\Local\\Programs\\Python\\Python38\\python.exe",
+    "python.linting.mypyEnabled": true,
+    "python.linting.enabled": true
+}

@@ -5,7 +5,7 @@ bot/
     files/ - The files needed for the bot to function, all files in this
             folder are gitignored
     patches/ - Python package for integration with discord.ext.commands
-    cogs/ - Python package, which is discord.py extension. it contains all
+    cogs/ - Python package, which is a discord.py extension. it contains all
             the commands
     sentde.py - The file containing the final bot class and any necessary
                 config helpers.
