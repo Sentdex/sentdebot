@@ -2,9 +2,12 @@ import logging
 import pathlib
 
 import discord
+from matplotlib import style
 
 from bot import SentdeBot, get_intents
 
+
+style.use("dark_background")
 # Optionally get uvloop for higher performance
 try:
     import uvloop  # type: ignore
