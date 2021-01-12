@@ -11,8 +11,8 @@ The "style" of using methods to interact with sentdebot should be retained.
 I understand this goes against the main method of making discord bots and commands, but I like interacting my way better :)
 
  <hr />
- 
-Code is messy, or as our resident coding expert sysadmin full stack dev Scoot puts it: 
+
+Code is messy, or as our resident coding expert sysadmin full stack dev Scoot puts it:
 > Ugly.
 
 Everything you see on init commit was written in 1 pass to just make it work. Feel free to clean up as you wish.

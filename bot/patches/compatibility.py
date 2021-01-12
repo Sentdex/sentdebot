@@ -1,7 +1,7 @@
 from discord.ext.commands.view import _quotes
 
 # WARNING:: [The commented code is important please don't remove it
-# unless absolutly neccesary]
+# unless absolutely neccesary]
 # TODO:: [Optimise this function more,
 # and discard invalid commands to make up for lost cpu time.]
 
@@ -10,7 +10,7 @@ from discord.ext.commands.view import _quotes
 # Example:
 #   Id of sentdebot.oof("\", 5) is 163456
 #   Id of sentdebot.oof("\", 5, 888) is 16345645666
-#   Id of "HEllo, how are you?" does not exist
+#   Id of "Hello, how are you?" does not exist
 # Similar strings will have similar IDs
 # The IDs Can be very useful for debugging
 # But i have not implemented this, this could be made easily when bugs
@@ -48,7 +48,7 @@ def clean_string(content: str, prefix: str = "sentdebot "):
 
         # Now we need to build a tuple a of strings from a string which is similar to a tuple's repr
         # eval is not an option since even without builtins it is dangerous
-        # we could just split with comma,
+        # we could just split with a comma,
         # but the args might have commas inside quotes (aka comma inside the command args)!
 
         closer = ""

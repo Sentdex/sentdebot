@@ -16,7 +16,7 @@ class Sudo(Cog):
         self.bot = bot
         self.gen_chat = self.bot.guild.get_channel(self.bot.channels[0])
 
-    # Sentdex Only (i don't know for sure wether he owns the bot)
+    # Sentdex Only (i don't know for sure whether he owns the bot)
     @command(aliases=["gtfo"])
     @is_user(324953561416859658)
     async def logout(self, ctx: Context):

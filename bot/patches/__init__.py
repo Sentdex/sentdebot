@@ -5,9 +5,9 @@ SentdeBot Commands into a string which
 discord.ext.commands needs.
 """
 
-# I could have just a written a new commands lib,
+# I could have just written a new commands lib,
 # but,
-#   1. Thats is too time consuming and hard to maintain
+#   1. That is too time consuming and hard to maintain
 #   2. discord.ext.commands has a lot of useful features
 #       and many libs depend on commands.Bot
 #

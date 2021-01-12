@@ -41,7 +41,7 @@ class SentdeBot(SnekBot):
     Uses A.b(arg1, arg2, ...) style of commands where
     A is the prefix
     """
-    # TODO:: [May be let these ids be shelved and modified during runtime?
+    # TODO:: [Maybe let these ids be shelved and modified during runtime?
     #         aka let the ids be changed by commands]
 
     vanity_roles: Set[int] = {
