@@ -1,12 +1,14 @@
 from typing import NamedTuple, Literal, Callable
 
 # module to define definitions for other modules Only
+Channel_Type = Literal['text', 'voice']
+Role_Type = Literal['admin', 'mod', 'vanity']
 
 
 class Channel(NamedTuple):
     name: str
     id: int
-    type: Literal['text', 'voice']
+    channel_type: Channel_Type
     tags: tuple[Literal['community', 'general', 'help', 'image'], ...]
 
     # defaults
@@ -17,7 +19,7 @@ Role = NamedTuple(
     'Role', [
         ('name', str),
         ('id', int),
-        ('type', Literal['admin', 'mod', 'vanity'])
+        ('role_type', Role_Type),
     ]
 )
 

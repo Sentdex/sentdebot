@@ -1,15 +1,16 @@
-# sentdebot
+# sentdebot revision 2
 
 Code for Sentdebot in the Sentdex discord channel (discord.gg/sentdex)
 
-Pull requests welcome for just about anything. 
+Community upgrade to the sentdebot codebase.
 
-The "style" of using methods to interact with sentdebot should be retained. 
+Core ideas:
+* To improve the quality of the codebase, making it more readable
+* Decouple the codebase from the bot itself, making it more maintainable
+* To make the codebase more flexible, allowing for easy addition of new features
 
-sentdebot.search("text here") vs !search text here. 
-
-I understand this goes against the main method of making discord bots and commands, but I like interacting my way better :)
-
-Code is messy, or as our resident coding expert sysadmin full stack dev Scoot puts it: "Ugly."
-
-Everything you see on init commit was written in 1 pass to just make it work. Feel free to clean up as you wish. 
+Core ethos:
+* No code is precious, if it can be improved, cleaned or otherwise made more usable and friendly, then feel free to do so
+* Try to create and maintain a standardized codebase, so that everyone can use it, tinker with it, and improve it
+* improve the experience for the end user, by providing discrete but useful features
+* Provide quality of life features for new devs, helpers and seniors alike

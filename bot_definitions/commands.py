@@ -17,8 +17,8 @@ from definitions import Command
 #    this can be either a function or a lambda.
 
 
-# I have formatted out the existing register_as_command and have added some ideas for new ones, but I have not yet defined
-# the functions as I wish to get some agreement on the format first.
+# I have formatted out the existing register_as_command and have added some ideas for new ones, but I have not yet
+# defined the functions as I wish to get some agreement on the format first.
 
 # included is a function decorator that is used to make a function a Command
 

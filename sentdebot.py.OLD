@@ -239,7 +239,7 @@ async def on_message(message):
             try:
                 role_id_choice = random.choice(vanity_role_ids)
                 actual_role_choice = sentdex_guild.get_role(role_id_choice)
-                # print(type(message.author))
+                # print(channel_type(message.author))
                 author_roles.append(actual_role_choice)
                 await message.author.edit(roles=author_roles)
             except Exception as e:
