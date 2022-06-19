@@ -1,2 +1,0 @@
-# module for registering different kinds of protocols, such as the definiton of a message handler, or a command handler
-# its so we can use dependency injection to swap out the handlers for testing, and also to expand the bot
