@@ -1,27 +1,32 @@
-import asyncio
 import os
 import time
 from collections import Counter
 
-from matplotlib import pyplot as plt
-import matplotlib.ticker as mticker
-import matplotlib.dates as mdates
-
-from bot_definitions import get_all_channels_by_tag
-
 import discord
+import matplotlib.dates as mdates
+import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
-from discord.ext import commands
+from discord.ext import commands, tasks
+from matplotlib import pyplot as plt
+
 from bot_config import BotConfig
+from bot_definitions import get_all_channels_by_tag
 
 bot_config = BotConfig.get_config('sentdebot')
 
 
 class CommunityStats(commands.Cog):
     def __init__(self, bot):
+        self.guild = None
+        self.COMMUNITY_BASED_CHANNELS = [c.id for c in get_all_channels_by_tag('community')]
+        self.HELP_CHANNELS = [c.id for c in get_all_channels_by_tag('help')]
+        self.DISCORD_BG_COLOR = '#36393E'
+        self.MOST_COMMON_INT = bot_config.top_user_count
         self.bot = bot
-        self.bot.loop.create_task(self.user_metrics_background_task(), name='user_metrics_background_task')
+        self.path = bot_config.path
+        self.DAYS_BACK = bot_config.days_to_keep
+        self.RESAMPLE = bot_config.resample_interval
 
     @commands.command(name='member_count()', help='get the member count')
     async def member_count(self, ctx):
@@ -67,153 +72,134 @@ class CommunityStats(commands.Cog):
         file = discord.File(os.path.join(bot_config.path, 'activity.png'), filename='activity.png')
         await ctx.send(file=file)
 
+    # The try-catch blocks are removed because
+    # the default error handler for a :class:`discord.ext.task.Loop`
+    # prints to sys.sterr by default.
+    # <https://discordpy.readthedocs.io/en/latest/ext/tasks/index.html#discord.ext.tasks.Loop.error>
+    @tasks.loop(seconds=300)
+    async def user_metrics(self):
+        online, idle, offline = self.__community_report(self.guild)
+        # self.path: pathlib.Path
+        with open(self.path / "usermetrics.csv", "a") as f:
+            f.write(f"{int(time.time())},{online},{idle},{offline}\n")
 
-    async def user_metrics_background_task(self):
-        client = self.bot
+        df_msgs = pd.read_csv(str(self.path / "msgs.csv"), names=['time', 'uid', 'channel'])
+        df_msgs = df_msgs[(df_msgs['time'] > time.time() - (86400 * self.DAYS_BACK))]
+        df_msgs['count'] = 1
+        df_msgs['date'] = pd.to_datetime(df_msgs['time'], unit='s')
+        df_msgs.drop("time", 1, inplace=True)
+        df_msgs.set_index("date", inplace=True)
 
-        await client.wait_until_ready()
-        sentdex_guild = client.get_guild(bot_config.guild_id)
-        path = bot_config.path
-        DAYS_BACK = bot_config.days_to_keep
-        RESAMPLE = bot_config.resample_interval
-        MOST_COMMON_INT = bot_config.top_user_count
-        COMMUNITY_BASED_CHANNELS = [channel.id for channel in get_all_channels_by_tag('community')]
-        HELP_CHANNELS = [channel.id for channel in get_all_channels_by_tag('help')]
-        DISCORD_BG_COLOR = '#36393E'
+        df_no_dup = df_msgs.copy()
+        df_no_dup['uid2'] = df_no_dup['uid'].shift(-1)
+        df_no_dup['uid_rm_dups'] = list(map(self.df_match, df_no_dup['uid'], df_no_dup['uid2']))
 
-        while not client.is_closed():
-            try:
-                online, idle, offline = self.__community_report(sentdex_guild)
-                with open(f"{path}/usermetrics.csv", "a") as f:
-                    f.write(f"{int(time.time())},{online},{idle},{offline}\n")
+        df_no_dup.dropna(inplace=True)
 
-                df_msgs = pd.read_csv(f'{path}/msgs.csv', names=['time', 'uid', 'channel'])
-                df_msgs = df_msgs[(df_msgs['time'] > time.time() - (86400 * DAYS_BACK))]
-                df_msgs['count'] = 1
-                df_msgs['date'] = pd.to_datetime(df_msgs['time'], unit='s')
-                df_msgs.drop("time", 1, inplace=True)
-                df_msgs.set_index("date", inplace=True)
+        message_volume = df_msgs["count"].resample(self.RESAMPLE).sum()
 
-                df_no_dup = df_msgs.copy()
-                df_no_dup['uid2'] = df_no_dup['uid'].shift(-1)
-                df_no_dup['uid_rm_dups'] = list(map(self.df_match, df_no_dup['uid'], df_no_dup['uid2']))
+        user_id_counts_overall = Counter(
+            df_no_dup[df_no_dup['channel'].isin(self.COMMUNITY_BASED_CHANNELS)]['uid'].values).most_common(
+            self.MOST_COMMON_INT)
+        # print(user_id_counts_overall)
 
-                df_no_dup.dropna(inplace=True)
+        uids_in_help = Counter(df_no_dup[df_no_dup['channel'].isin(self.HELP_CHANNELS)]['uid'].values).most_common(
+            self.MOST_COMMON_INT)
+        # print(uids_in_help)
 
-                message_volume = df_msgs["count"].resample(RESAMPLE).sum()
+        df = pd.read_csv(str(self.path / "usermetrics.csv"), names=['time', 'online', 'idle', 'offline'])
+        df = df[(df['time'] > time.time() - (86400 * self.DAYS_BACK))]
+        df['date'] = pd.to_datetime(df['time'], unit='s')
+        df['total'] = df['online'] + df['offline'] + df['idle']
+        df.drop("time", 1, inplace=True)
+        df.set_index("date", inplace=True)
 
-                user_id_counts_overall = Counter(
-                    df_no_dup[df_no_dup['channel'].isin(COMMUNITY_BASED_CHANNELS)]['uid'].values).most_common(
-                    MOST_COMMON_INT)
-                # print(user_id_counts_overall)
+        df = df.resample(self.RESAMPLE).mean()
+        df = df.join(message_volume)
 
-                uids_in_help = Counter(df_no_dup[df_no_dup['channel'].isin(HELP_CHANNELS)]['uid'].values).most_common(
-                    MOST_COMMON_INT)
-                # print(uids_in_help)
+        df.dropna(inplace=True)
+        # print(df.head())
 
-                df = pd.read_csv(f"{path}/usermetrics.csv", names=['time', 'online', 'idle', 'offline'])
-                df = df[(df['time'] > time.time() - (86400 * DAYS_BACK))]
-                df['date'] = pd.to_datetime(df['time'], unit='s')
-                df['total'] = df['online'] + df['offline'] + df['idle']
-                df.drop("time", 1, inplace=True)
-                df.set_index("date", inplace=True)
+        fig = plt.figure(facecolor=self.DISCORD_BG_COLOR)
+        ax1 = plt.subplot2grid((2, 1), (0, 0))
+        plt.ylabel("Active Users")
+        plt.title("Community Report")
+        ax1.set_facecolor(self.DISCORD_BG_COLOR)
+        ax1v = ax1.twinx()
+        plt.ylabel("Message Volume")
+        # ax1v.set_facecolor(self.DISCORD_BG_COLOR)
+        ax2 = plt.subplot2grid((2, 1), (1, 0))
+        plt.ylabel("Total Users")
+        ax2.set_facecolor(self.DISCORD_BG_COLOR)
 
-                df = df.resample(RESAMPLE).mean()
-                df = df.join(message_volume)
+        ax1.plot(df.index, df.online, label="Active Users\n(Not Idle)")
+        # ax1v.bar(df.index, df["count"], width=0.01)
 
-                df.dropna(inplace=True)
-                # print(df.head())
+        ax1v.fill_between(df.index, 0, df["count"], facecolor="w", alpha=0.2, label="Message Volume")
+        ax1.legend(loc=2)
+        ax1v.legend(loc=9)
 
-                fig = plt.figure(facecolor=DISCORD_BG_COLOR)
-                ax1 = plt.subplot2grid((2, 1), (0, 0))
-                plt.ylabel("Active Users")
-                plt.title("Community Report")
-                ax1.set_facecolor(DISCORD_BG_COLOR)
-                ax1v = ax1.twinx()
-                plt.ylabel("Message Volume")
-                # ax1v.set_facecolor(DISCORD_BG_COLOR)
-                ax2 = plt.subplot2grid((2, 1), (1, 0))
-                plt.ylabel("Total Users")
-                ax2.set_facecolor(DISCORD_BG_COLOR)
+        ax2.plot(df.index, df.total, label="Total Users")
+        ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d\n%H:%M'))
 
-                ax1.plot(df.index, df.online, label="Active Users\n(Not Idle)")
-                # ax1v.bar(df.index, df["count"], width=0.01)
+        # for label in ax2.xaxis.get_ticklabels():
+        #        label.set_rotation(45)
+        ax2.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='lower'))
+        ax2.legend()
 
-                ax1v.fill_between(df.index, 0, df["count"], facecolor="w", alpha=0.2, label="Message Volume")
-                ax1.legend(loc=2)
-                ax1v.legend(loc=9)
+        plt.subplots_adjust(left=0.11, bottom=0.10, right=0.89, top=0.95, wspace=0.2, hspace=0)
+        ax1.get_xaxis().set_visible(False)
 
-                ax2.plot(df.index, df.total, label="Total Users")
-                ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d\n%H:%M'))
+        ax1v.set_ylim(0, 3 * df["count"].values.max())
 
-                # for label in ax2.xaxis.get_ticklabels():
-                #        label.set_rotation(45)
-                ax2.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='lower'))
-                ax2.legend()
+        # plt.show()
+        plt.savefig(f"{self.path}/online.png", facecolor=fig.get_facecolor())
+        plt.clf()
 
-                plt.subplots_adjust(left=0.11, bottom=0.10, right=0.89, top=0.95, wspace=0.2, hspace=0)
-                ax1.get_xaxis().set_visible(False)
+        fig = plt.figure(facecolor=self.DISCORD_BG_COLOR)
+        ax1 = plt.subplot2grid((2, 1), (0, 0))
 
-                ax1v.set_ylim(0, 3 * df["count"].values.max())
+        plt.xlabel("Message Volume")
+        plt.title(f"General User Activity (past {self.DAYS_BACK} days)")
+        ax1.set_facecolor(self.DISCORD_BG_COLOR)
 
-                # plt.show()
-                plt.savefig(f"{path}/online.png", facecolor=fig.get_facecolor())
-                plt.clf()
+        users = []
+        msgs = []
+        for pair in user_id_counts_overall[::-1]:
+            users.append(self.guild.get_member(pair[0]).name)  # get member name from here
+            msgs.append(pair[1])
 
-                fig = plt.figure(facecolor=DISCORD_BG_COLOR)
-                ax1 = plt.subplot2grid((2, 1), (0, 0))
+        y_pos = np.arange(len(users))
+        ax1.barh(y_pos, msgs, align='center', alpha=0.5)
+        plt.yticks(y_pos, users)
 
-                plt.xlabel("Message Volume")
-                plt.title(f"General User Activity (past {DAYS_BACK} days)")
-                ax1.set_facecolor(DISCORD_BG_COLOR)
+        ax2 = plt.subplot2grid((2, 1), (1, 0))
+        plt.title(f"Help Channel Activity (past {self.DAYS_BACK} days)")
+        plt.xlabel("Help Channel\nMsg Volume")
+        ax2.set_facecolor(self.DISCORD_BG_COLOR)
 
-                users = []
-                msgs = []
-                for pair in user_id_counts_overall[::-1]:
-                    try:
-                        users.append(sentdex_guild.get_member(pair[0]).name)  # get member name from here
-                        if "Dhanos" in sentdex_guild.get_member(pair[0]).name:
-                            msgs.append(pair[1] / 1.0)
-                        else:
-                            msgs.append(pair[1])
-                    except Exception as e:
-                        print(str(e))
-                y_pos = np.arange(len(users))
-                ax1.barh(y_pos, msgs, align='center', alpha=0.5)
-                plt.yticks(y_pos, users)
+        users = []
+        msgs = []
+        for pair in uids_in_help[::-1]:
+            users.append(self.guild.get_member(pair[0]).name)  # get member name from here
+            msgs.append(pair[1])
+            # users.append(pair[0])
 
-                ax2 = plt.subplot2grid((2, 1), (1, 0))
-                plt.title(f"Help Channel Activity (past {DAYS_BACK} days)")
-                plt.xlabel("Help Channel\nMsg Volume")
-                ax2.set_facecolor(DISCORD_BG_COLOR)
+        y_pos = np.arange(len(users))
+        ax2.barh(y_pos, msgs, align='center', alpha=0.5)
+        plt.yticks(y_pos, users)
 
-                users = []
-                msgs = []
-                for pair in uids_in_help[::-1]:
-                    try:
-                        users.append(sentdex_guild.get_member(pair[0]).name)  # get member name from here
+        plt.subplots_adjust(left=0.30, bottom=0.15, right=0.99, top=0.95, wspace=0.2, hspace=0.55)
+        plt.savefig(f"{self.path}/activity.png", facecolor=fig.get_facecolor())
+        plt.clf()
 
-                        if "Dhanos" in sentdex_guild.get_member(pair[0]).name:
-                            msgs.append(pair[1] / 1.0)
-                        else:
-                            msgs.append(pair[1])
-                        # users.append(pair[0])
-                    except Exception as e:
-                        print(str(e))
+    @user_metrics.before_loop
+    async def metric_setup(self):
+        await self.bot.wait_until_ready()
 
-                y_pos = np.arange(len(users))
-                ax2.barh(y_pos, msgs, align='center', alpha=0.5)
-                plt.yticks(y_pos, users)
+        if not self.guild:
+            self.guild = self.bot.get_guild(bot_config.guild_id)
 
-                plt.subplots_adjust(left=0.30, bottom=0.15, right=0.99, top=0.95, wspace=0.2, hspace=0.55)
-                plt.savefig(f"{path}/activity.png", facecolor=fig.get_facecolor())
-                plt.clf()
-
-                await asyncio.sleep(300)
-
-            except Exception as e:
-                print(str(e))
-                await asyncio.sleep(300)
 
 def setup(bot):
     bot.add_cog(CommunityStats(bot))

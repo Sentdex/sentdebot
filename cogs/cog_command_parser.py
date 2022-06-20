@@ -53,7 +53,8 @@ class CommandParser(commands.Cog):
         commands_list = []
         # add bot commands if not hidden
         for command in self.bot.commands:
-            if not command.hidden:
+            # if not hidden, or author not admin
+            if not command.hidden or ctx.author.guild_permissions.administrator:
                 # bot prefix commandname: help
                 commands_list.append(f"\t{self.bot.command_prefix}{command.name}: '{command.help}',")
         # add search commands
@@ -63,7 +64,11 @@ class CommandParser(commands.Cog):
                 f"\t{self.bot.command_prefix}{command}('QUERY'): '{self.search_commands[command][1]}',")
 
         commands_list = "\n".join(commands_list)
-        await ctx.send(prefix + commands_list + suffix)
+        # if admin message author, else message channel
+        if ctx.author.guild_permissions.administrator:
+            await ctx.author.send(prefix + commands_list + suffix)
+        else:
+            await ctx.send(prefix + commands_list + suffix)
 
     async def search(self, message, query):
         query = query.strip('"').strip("'")
