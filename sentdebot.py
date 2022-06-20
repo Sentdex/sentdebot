@@ -8,6 +8,8 @@ from bot_config import BotConfig
 bot_config: BotConfig = BotConfig.get_config('sentdebot')
 client = commands.Bot(command_prefix=bot_config.prefix, intents=discord.Intents.all())
 
+# drop the help command
+client.remove_command('help')
 
 @client.event
 async def on_message(message):
@@ -19,19 +21,17 @@ async def on_message(message):
     await client.process_commands(message)
 
 
-@client.command(name='commands_string()', help='get commands_string', aliases=['help()'])
+@client.command(name='commands()', help='get commands', aliases=['help()'])
 async def commands(ctx):
     prefix = "```py\ndef commands_string():\n\treturn {\n\t\t"
     suffix = "\n\t}\n```"
-    commands_string = ",\n\t\t".join(
+    # if commands are not hidden
+    commands_string = ',\n\t\t'.join(
         f'{command.name}: "{command.help}"'
         for command
-        in client.commands)[:-1]
-
-    # add cog commands_string
-    for cog in client.cogs:
-        for command in client.get_cog(cog).get_commands():
-            commands_string += f',\n\t\t{command.name}: "{command.help}"'
+        in client.commands
+        if not command.hidden
+    )
 
     await ctx.send(
         prefix + commands_string + suffix
