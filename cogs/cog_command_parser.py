@@ -89,23 +89,37 @@ class CommandParser(commands.Cog):
 
     async def search_youtube(self, message, query):
         # look on youtube for query
-        session = AsyncHTMLSession()
+        try:
+            session = AsyncHTMLSession()
 
-        query = query.strip('"').strip("'")
-        query = query.replace(" ", "%20")
-        # url = f"https://www.youtube.com/results?search_query={query}"
-        url = f"https://www.youtube.com/c/{bot_config.yt_channel_id}/search?query={query}"
-        print(url)
-        response = await session.get(url)
-        await response.html.arender(sleep=1, keep_page=True, scrolldown=2, timeout=30)
-        found = response.html.find('a#video-title')[0:2]
-        for links in found:
-            link = next(iter(links.absolute_links))
-            # find embed link
-            # make discord watchable embed with title, description, and thumbnail
-            embed = discord.Embed(title=links.text, description=links.text, url=link, color=0x00ff00)
-            embed.set_thumbnail(url=f"https://img.youtube.com/vi/{link.split('=')[1]}/0.jpg")
-            await message.channel.send(embed=embed)
+            query = query.strip('"').strip("'")
+            query = query.replace(" ", "%20")
+            # url = f"https://www.youtube.com/results?search_query={query}"
+            url = f"https://www.youtube.com/c/{bot_config.yt_channel_id}/search?query={query}"
+            print(url)
+            response = await session.get(url)
+            await response.html.arender(sleep=1, keep_page=True, scrolldown=1, timeout=30)
+            found = response.html.find('a#video-title')
+            if len(found) > 0:
+                for links in found[:5]:
+                    link = next(iter(links.absolute_links))
+                    # find embed link
+                    # make discord watchable embed with title, description, and thumbnail
+                    embed = discord.Embed(title=links.text, description=links.text, url=link, color=0x00ff00)
+                    embed.set_thumbnail(url=f"https://img.youtube.com/vi/{link.split('=')[1]}/0.jpg")
+                    await message.channel.send(embed=embed)
+            else:
+                await message.channel.send(f"""```py
+            Traceback (most recent call last):
+              File "<stdin>", line 1, in <module>
+            NotFoundError: {query} not found```""")
+        except Exception as e:
+            print(e)
+            await message.channel.send(f"""```py
+        Traceback (most recent call last):
+          File "<stdin>", line 1, in <module>
+        NotFoundError: {query} not found```""")
+
 
 def setup(bot):
     bot.add_cog(CommandParser(bot))
