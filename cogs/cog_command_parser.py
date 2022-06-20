@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord.ext.commands import CommandNotFound
 from requests_html import HTMLSession
 
 
@@ -36,8 +37,13 @@ class CommandParser(commands.Cog):
                 else:
                     # process command
                     print(f'Command name: {command_name} is not a search command')
-                    await self.bot.process_commands(message)
         return False
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, CommandNotFound):
+            return
+        raise error
 
     async def search(self, message, query):
         #strip " from query
@@ -63,7 +69,6 @@ class CommandParser(commands.Cog):
           File "<stdin>", line 1, in <module>
         NotFoundError: {query} not found```""")
 
-
     @commands.command(name='commands()', help='get commands', aliases=['help()'])
     async def commands(self, ctx):
         prefix = "```py\ndef commands_string():\n\treturn {\n\t\t"
@@ -79,6 +84,7 @@ class CommandParser(commands.Cog):
         await ctx.send(
             prefix + commands_string + suffix
         )
+
 
 
 def setup(bot):

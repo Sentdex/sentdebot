@@ -62,6 +62,17 @@ class AdminTools(commands.Cog):
         else:
             await ctx.send('You are not allowed to use this command')
 
+    @commands.command(name='restart()', help='shutdown', aliases=['shutdown()'], hidden=True)
+    async def restart(self, ctx):
+        # check to see if the authors' id is the server owners or admins
+        print(f'{ctx.author.id} is trying to restart')
+        if ctx.author.id == ctx.guild.owner.id or ctx.author.id in ctx.guild.owner.guild_permissions.administrator:
+            # todo, restrict bact to server owner
+            await ctx.send('Restarting')
+            await self.bot.logout()
+            await self.bot.close()
+            await self.bot.start(self.bot.token)
+
 
 def setup(bot):
     bot.add_cog(AdminTools(bot))

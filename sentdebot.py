@@ -27,6 +27,7 @@ for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
 
-
+# set bot to ignore CommandNotFound errors
+client.command_not_found = lambda ctx, command: None
 
 client.run(token)
