@@ -10,7 +10,10 @@ bot_config: BotConfig = BotConfig.get_config('sentdebot')
 client = commands.Bot(command_prefix=bot_config.prefix, intents=discord.Intents.all())
 
 # if .replit.txt exists token = token = os.environ['token'] else bot_config.token
-
+if os.path.exists('.replit'):
+    token = os.environ['token']
+else:
+    token = bot_config.token
 
 
 # drop the help command
@@ -50,4 +53,4 @@ for filename in os.listdir('./cogs'):
 
 
 
-client.run(bot_config.token)
+client.run(token)
