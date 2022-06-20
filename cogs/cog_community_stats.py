@@ -28,6 +28,16 @@ class CommunityStats(commands.Cog):
         string = f"```py\n{len([member for member in ctx.guild.members if not member.bot])}```"
         await ctx.send(string)
 
+    @commands.command(name='community_report()', help='get some stats on community')
+    async def community_report(self, ctx):
+        online, idle, offline = self.__community_report(ctx.guild)
+
+        file = discord.File(f"{bot_config.path}/online.png", filename=f"{bot_config.path}/online.png")
+        await ctx.send("", file=file)
+
+        await ctx.send(
+            f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')
+
     @staticmethod
     def __community_report(guild):
         online = 0
@@ -63,11 +73,9 @@ class CommunityStats(commands.Cog):
 
         while not self.bot.is_closed():
             try:
-                print('Updating user metrics...')
                 online, idle, offline = self.__community_report(guild)
                 with open(f"{bot_config.path}/usermetrics.csv", "a") as f:
                     f.write(f"{int(time.time())},{online},{idle},{offline}\n")
-                    print(f"{int(time.time())},{online},{idle},{offline}")
 
                 df_msgs = pd.read_csv(f'{bot_config.path}/msgs.csv', names=['time', 'uid', 'channel'])
                 df_msgs = df_msgs[(df_msgs['time'] > time.time() - (86400 * bot_config.days_to_keep))]
@@ -142,7 +150,6 @@ class CommunityStats(commands.Cog):
                 ax1.get_xaxis().set_visible(False)
                 ax1v.set_ylim(0, 3 * df["count"].values.max())
 
-
                 # plt.show()
                 plt.savefig(f"{bot_config.path}/online.png", facecolor=fig.get_facecolor())
                 plt.clf()
@@ -212,8 +219,6 @@ class CommunityStats(commands.Cog):
                         f.write("")
             except Exception as e:
                 raise e
-
-
 
 def setup(bot):
     bot.add_cog(CommunityStats(bot))

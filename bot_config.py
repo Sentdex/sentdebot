@@ -11,6 +11,8 @@ class BotConfig(NamedTuple):
     prefix: str
     guild_id: int
 
+    yt_channel_id: str
+
     intents: int
 
     resample_interval: str
@@ -60,6 +62,7 @@ class BotConfig(NamedTuple):
                 token=input('Enter your bot token: ') if token is None else token,
                 prefix='sentdebot.',
                 guild_id=405403391410438165,
+                yt_channel_id='sentdex',
                 intents=32767,
                 resample_interval='60min',
                 days_to_keep=21,

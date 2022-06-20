@@ -1,6 +1,18 @@
+import re
+
+import discord
+import requests
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
+from requests import Response
 from requests_html import HTMLSession
+import urllib.request
+
+from bot_config import BotConfig
+
+bot_config = BotConfig.get_config('sentdebot')
+
+
 
 
 class CommandParser(commands.Cog):
@@ -8,6 +20,7 @@ class CommandParser(commands.Cog):
         self.bot = bot
         self.search_commands = {
             'search': (self.search, 'search site for query'),
+            'search_youtube': (self.search_youtube, 'search youtube for query'),
         }
         print(f'Loaded {self.__class__.__name__}')
         print(f'Loaded commands: {list(self.search_commands.keys())}')
@@ -46,8 +59,7 @@ class CommandParser(commands.Cog):
         raise error
 
     async def search(self, message, query):
-        #strip " from query
-        query = query.strip('"')
+        query = query.strip('"').strip("'")
         print(query)
         qsearch = query.replace(" ", "%20")
         full_link = f"https://pythonprogramming.net/search/?q={qsearch}"
@@ -69,21 +81,25 @@ class CommandParser(commands.Cog):
           File "<stdin>", line 1, in <module>
         NotFoundError: {query} not found```""")
 
-    @commands.command(name='commands()', help='get commands', aliases=['help()'])
-    async def commands(self, ctx):
-        prefix = "```py\ndef commands_string():\n\treturn {\n\t\t"
-        suffix = "\n\t}\n```"
-        # if commands are not hidden
-        commands_string = ',\n\t\t'.join(
-            f'{command.name}: "{command.help}"'
-            for command
-            in self.bot.commands
-            if not command.hidden
-        )
+    async def search_youtube(self, message, query):
+        # look on youtube for query
+        query = query.strip('"').strip("'")
+        query = query.replace(" ", "%20")
+        search_url = f"https://www.youtube.com/results?search_query={query}"
+        r = urllib.request.urlopen(search_url)
+        html = r.read().decode('utf-8')
+        print(html.find('yt-lockup-title'))
 
-        await ctx.send(
-            prefix + commands_string + suffix
-        )
+
+
+
+
+
+
+
+
+
+
 
 
 

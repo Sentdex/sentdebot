@@ -18,12 +18,6 @@ class BotOnReady(commands.Cog):
                 'help(sentdebot)',
                 type=discord.ActivityType.watching),
             afk=True)
-        # list of extensions
-        channel = self.bot.get_channel(config.channels[0].id)
-        await channel.send('Loaded cogs: ' + ', '.join(self.bot.cogs))
-
-
-
 
 
 def setup(bot):
