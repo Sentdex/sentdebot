@@ -8,6 +8,7 @@ class BotConfig(NamedTuple):
     path: str
     token: str
     prefix: str
+    guild_id: int
 
     intents: int
 
@@ -27,12 +28,14 @@ class BotConfig(NamedTuple):
     @classmethod
     def from_json(cls, json_str):
         json_dict = loads(json_str)
-        print(json_dict)
-        # convert to namedtuple
-        json_dict['channels'] = [Channel(**c) for c in json_dict['channels']]
-        json_dict['roles'] = [Role(**r) for r in json_dict['roles']]
-        json_dict['chatbots'] = [ChatBot(**b) for b in json_dict['chatbots']]
+        # convert  channels, roles, chatbots to their namedtuples
+        for key, entry_type in [('channels', Channel), ('roles', Role), ('chatbots', ChatBot)]:
+            json_dict[key] = [entry_type._make(entry) for entry in json_dict[key]]
+            print(json_dict[key])
         return cls(**json_dict)
+
+    def as_dict(self):
+        return self._asdict()
 
 
     @classmethod
@@ -46,7 +49,6 @@ class BotConfig(NamedTuple):
                         with open(os.path.join(save_path, 'config.json'), 'r') as f:
                             json_dict = loads(f.read())
                             token = json_dict['token']
-                    os.remove(os.path.join(save_path, 'config.json'))
                 else:
                     return
 
@@ -56,6 +58,7 @@ class BotConfig(NamedTuple):
                 path=save_path,
                 token=input('Enter your bot token: ') if token is None else token,
                 prefix='sentdebot.',
+                guild_id=405403391410438165,
                 intents=32767,
                 resample_interval='60min',
                 days_to_keep=21,
