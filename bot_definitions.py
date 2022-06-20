@@ -89,8 +89,8 @@ def get_all_roles_by_type(role_type: str) -> list:
 
 
 __all__ = [  # to not pollute imports
-    'Channel',
     'Role',
+    'Channel',
     'ChatBot',
     'roles',
     'channels',

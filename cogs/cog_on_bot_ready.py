@@ -1,7 +1,8 @@
 import discord
 from discord.ext import commands
+from bot_config import BotConfig
 
-from sentdebot import bot_config
+config = BotConfig.get_config('sentdebot')
 
 
 class BotOnReady(commands.Cog):
@@ -11,9 +12,18 @@ class BotOnReady(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print(f"We have logged in as {self.bot.user}")
-        await self.bot.change_presence(status=discord.Status.online, activity=discord.Game('help(sentdebot)'))
-        channel = self.bot.get_channel(bot_config.channels[0].id)
-        await channel.send('Hello world!')
+        await self.bot.change_presence(
+            status=discord.Status.online,
+            activity=discord.Game(
+                'help(sentdebot)',
+                type=discord.ActivityType.watching),
+            afk=True)
+        # list of extensions
+        channel = self.bot.get_channel(config.channels[0].id)
+        await channel.send('Loaded cogs: ' + ', '.join(self.bot.cogs))
+
+
+
 
 
 def setup(bot):

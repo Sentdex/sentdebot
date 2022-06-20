@@ -1,18 +1,12 @@
 import os
-import random
 
 import discord
-from discord.ext import commands, tasks
-from requests_html import HTMLSession
+from discord.ext import commands
 
-from bot_definitions import *
-from bot_config import *
+from bot_config import BotConfig
 
-bot_config: BotConfig = get_config('sentdebot')
+bot_config: BotConfig = BotConfig.get_config('sentdebot')
 client = commands.Bot(command_prefix=bot_config.prefix, intents=discord.Intents.all())
-
-# drop the help command
-client.remove_command('help')
 
 
 @client.event
@@ -21,36 +15,33 @@ async def on_message(message):
     print(f'{message.author}: {message.content}')
     if message.author == client.user:
         return
+    # get msg context
+    await client.process_commands(message)
 
-    elif message.content.startswith(bot_config.prefix):
-        await client.invoke(message)
 
-
-@client.command(name='commands()', help='get commands', aliases=['help()'])
+@client.command(name='commands_string()', help='get commands_string', aliases=['help()'])
 async def commands(ctx):
+    prefix = "```py\ndef commands_string():\n\treturn {\n\t\t"
+    suffix = "\n\t}\n```"
+    commands_string = ",\n\t\t".join(
+        f'{command.name}: "{command.help}"'
+        for command
+        in client.commands)[:-1]
+
+    # add cog commands_string
+    for cog in client.cogs:
+        for command in client.get_cog(cog).get_commands():
+            commands_string += f',\n\t\t{command.name}: "{command.help}"'
+
     await ctx.send(
-        "```py\ndef commands():\n\treturn {\n\t\t" +
-        ",\n\t\t".join(
-            f'{command.name}: "{command.help}"'
-            for command
-            in client.commands)[:-1]
-        + "\n\t}\n```"
+        prefix + commands_string + suffix
     )
 
-
-@client.command(name='logout()', help='logout', aliases=['gtfo()'])
-async def logout(ctx):
-    await ctx.send('Logging out...')
-    await client.logout()
-
-
-
-# check to see if cogs folder exists
 if not os.path.exists('cogs'):
     os.makedirs('cogs')
-# load cogs
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
         client.load_extension(f'cogs.{filename[:-3]}')
+
 
 client.run(bot_config.token)

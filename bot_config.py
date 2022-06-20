@@ -1,4 +1,5 @@
 import os
+from functools import cache
 from typing import NamedTuple
 from json import loads, dumps
 from bot_definitions import Channel, Role, ChatBot, channels, roles, chatbots
@@ -68,11 +69,16 @@ class BotConfig(NamedTuple):
                 chatbots=chatbots,
             ).to_json())
 
-def get_config(save_path):
-    if not os.path.exists(save_path):
-        BotConfig.setup_config(save_path)
-    with open(os.path.join(save_path, 'config.json'), 'r') as f:
-        return BotConfig.from_json(f.read())
+    @classmethod
+    @cache
+    def get_config(cls, save_path):
+        if not os.path.exists(save_path):
+            cls.setup_config(save_path)
+        with open(os.path.join(save_path, 'config.json'), 'r') as f:
+            return cls.from_json(f.read())
+
+
+__all__ = ['BotConfig']
 
 if __name__ == '__main__':
     BotConfig.setup_config('sentdebot')
