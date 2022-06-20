@@ -10,13 +10,14 @@ class AdminTools(commands.Cog):
     def class_to_file(self, class_name):
         # we need to split at the capital letters
         cap_indexes = [i for i, char in enumerate(class_name) if char.isupper()]
-        # split at the char before caps it > 0 to avoid the first letter and insert an underscore
-        file_name = class_name[:cap_indexes[0]] + '_' + class_name[cap_indexes[0]:]
-        # lowercase the file name
-        file_name = file_name.lower()
-        # add cog_ to the file name
-        file_name = 'cogs.' + file_name
-        return file_name
+        # for every capital letter, we need to add a _ before it, unless its the first letter, then we just lowercase it
+        for i in cap_indexes:
+            if i == 0:
+                class_name = class_name[:i] + class_name[i].lower() + class_name[i + 1:]
+            else:
+                class_name = class_name[:i] + '_' + class_name[i].lower() + class_name[i + 1:]
+        # return the file name
+        return "cog_" + class_name
 
 
     @commands.command(name='load_cog()', help='load a cog', hidden=True, aliases=['load_cog'])
