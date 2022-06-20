@@ -15,6 +15,7 @@ class LoggingTools(commands.Cog):
     # on message
     @commands.Cog.listener()
     async def on_message(self, message):
+        print(f'{message.created_at} {message.author} {message.content}')
         with open(f"{bot_config.path}/msgs.csv", "a") as msgs, open(f"{bot_config.path}/logs.csv", "a") as log:
             try:
                 if not message.author.bot:

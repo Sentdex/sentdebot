@@ -2,17 +2,16 @@ import re
 
 import discord
 import requests
+from bs4 import BeautifulSoup
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from requests import Response
-from requests_html import HTMLSession
+from requests_html import HTMLSession, AsyncHTMLSession
 import urllib.request
 
 from bot_config import BotConfig
 
 bot_config = BotConfig.get_config('sentdebot')
-
-
 
 
 class CommandParser(commands.Cog):
@@ -28,28 +27,17 @@ class CommandParser(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author != self.bot.user:
-            # get content
             content = message.content
-            print(f'{message.author} said: {content}')
-            # if starts with prefix
             if content.startswith(self.bot.command_prefix):
-                print("It's a command")
-                # trim prefix
                 content = content[len(self.bot.command_prefix):]
                 query_start = content.find('(')
                 query_end = content.find(')')
                 command_name = content[:query_start]
-                print(f'Command name: {command_name}')
                 if command_name in self.search_commands.keys():
-                    print(f'Command name: {command_name} is a search command')
                     args = content[query_start + 1:query_end]
-                    print(f'{command_name} {args}')
                     func = self.search_commands[command_name][0]
                     await func(message, args)
                     return True
-                else:
-                    # process command
-                    print(f'Command name: {command_name} is not a search command')
         return False
 
     @commands.Cog.listener()
@@ -58,9 +46,27 @@ class CommandParser(commands.Cog):
             return
         raise error
 
+    @commands.command("commands()", help="list all commands")
+    async def commands(self, ctx):
+        prefix = """```py\ndef commands():\n\treturn {\n"""
+        suffix = """\n}\n```"""
+        commands_list = []
+        # add bot commands if not hidden
+        for command in self.bot.commands:
+            if not command.hidden:
+                # bot prefix commandname: help
+                commands_list.append(f"\t{self.bot.command_prefix}{command.name}: '{command.help}',")
+        # add search commands
+        for command in self.search_commands.keys():
+            # bot prefix commandname: help
+            commands_list.append(
+                f"\t{self.bot.command_prefix}{command}('QUERY'): '{self.search_commands[command][1]}',")
+
+        commands_list = "\n".join(commands_list)
+        await ctx.send(prefix + commands_list + suffix)
+
     async def search(self, message, query):
         query = query.strip('"').strip("'")
-        print(query)
         qsearch = query.replace(" ", "%20")
         full_link = f"https://pythonprogramming.net/search/?q={qsearch}"
         session = HTMLSession()
@@ -83,25 +89,23 @@ class CommandParser(commands.Cog):
 
     async def search_youtube(self, message, query):
         # look on youtube for query
+        session = AsyncHTMLSession()
+
         query = query.strip('"').strip("'")
         query = query.replace(" ", "%20")
-        search_url = f"https://www.youtube.com/results?search_query={query}"
-        r = urllib.request.urlopen(search_url)
-        html = r.read().decode('utf-8')
-        print(html.find('yt-lockup-title'))
-
-
-
-
-
-
-
-
-
-
-
-
-
+        # url = f"https://www.youtube.com/results?search_query={query}"
+        url = f"https://www.youtube.com/c/{bot_config.yt_channel_id}/search?query={query}"
+        print(url)
+        response = await session.get(url)
+        await response.html.arender(sleep=1, keep_page=True, scrolldown=2, timeout=30)
+        found = response.html.find('a#video-title')[0:2]
+        for links in found:
+            link = next(iter(links.absolute_links))
+            # find embed link
+            # make discord watchable embed with title, description, and thumbnail
+            embed = discord.Embed(title=links.text, description=links.text, url=link, color=0x00ff00)
+            embed.set_thumbnail(url=f"https://img.youtube.com/vi/{link.split('=')[1]}/0.jpg")
+            await message.channel.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(CommandParser(bot))

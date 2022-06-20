@@ -1,3 +1,5 @@
+import time
+
 import discord
 from discord.ext import commands
 
@@ -16,15 +18,18 @@ class MessageCleanup(commands.Cog):
         # search for messaged that are older than 24 hour that are from the bot or start with the bot prefix
         await self.bot.wait_until_ready()
         guild = self.bot.get_guild(bot_config.guild_id)
+        # only delete if it THIS bot
         for channel in guild.text_channels:
-            await channel.purge(limit=100, check=lambda m: m.author.bot or m.content.startswith(bot_config.prefix))
+            async for message in channel.history(limit=None, oldest_first=True):
+                if message.author == self.bot.user or message.content.startswith(self.bot.command_prefix):
+                    if time.time() - message.created_at.timestamp() > 60*5:
+                        await message.delete()
 
     # on message
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author.bot or message.content.startswith(self.bot.command_prefix):
-            # flag message for delete, delay, 5 minutes
-            await message.delete(delay=5)
+        if message.author == self.bot.user or message.content.startswith(self.bot.command_prefix):
+            await message.delete(delay=300)
 
 
 def setup(bot):
