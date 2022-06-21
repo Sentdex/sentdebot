@@ -202,6 +202,10 @@ class CommunityStats(commands.Cog):
         if not self.guild:
             self.guild = self.bot.get_guild(bot_config.guild_id)
 
+    @user_metrics.error
+    async def metric_error(self, ctx, error):
+        raise error
+
 
 def setup(bot):
     bot.add_cog(CommunityStats(bot))

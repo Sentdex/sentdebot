@@ -37,7 +37,7 @@ class MessageCleanup(commands.Cog):
                 await message.delete(delay=86400)
 
     # sweep command
-    @commands.command(name='sweep()')
+    @commands.command(name='sweep()', hidden=True)
     @commands.has_permissions(manage_messages=True)
     async def sweep(self, ctx):
         guild = self.bot.get_guild(bot_config.guild_id)

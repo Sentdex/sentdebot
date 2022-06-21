@@ -104,11 +104,10 @@ class CommandParser(commands.Cog):
           File "<stdin>", line 1, in <module>
         NotFoundError: {query} not found```""")
 
-
     async def eval(self, message, code):
         """Evaluates code"""
         try:
-            client = PystonClient() #  new client for each eval so no pollution
+            client = PystonClient()  # new client for each eval so no pollution
             code = code.strip('"').strip("'").strip('```')
             # first word is language
             lang = code.split('\n')[0].split(' ')[0]
@@ -165,8 +164,6 @@ class CommandParser(commands.Cog):
             await ctx.author.send(prefix + commands_list + suffix)
         except discord.Forbidden:
             await ctx.send(f'{ctx.author.mention} I do not have permission to send messages in {ctx.channel.mention}')
-
-
 
 
 def setup(bot):
