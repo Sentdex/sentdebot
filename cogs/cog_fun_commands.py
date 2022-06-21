@@ -43,6 +43,13 @@ class FunCommands(commands.Cog):
         dogs_channel = discord.utils.get(self.bot.get_all_channels(), name='dogs')
         if dogs_channel is None:
             return
+        # check to see if there was already a daily dog in the last 24 hours
+        # get last bot message that starts with "Here's your daily dog!"
+        messages = await dogs_channel.history(limit=100).flatten()
+        for message in messages:
+            if message.content.startswith('Here\'s your daily dog!'):
+                return
+        # if there was no daily dog in the last 24 hours, send one
         async with aiohttp.ClientSession() as session:
             async with session.get(requests.get('https://dog.ceo/api/breeds/image/random').json()['message']) as resp:
                 if resp.status != 200:
