@@ -1,3 +1,4 @@
+"""Cog to randomly assign vanity roles"""
 import random
 
 import discord

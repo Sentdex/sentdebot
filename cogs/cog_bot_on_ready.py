@@ -1,4 +1,4 @@
-"""cog to handle initial setup of the bot"""
+"""Cog to handle initial setup of the bot"""
 
 import discord
 from discord.ext import commands

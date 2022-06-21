@@ -20,8 +20,9 @@ bot_config = BotConfig.get_config('sentdebot')
 class CommunityStats(commands.Cog):
     def __init__(self, bot):
         self.guild = None
-        self.COMMUNITY_BASED_CHANNELS = [c.id for c in get_all_channels_by_tag('community')]
-        self.HELP_CHANNELS = [c.id for c in get_all_channels_by_tag('help')]
+        self.COMMUNITY_BASED_CHANNELS = self.COMMUNITY_BASED_CHANNELS = [c.name for c in
+                                                                         get_all_channels_by_tag('community')]
+        self.HELP_CHANNELS = [c.name for c in get_all_channels_by_tag('help')]
         self.DISCORD_BG_COLOR = '#36393E'
         self.MOST_COMMON_INT = bot_config.top_user_count
         self.bot = bot
@@ -41,7 +42,6 @@ class CommunityStats(commands.Cog):
 
         file = discord.File(f"{bot_config.path}/online.png", filename=f"{bot_config.path}/online.png")
         await ctx.send("", file=file)
-
         await ctx.send(
             f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')
 
@@ -70,14 +70,13 @@ class CommunityStats(commands.Cog):
 
     @commands.command(name='user_activity()', help='See some stats on top users')
     async def user_activity(self, ctx):
-        # path + activity.png
-        file = discord.File(os.path.join(bot_config.path, 'activity.png'), filename='activity.png')
-        await ctx.send(file=file)
+        await ctx.send(file=discord.File(os.path.join(bot_config.path, 'activity.png'), filename='activity.png'))
 
     # The try-catch blocks are removed because
     # the default error handler for a :class:`discord.ext.task.Loop`
     # prints to sys.sterr by default.
     # <https://discordpy.readthedocs.io/en/latest/ext/tasks/index.html#discord.ext.tasks.Loop.error>
+
     @tasks.loop(seconds=300)
     async def user_metrics(self):
         online, idle, offline = self.__community_report(self.guild)
@@ -198,12 +197,13 @@ class CommunityStats(commands.Cog):
     @user_metrics.before_loop
     async def metric_setup(self):
         await self.bot.wait_until_ready()
-
         if not self.guild:
             self.guild = self.bot.get_guild(bot_config.guild_id)
 
     @user_metrics.error
     async def metric_error(self, ctx, error):
+        if isinstance(error, UserWarning):
+            pass
         raise error
 
 

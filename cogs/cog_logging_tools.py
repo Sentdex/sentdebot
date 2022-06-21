@@ -1,3 +1,4 @@
+"""Cog to logging handler"""
 import time
 
 import discord

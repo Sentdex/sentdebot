@@ -20,6 +20,24 @@ class AdminTools(commands.Cog):
                 class_name = class_name[:i] + '_' + class_name[i].lower() + class_name[i + 1:]
         return "cog_" + class_name
 
+    @staticmethod
+    def file_to_class(file_name):
+        """Function to convert from cog file name to a Cog class name"""
+        # remove 'cog.cog' from the start of the file name
+        # switch from camel_case to PascalCase
+        file_name = file_name[8:]
+        to_strip_indexes = [i for i, char in enumerate(file_name) if char == '_']
+        to_upper_indexes = [i + 1 for i, char in enumerate(file_name) if char == '_']
+        output_string = ''
+        for i in range(len(file_name)):
+            if i in to_strip_indexes:
+                pass
+            elif i in to_upper_indexes:
+                output_string += file_name[i].upper()
+            else:
+                output_string += file_name[i]
+        return output_string
+
     @commands.command(name='load_cog()', help='load a cog', hidden=True, aliases=['load_cog'])
     @commands.has_permissions(administrator=True)
     async def load_cog(self, ctx, cog_name):
@@ -47,7 +65,7 @@ class AdminTools(commands.Cog):
         embed = discord.Embed(title='Loaded cogs', color=0x00ff00)
         for extension in self.bot.extensions:
             embed.add_field(
-                name=extension,
+                name=self.file_to_class(extension),
                 value=self.bot.extensions[extension].__doc__
                 if self.bot.extensions[extension].__doc__
                 else 'No description',

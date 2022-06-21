@@ -1,5 +1,6 @@
 """Cog that handles command parsing for any command that has a query"""
 import discord
+import requests
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from pyston import PystonClient, File
@@ -16,6 +17,7 @@ class CommandParser(commands.Cog):
         self.search_commands = {
             'search': (self.search, 'search site for query'),
             'search_youtube': (self.search_youtube, 'search youtube for query'),
+            'search_github_user': (self.search_github_user, 'search github for query'),
             'eval': (self.eval, 'evaluate code')
         }
         print(f'Loaded {self.__class__.__name__}')
@@ -47,7 +49,8 @@ class CommandParser(commands.Cog):
             return
         raise error  # so we don't silently handle all errors
 
-    async def search(self, message, query):
+    @staticmethod
+    async def search(message, query):
         """Searches the sentdex website for the query"""
         query = query.strip('"').strip("'")
         qsearch = query.replace(" ", "%20")
@@ -55,8 +58,10 @@ class CommandParser(commands.Cog):
         session = HTMLSession()
         r = session.get(full_link)
 
-        specific_tutorials = [(tut.text, list(tut.links)[0]) for tut in r.html.find("a") if
-                              "collection-item" in tut.html]
+        specific_tutorials = [(
+            tut.text, list(tut.links)[0])
+            for tut in r.html.find("a")
+            if "collection-item" in tut.html]
 
         if len(specific_tutorials) > 0:
             return_str = "\n---------------------------------------\n".join(
@@ -70,7 +75,8 @@ class CommandParser(commands.Cog):
           File "<stdin>", line 1, in <module>
         NotFoundError: {query} not found```""")
 
-    async def search_youtube(self, message, query):
+    @staticmethod
+    async def search_youtube(message, query):
         """Searches youtube channel for the query"""
         # look on youtube for query
         try:
@@ -85,6 +91,7 @@ class CommandParser(commands.Cog):
             await response.html.arender(sleep=1, keep_page=True, scrolldown=1, timeout=30)
             found = response.html.find('a#video-title')
             if len(found) > 0:
+
                 for links in found[:5]:
                     link = next(iter(links.absolute_links))
                     # find embed link
@@ -104,14 +111,20 @@ class CommandParser(commands.Cog):
           File "<stdin>", line 1, in <module>
         NotFoundError: {query} not found```""")
 
+    @staticmethod
+    async def search_github_user(message, query):
+        """Searches github for the query"""
+        url = f"https://api.github.com/users/{query}"
+        print(url)
+        response = requests.get(url)
+        print(response.json())
+
+
     async def eval(self, message, code):
         """Evaluates code"""
         try:
             client = PystonClient()  # new client for each eval so no pollution
-            code = code.strip('"').strip("'").strip('```')
-            # first word is language
-            lang = code.split('\n')[0].split(' ')[0]
-            code = code[len(lang) + 1:]
+            lang, code = map(str.strip, code.strip('"\'`\n').split('\n', 1))
             if len(code) > 265:
                 # tell user code is too long
                 await message.channel.send(f"""```py

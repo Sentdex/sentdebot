@@ -1,4 +1,4 @@
-"""function to add silly non useful commands to the bot"""
+"""Cog to add silly bot functions like jokes, etc."""
 import asyncio
 import requests
 from discord.ext import commands, tasks

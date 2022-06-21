@@ -1,3 +1,4 @@
+"""Cog to clean up old bot interactions"""
 import time
 
 import discord
@@ -48,6 +49,7 @@ class MessageCleanup(commands.Cog):
                     if time.time() - message.created_at.timestamp() > 86400:
                         await message.delete()
         await ctx.send('Sweeped!')
+
 
 
 
