@@ -78,12 +78,11 @@ class CommandParser(commands.Cog):
         # look on youtube for query
         try:
             session = AsyncHTMLSession()
-
             query = query.strip('"').strip("'")
             query = query.replace(" ", "%20")
             url = f"https://www.youtube.com/c/{bot_config.yt_channel_id}/search?query={query}"
             response = await session.get(url)
-            await response.html.arender(sleep=1, keep_page=True, scrolldown=1, timeout=30)
+            await response.html.arender(sleep=1, keep_page=False, scrolldown=0, timeout=10)
             found = response.html.find('a#video-title')
             if len(found) > 0:
                 for links in found[:5]:
