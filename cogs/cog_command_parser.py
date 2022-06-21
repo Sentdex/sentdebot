@@ -1,13 +1,8 @@
-import re
-
 import discord
-import requests
-from bs4 import BeautifulSoup
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
-from requests import Response
+from pyston import PystonClient, File
 from requests_html import HTMLSession, AsyncHTMLSession
-import urllib.request
 
 from bot_config import BotConfig
 
@@ -20,18 +15,21 @@ class CommandParser(commands.Cog):
         self.search_commands = {
             'search': (self.search, 'search site for query'),
             'search_youtube': (self.search_youtube, 'search youtube for query'),
+            'eval': (self.eval, 'evaluate code')
         }
         print(f'Loaded {self.__class__.__name__}')
         print(f'Loaded commands: {list(self.search_commands.keys())}')
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        """Listens for messages and parses them for commands"""
         if message.author != self.bot.user:
             content = message.content
             if content.startswith(self.bot.command_prefix):
                 content = content[len(self.bot.command_prefix):]
                 query_start = content.find('(')
-                query_end = content.find(')')
+                # get last instance of ')'
+                query_end = content.rfind(')')
                 command_name = content[:query_start]
                 if command_name in self.search_commands.keys():
                     args = content[query_start + 1:query_end]
@@ -42,35 +40,44 @@ class CommandParser(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
+        """Function to ignore command not found errors. this is because we are using the same format for both the
+        built in commands and the parsed ones, thus whenever you use a command with a query, it logs an error"""
         if isinstance(error, CommandNotFound):
             return
-        raise error
+        raise error  # so we don't silently handle all errors
 
     @commands.command("commands()", help="list all commands")
     async def commands(self, ctx):
+        """Function to print commands"""
         prefix = """```py\ndef commands():\n\treturn {\n"""
         suffix = """\n}\n```"""
         commands_list = []
+        admin_commands_list = []
         # add bot commands if not hidden
         for command in self.bot.commands:
             # if not hidden, or author not admin
-            if not command.hidden or ctx.author.guild_permissions.administrator:
+            if not command.hidden:
                 # bot prefix commandname: help
                 commands_list.append(f"\t{self.bot.command_prefix}{command.name}: '{command.help}',")
+            elif ctx.author.guild_permissions.administrator:
+                admin_commands_list.append(f"\t{self.bot.command_prefix}{command.name}: '{command.help}',")
         # add search commands
         for command in self.search_commands.keys():
             # bot prefix commandname: help
             commands_list.append(
                 f"\t{self.bot.command_prefix}{command}('QUERY'): '{self.search_commands[command][1]}',")
-
         commands_list = "\n".join(commands_list)
+        admin_commands_list = "\n".join(admin_commands_list)
         # if admin message author, else message channel
-        if ctx.author.guild_permissions.administrator:
-            await ctx.author.send(prefix + commands_list + suffix)
-        else:
+        try:
+            if ctx.author.guild_permissions.administrator:
+                await ctx.author.send(prefix + commands_list + admin_commands_list + suffix)
             await ctx.send(prefix + commands_list + suffix)
+        except discord.Forbidden:
+            await ctx.send(f'{ctx.author.mention} I do not have permission to send messages in {ctx.channel.mention}')
 
     async def search(self, message, query):
+        """Searches the sentdex website for the query"""
         query = query.strip('"').strip("'")
         qsearch = query.replace(" ", "%20")
         full_link = f"https://pythonprogramming.net/search/?q={qsearch}"
@@ -93,6 +100,7 @@ class CommandParser(commands.Cog):
         NotFoundError: {query} not found```""")
 
     async def search_youtube(self, message, query):
+        """Searches youtube channel for the query"""
         # look on youtube for query
         try:
             session = AsyncHTMLSession()
@@ -124,6 +132,37 @@ class CommandParser(commands.Cog):
         Traceback (most recent call last):
           File "<stdin>", line 1, in <module>
         NotFoundError: {query} not found```""")
+
+
+    async def eval(self, message, code):
+        """Evaluates code"""
+        try:
+            client = PystonClient() #  new client for each eval so no pollution
+            code = code.strip('"').strip("'").strip('```')
+            # first word is language
+            lang = code.split('\n')[0].split(' ')[0]
+            code = code[len(lang) + 1:]
+            if len(code) > 265:
+                # tell user code is too long
+                await message.channel.send(f"""```py
+            Traceback (most recent call last):
+                File "<stdin>", line 1, in <module>
+            SyntaxError: {code} is too long```""")
+                return
+
+            print(code)
+            output = await client.execute(lang, [File(code)])
+
+            await message.channel.send(f"```py\n{output}\n```")
+        except Exception as e:
+            print(e)
+            await message.channel.send(f"""```py
+        Traceback (most recent call last):
+            File "<stdin>", line 1, in <module>
+        {e}```""")
+
+
+
 
 
 def setup(bot):

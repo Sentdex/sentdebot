@@ -1,9 +1,9 @@
-from typing import NamedTuple, Literal, Callable
+from typing import NamedTuple, Literal
 
 ########################################################################################################################
 
 ChannelType = Literal['text', 'voice']
-ChannelTag = Literal['community', 'general', 'help', 'image']
+ChannelTag = Literal['community', 'general', 'help', 'image', 'no-cleanup']
 
 
 class Channel(NamedTuple):
@@ -49,18 +49,18 @@ roles = [
 ########################################################################################################################
 
 channels = [
-    Channel('__init__', 476473718479257620, 'text', ('community',)),
+    Channel('__init__', 476473718479257620, 'text', ('community', "no-cleanup")),
 
     Channel('__main__', 408713676095488000, 'text', ('general', 'community'), True),
     Channel('show_and_tell', 767379896040161290, 'text', ('general', 'community')),
 
-    Channel('help', 412620789133606914, 'text', ('help', 'community'), True),
-    Channel('help_0', 412620789133606914, 'text', ('help', 'community')),
-    Channel('help_1', 507281643606638622, 'text', ('help', 'community')),
-    Channel('help_2', 682674227664388146, 'text', ('help', 'community')),
-    Channel('help_3', 843130901998469177, 'text', ('help', 'community')),
+    Channel('help', 412620789133606914, 'text', ('help', 'community', "no-cleanup"), True),
+    Channel('help_0', 412620789133606914, 'text', ('help', 'community', "no-cleanup")),
+    Channel('help_1', 507281643606638622, 'text', ('help', 'community', "no-cleanup")),
+    Channel('help_2', 682674227664388146, 'text', ('help', 'community', "no-cleanup")),
+    Channel('help_3', 843130901998469177, 'text', ('help', 'community', "no-cleanup")),
 
-    Channel('dogs', 671016601440747520, 'text', ('general', 'community')),
+    Channel('dogs', 671016601440747520, 'text', ('general', 'community', "no-cleanup")),
 
     Channel('voice-channel-text', 484406428233367562, 'voice', ('general', 'community')),
 
@@ -76,15 +76,15 @@ chatbots = [
 
 ########################################################################################################################
 
-def get_all_channels_by_tag(tag: Literal) -> list:
+def get_all_channels_by_tag(tag: ChannelTag) -> list:
     return [channel for channel in channels if tag in channel.tags]
 
 
-def get_all_channels_by_type(channel_type: str) -> list:
+def get_all_channels_by_type(channel_type: ChannelType) -> list:
     return [channel for channel in channels if channel.channel_type == channel_type]
 
 
-def get_all_roles_by_type(role_type: str) -> list:
+def get_all_roles_by_type(role_type: RoleType) -> list:
     return [role for role in roles if role.role_type == role_type]
 
 

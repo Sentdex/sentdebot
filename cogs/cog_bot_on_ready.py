@@ -11,6 +11,7 @@ class BotOnReady(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        """Sets up the bot status"""
         print(f"We have logged in as {self.bot.user}")
         await self.bot.change_presence(
             status=discord.Status.online,

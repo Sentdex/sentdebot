@@ -25,5 +25,9 @@ class LoggingTools(commands.Cog):
             except Exception as e:
                 log.write(f"{str(e)}\n")
 
+
+
+
+
 def setup(bot):
     bot.add_cog(LoggingTools(bot))
