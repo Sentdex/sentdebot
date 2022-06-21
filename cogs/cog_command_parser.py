@@ -17,7 +17,6 @@ class CommandParser(commands.Cog):
         self.search_commands = {
             'search': (self.search, 'search site for query'),
             'search_youtube': (self.search_youtube, 'search youtube for query'),
-            'search_github_user': (self.search_github_user, 'search github for query'),
             'eval': (self.eval, 'evaluate code')
         }
         print(f'Loaded {self.__class__.__name__}')
@@ -27,8 +26,8 @@ class CommandParser(commands.Cog):
     async def on_message(self, message):
         """Listens for messages and parses them for commands"""
         if message.author != self.bot.user:
-            content = message.content
-            if content.startswith(self.bot.command_prefix):
+            content = message.content.strip()
+            if content.lower().startswith(self.bot.command_prefix.lower()):
                 content = content[len(self.bot.command_prefix):]
                 query_start = content.find('(')
                 # get last instance of ')'
@@ -38,8 +37,6 @@ class CommandParser(commands.Cog):
                     args = content[query_start + 1:query_end]
                     func = self.search_commands[command_name][0]
                     await func(message, args)
-                    return True
-        return False
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
@@ -84,19 +81,16 @@ class CommandParser(commands.Cog):
 
             query = query.strip('"').strip("'")
             query = query.replace(" ", "%20")
-            # url = f"https://www.youtube.com/results?search_query={query}"
             url = f"https://www.youtube.com/c/{bot_config.yt_channel_id}/search?query={query}"
-            print(url)
             response = await session.get(url)
             await response.html.arender(sleep=1, keep_page=True, scrolldown=1, timeout=30)
             found = response.html.find('a#video-title')
             if len(found) > 0:
-
                 for links in found[:5]:
                     link = next(iter(links.absolute_links))
                     # find embed link
                     # make discord watchable embed with title, description, and thumbnail
-                    embed = discord.Embed(title=links.text, description=links.text, url=link, color=0x00ff00)
+                    embed = discord.Embed(title=links.text, description=links.text, url=link, color=0x00ff00, type='link')
                     embed.set_thumbnail(url=f"https://img.youtube.com/vi/{link.split('=')[1]}/0.jpg")
                     await message.channel.send(embed=embed)
             else:
@@ -110,15 +104,6 @@ class CommandParser(commands.Cog):
         Traceback (most recent call last):
           File "<stdin>", line 1, in <module>
         NotFoundError: {query} not found```""")
-
-    @staticmethod
-    async def search_github_user(message, query):
-        """Searches github for the query"""
-        url = f"https://api.github.com/users/{query}"
-        print(url)
-        response = requests.get(url)
-        print(response.json())
-
 
     async def eval(self, message, code):
         """Evaluates code"""

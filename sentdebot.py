@@ -7,7 +7,7 @@ from bot_config import BotConfig
 
 bot_config: BotConfig = BotConfig.get_config('sentdebot')
 
-client = commands.Bot(command_prefix=bot_config.prefix, case_insensitive=True, intents=discord.Intents.all())
+client = commands.Bot(command_prefix=bot_config.prefix, case_insensitive=False, intents=discord.Intents.all())
 
 client.remove_command('help')
 
