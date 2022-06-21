@@ -1,4 +1,7 @@
+"""Cog to handle admin tools, such as reloading cogs, restarting and logging out the bot."""
+import discord
 from discord.ext import commands
+
 
 # todo: make it so the file names are not forced to be one word lower case
 
@@ -6,7 +9,8 @@ class AdminTools(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    def class_to_file(self, class_name):
+    @staticmethod
+    def class_to_file(class_name):
         """Function to convert from Cog class name to a cog file name"""
         cap_indexes = [i for i, char in enumerate(class_name) if char.isupper()]
         for i in cap_indexes:
@@ -16,66 +20,57 @@ class AdminTools(commands.Cog):
                 class_name = class_name[:i] + '_' + class_name[i].lower() + class_name[i + 1:]
         return "cog_" + class_name
 
-
     @commands.command(name='load_cog()', help='load a cog', hidden=True, aliases=['load_cog'])
+    @commands.has_permissions(administrator=True)
     async def load_cog(self, ctx, cog_name):
         """Load a cog"""
-        if ctx.author.id == ctx.guild.owner.id or ctx.author.id in ctx.guild.owner.guild_permissions.administrator:
-            self.bot.load_extension(f'cogs.{self.class_to_file(cog_name)}')
-            await ctx.send(f'{cog_name} loaded')
-        else:
-            await ctx.send('You are not allowed to use this command')
+        self.bot.load_extension(f'cogs.{self.class_to_file(cog_name)}')
+        await ctx.send(f'{cog_name} loaded')
 
     @commands.command(name='unload_cog()', help='unload a cog', hidden=True, aliases=['unload_cog'])
+    @commands.has_permissions(administrator=True)
     async def unload_cog(self, ctx, cog_name):
         """Unload a cog"""
-
-        if ctx.author.id == ctx.guild.owner.id or ctx.author.id in ctx.guild.owner.guild_permissions.administrator:
-            self.bot.unload_extension(f'cogs.{self.class_to_file(cog_name)}')
-            await ctx.send(f'{cog_name} unloaded')
-        else:
-            await ctx.send('You are not allowed to use this command')
+        self.bot.unload_extension(f'cogs.{self.class_to_file(cog_name)}')
+        await ctx.send(f'{cog_name} unloaded')
 
     @commands.command(name='reload_cog()', help='reload a cog', hidden=True, aliases=['reload_cog'])
+    @commands.has_permissions(administrator=True)
     async def reload_cog(self, ctx, cog_name):
-        """reload a cog"""
+        self.bot.reload_extension(f'cogs.{self.class_to_file(cog_name)}')
+        await ctx.send(f'{cog_name} reloaded')
 
-        if ctx.author.id == ctx.guild.owner.id or ctx.author.id in ctx.guild.owner.guild_permissions.administrator:
-            self.bot.reload_extension(f'cogs.{self.class_to_file(cog_name)}')
-            await ctx.send(f'{cog_name} reloaded')
-        else:
-            await ctx.send('You are not allowed to use this command')
-
-    @commands.command(name='list_cogs()', help='gives a list of loaded extensions', hidden=True)
+    @commands.command(name='list_cogs()', help='gives a list of loaded extensions', hidden=True, aliases=['list_cogs'])
+    @commands.has_permissions(administrator=True)
     async def list_cogs(self, ctx):
-        """list cogs"""
-
-        if ctx.author.id == ctx.guild.owner.id or ctx.author.id in ctx.guild.owner.guild_permissions.administrator:
-            await ctx.send(f'Loaded cogs: {", ".join(self.bot.cogs)}')
-        else:
-            await ctx.send('You are not allowed to use this command')
+        # embed a list of loaded cogs
+        embed = discord.Embed(title='Loaded cogs', color=0x00ff00)
+        for extension in self.bot.extensions:
+            embed.add_field(
+                name=extension,
+                value=self.bot.extensions[extension].__doc__
+                if self.bot.extensions[extension].__doc__
+                else 'No description',
+                inline=False)
+        await ctx.send(embed=embed)
 
     @commands.command(name='logout()', help='logout', aliases=['gtfo()'], hidden=True)
+    @commands.is_owner()
     async def logout(self, ctx):
         """logout bot"""
-        # check to see if the authors' id is the server owners or admins
-        print(f'{ctx.author.id} is trying to logout')
-        if ctx.author.id == ctx.guild.owner.id or ctx.author.id in ctx.guild.owner.guild_permissions.administrator:
-            # todo, restrict bact to server owner
-            await ctx.send('Logging out')
-            await self.bot.logout()
-        else:
-            await ctx.send('You are not allowed to use this command')
+        await ctx.send('Logging out')
+        await self.bot.logout()
 
-    @commands.command(name='restart()', help='shutdown', aliases=['shutdown()'], hidden=True)
+    @commands.command(name='restart()', help='restart', aliases=['restart_bot()'], hidden=True)
+    @commands.is_owner()
     async def restart(self, ctx):
         """restart bot"""
-        if ctx.author.id == ctx.guild.owner.id or ctx.author.id in ctx.guild.owner.guild_permissions.administrator:
-            # todo, restrict bact to server owner
-            await ctx.send('Restarting')
-            await self.bot.logout()
-            await self.bot.close()
-            await self.bot.start(self.bot.token)
+        await ctx.send('Restarting')
+        await self.bot.logout()
+        await self.bot.start(self.bot.token)
+        for cog in self.bot.cogs:
+            self.bot.reload_extension(f'cogs.{cog}')
+        await ctx.send('Restarted')
 
 
 def setup(bot):

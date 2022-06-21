@@ -1,3 +1,4 @@
+"""Cog for calculating and displaying community stats"""
 import os
 import time
 from collections import Counter
@@ -27,6 +28,7 @@ class CommunityStats(commands.Cog):
         self.path = bot_config.path
         self.DAYS_BACK = bot_config.days_to_keep
         self.RESAMPLE = bot_config.resample_interval
+        self.user_metrics.start()
 
     @commands.command(name='member_count()', help='get the member count')
     async def member_count(self, ctx):
@@ -80,14 +82,14 @@ class CommunityStats(commands.Cog):
     async def user_metrics(self):
         online, idle, offline = self.__community_report(self.guild)
         # self.path: pathlib.Path
-        with open(self.path / "usermetrics.csv", "a") as f:
+        with open(os.path.join(self.path, "usermetrics.csv"), "a") as f:
             f.write(f"{int(time.time())},{online},{idle},{offline}\n")
 
-        df_msgs = pd.read_csv(str(self.path / "msgs.csv"), names=['time', 'uid', 'channel'])
+        df_msgs = pd.read_csv(os.path.join(self.path, "msgs.csv"), names=['time', 'uid', 'channel'])
         df_msgs = df_msgs[(df_msgs['time'] > time.time() - (86400 * self.DAYS_BACK))]
         df_msgs['count'] = 1
         df_msgs['date'] = pd.to_datetime(df_msgs['time'], unit='s')
-        df_msgs.drop("time", 1, inplace=True)
+        df_msgs.drop(labels="time", axis=1, inplace=True)
         df_msgs.set_index("date", inplace=True)
 
         df_no_dup = df_msgs.copy()
@@ -107,11 +109,11 @@ class CommunityStats(commands.Cog):
             self.MOST_COMMON_INT)
         # print(uids_in_help)
 
-        df = pd.read_csv(str(self.path / "usermetrics.csv"), names=['time', 'online', 'idle', 'offline'])
+        df = pd.read_csv(os.path.join(self.path, "usermetrics.csv"), names=['time', 'online', 'idle', 'offline'])
         df = df[(df['time'] > time.time() - (86400 * self.DAYS_BACK))]
         df['date'] = pd.to_datetime(df['time'], unit='s')
         df['total'] = df['online'] + df['offline'] + df['idle']
-        df.drop("time", 1, inplace=True)
+        df.drop(labels="time", axis=1, inplace=True)
         df.set_index("date", inplace=True)
 
         df = df.resample(self.RESAMPLE).mean()
@@ -153,7 +155,7 @@ class CommunityStats(commands.Cog):
         ax1v.set_ylim(0, 3 * df["count"].values.max())
 
         # plt.show()
-        plt.savefig(f"{self.path}/online.png", facecolor=fig.get_facecolor())
+        plt.savefig(os.path.join(self.path, "online.png"), facecolor=fig.get_facecolor())
         plt.clf()
 
         fig = plt.figure(facecolor=self.DISCORD_BG_COLOR)
@@ -190,7 +192,7 @@ class CommunityStats(commands.Cog):
         plt.yticks(y_pos, users)
 
         plt.subplots_adjust(left=0.30, bottom=0.15, right=0.99, top=0.95, wspace=0.2, hspace=0.55)
-        plt.savefig(f"{self.path}/activity.png", facecolor=fig.get_facecolor())
+        plt.savefig(os.path.join(self.path, "activity.png"), facecolor=fig.get_facecolor())
         plt.clf()
 
     @user_metrics.before_loop

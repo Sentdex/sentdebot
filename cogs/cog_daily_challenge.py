@@ -1,3 +1,4 @@
+"""Cog to provide a daily challenge to the daily-challenge channel"""
 import discord
 import requests
 from bs4 import BeautifulSoup

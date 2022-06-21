@@ -1,3 +1,4 @@
+"""Cog that handles command parsing for any command that has a query"""
 import discord
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
@@ -45,36 +46,6 @@ class CommandParser(commands.Cog):
         if isinstance(error, CommandNotFound):
             return
         raise error  # so we don't silently handle all errors
-
-    @commands.command("commands()", help="list all commands")
-    async def commands(self, ctx):
-        """Function to print commands"""
-        prefix = """```py\ndef commands():\n\treturn {\n"""
-        suffix = """\n}\n```"""
-        commands_list = []
-        admin_commands_list = []
-        # add bot commands if not hidden
-        for command in self.bot.commands:
-            # if not hidden, or author not admin
-            if not command.hidden:
-                # bot prefix commandname: help
-                commands_list.append(f"\t{self.bot.command_prefix}{command.name}: '{command.help}',")
-            elif ctx.author.guild_permissions.administrator:
-                admin_commands_list.append(f"\t{self.bot.command_prefix}{command.name}: '{command.help}',")
-        # add search commands
-        for command in self.search_commands.keys():
-            # bot prefix commandname: help
-            commands_list.append(
-                f"\t{self.bot.command_prefix}{command}('QUERY'): '{self.search_commands[command][1]}',")
-        commands_list = "\n".join(commands_list)
-        admin_commands_list = "\n".join(admin_commands_list)
-        # if admin message author, else message channel
-        try:
-            if ctx.author.guild_permissions.administrator:
-                await ctx.author.send(prefix + commands_list + admin_commands_list + suffix)
-            await ctx.send(prefix + commands_list + suffix)
-        except discord.Forbidden:
-            await ctx.send(f'{ctx.author.mention} I do not have permission to send messages in {ctx.channel.mention}')
 
     async def search(self, message, query):
         """Searches the sentdex website for the query"""
@@ -161,6 +132,39 @@ class CommandParser(commands.Cog):
             File "<stdin>", line 1, in <module>
         {e}```""")
 
+    @commands.command("commands()", help="list all commands")
+    async def commands_user(self, ctx):
+        """Function to print commands"""
+        prefix = """```py\ndef commands():\n\treturn {\n"""
+        suffix = """\n}\n```"""
+        commands_list = []
+        for command in sorted(self.bot.commands, key=lambda x: x.name):
+            if not command.hidden:
+                commands_list.append(f"\t{self.bot.command_prefix}{command.name}: '{command.help}',")
+        for command in self.search_commands.keys():
+            commands_list.append(
+                f"\t{self.bot.command_prefix}{command}('QUERY'): '{self.search_commands[command][1]}',")
+        commands_list = "\n".join(commands_list)
+        await ctx.send(prefix + commands_list + suffix)
+
+    @commands.command("commands_admin()", help="list all commands")
+    @commands.has_permissions(administrator=True)
+    async def command_admin(self, ctx):
+        """Function to print commands"""
+        prefix = """```py\ndef commands():\n\treturn {\n"""
+        suffix = """\n}\n```"""
+        commands_list = []
+        for command in sorted(self.bot.commands, key=lambda x: x.name):
+            commands_list.append(f"\t{self.bot.command_prefix}{command.name}: '{command.help}',")
+        for command in self.search_commands.keys():
+            commands_list.append(
+                f"\t{self.bot.command_prefix}{command}('QUERY'): '{self.search_commands[command][1]}',")
+        commands_list = "\n".join(commands_list)
+        try:
+            await ctx.message.delete()
+            await ctx.author.send(prefix + commands_list + suffix)
+        except discord.Forbidden:
+            await ctx.send(f'{ctx.author.mention} I do not have permission to send messages in {ctx.channel.mention}')
 
 
 

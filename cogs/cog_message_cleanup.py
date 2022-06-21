@@ -32,9 +32,23 @@ class MessageCleanup(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author == self.bot.user or message.content.startswith(self.bot.command_prefix):
-           # if not channel is in ignored list
+            # if not channel is in ignored list
             if message.channel.id not in self.ignored_channels:
                 await message.delete(delay=86400)
+
+    # sweep command
+    @commands.command(name='sweep()')
+    @commands.has_permissions(manage_messages=True)
+    async def sweep(self, ctx):
+        guild = self.bot.get_guild(bot_config.guild_id)
+        # only delete if it THIS bot
+        for channel in guild.text_channels:
+            async for message in channel.history(limit=None, oldest_first=True):
+                if message.author == self.bot.user or message.content.startswith(self.bot.command_prefix):
+                    if time.time() - message.created_at.timestamp() > 86400:
+                        await message.delete()
+        await ctx.send('Sweeped!')
+
 
 
 def setup(bot):

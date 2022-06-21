@@ -1,3 +1,5 @@
+"""cog to handle initial setup of the bot"""
+
 import discord
 from discord.ext import commands
 from bot_config import BotConfig
