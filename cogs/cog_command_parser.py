@@ -10,6 +10,8 @@ from bot_config import BotConfig
 
 bot_config = BotConfig.get_config('sentdebot')
 
+session = AsyncHTMLSession()
+
 
 class CommandParser(commands.Cog):
     def __init__(self, bot):
@@ -77,16 +79,16 @@ class CommandParser(commands.Cog):
         """Searches youtube channel for the query"""
         # look on youtube for query
         try:
-            session = AsyncHTMLSession()
             query = query.strip('"').strip("'")
             query = query.replace(" ", "%20")
             url = f"https://www.youtube.com/c/{bot_config.yt_channel_id}/search?query={query}"
             response = await session.get(url)
-            await response.html.arender(sleep=1, keep_page=False, scrolldown=0, timeout=10)
+            await response.html.arender(sleep=1, keep_page=True, scrolldown=0, timeout=30)
             found = response.html.find('a#video-title')
             if len(found) > 0:
                 for links in found[:5]:
-                    link = next(iter(links.absolute_links))
+                    link = links.attrs['href']
+
                     # find embed link
                     # make discord watchable embed with title, description, and thumbnail
                     embed = discord.Embed(title=links.text, description=links.text, url=link, color=0x00ff00, type='link')
