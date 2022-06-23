@@ -1,7 +1,5 @@
-import discord
-from discord.ext import commands
-
-
+import nextcord as discord
+from nextcord.ext import commands
 class CheckSpeed(commands.Cog):
     def __init__(self, bot):
         self.bot = bot

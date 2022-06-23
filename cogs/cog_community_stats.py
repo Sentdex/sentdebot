@@ -1,14 +1,16 @@
 """Cog for calculating and displaying community stats"""
 import os
+import re
 import time
 from collections import Counter
 
-import discord
+import nextcord as discord
+from nextcord.ext import commands, tasks
+
 import matplotlib.dates as mdates
 import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
-from discord.ext import commands, tasks
 from matplotlib import pyplot as plt
 
 from bot_config import BotConfig
@@ -29,7 +31,7 @@ class CommunityStats(commands.Cog):
         self.path = bot_config.path
         self.DAYS_BACK = bot_config.days_to_keep
         self.RESAMPLE = bot_config.resample_interval
-        self.user_metrics.start()
+        self.draw_graphs.start()
 
     @commands.command(name='member_count()', help='get the member count')
     async def member_count(self, ctx):
@@ -38,7 +40,7 @@ class CommunityStats(commands.Cog):
 
     @commands.command(name='community_report()', help='get some stats on community')
     async def community_report(self, ctx):
-        online, idle, offline = self.__community_report(ctx.guild)
+        online, idle, offline = self.activity(ctx.guild)
 
         file = discord.File(f"{bot_config.path}/online.png", filename=f"{bot_config.path}/online.png")
         await ctx.send("", file=file)
@@ -46,7 +48,7 @@ class CommunityStats(commands.Cog):
             f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')
 
     @staticmethod
-    def __community_report(guild):
+    def activity(guild):
         online = 0
         idle = 0
         offline = 0
@@ -72,17 +74,8 @@ class CommunityStats(commands.Cog):
     async def user_activity(self, ctx):
         await ctx.send(file=discord.File(os.path.join(bot_config.path, 'activity.png'), filename='activity.png'))
 
-    # The try-catch blocks are removed because
-    # the default error handler for a :class:`discord.ext.task.Loop`
-    # prints to sys.sterr by default.
-    # <https://discordpy.readthedocs.io/en/latest/ext/tasks/index.html#discord.ext.tasks.Loop.error>
-
-    @tasks.loop(seconds=300)
-    async def user_metrics(self):
-        online, idle, offline = self.__community_report(self.guild)
-        # self.path: pathlib.Path
-        with open(os.path.join(self.path, "usermetrics.csv"), "a") as f:
-            f.write(f"{int(time.time())},{online},{idle},{offline}\n")
+    @tasks.loop(hours=1)  # because really, do we need to redraw this every 300s given the timescales?
+    async def draw_graphs(self):
 
         df_msgs = pd.read_csv(os.path.join(self.path, "msgs.csv"), names=['time', 'uid', 'channel'])
         df_msgs = df_msgs[(df_msgs['time'] > time.time() - (86400 * self.DAYS_BACK))]
@@ -102,11 +95,9 @@ class CommunityStats(commands.Cog):
         user_id_counts_overall = Counter(
             df_no_dup[df_no_dup['channel'].isin(self.COMMUNITY_BASED_CHANNELS)]['uid'].values).most_common(
             self.MOST_COMMON_INT)
-        # print(user_id_counts_overall)
 
         uids_in_help = Counter(df_no_dup[df_no_dup['channel'].isin(self.HELP_CHANNELS)]['uid'].values).most_common(
             self.MOST_COMMON_INT)
-        # print(uids_in_help)
 
         df = pd.read_csv(os.path.join(self.path, "usermetrics.csv"), names=['time', 'online', 'idle', 'offline'])
         df = df[(df['time'] > time.time() - (86400 * self.DAYS_BACK))]
@@ -119,7 +110,6 @@ class CommunityStats(commands.Cog):
         df = df.join(message_volume)
 
         df.dropna(inplace=True)
-        # print(df.head())
 
         fig = plt.figure(facecolor=self.DISCORD_BG_COLOR)
         ax1 = plt.subplot2grid((2, 1), (0, 0))
@@ -143,8 +133,6 @@ class CommunityStats(commands.Cog):
         ax2.plot(df.index, df.total, label="Total Users")
         ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d\n%H:%M'))
 
-        # for label in ax2.xaxis.get_ticklabels():
-        #        label.set_rotation(45)
         ax2.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='lower'))
         ax2.legend()
 
@@ -153,7 +141,6 @@ class CommunityStats(commands.Cog):
 
         ax1v.set_ylim(0, 3 * df["count"].values.max())
 
-        # plt.show()
         plt.savefig(os.path.join(self.path, "online.png"), facecolor=fig.get_facecolor())
         plt.clf()
 
@@ -182,7 +169,11 @@ class CommunityStats(commands.Cog):
         users = []
         msgs = []
         for pair in uids_in_help[::-1]:
-            users.append(self.guild.get_member(pair[0]).name)  # get member name from here
+            name = self.guild.get_member(pair[0]).name
+            # strip any glyphs from the name that doesn't exist in the font
+            name = re.sub(r'[^\x00-\x7F]+', '', name)
+            users.append(name)
+
             msgs.append(pair[1])
             # users.append(pair[0])
 
@@ -193,18 +184,20 @@ class CommunityStats(commands.Cog):
         plt.subplots_adjust(left=0.30, bottom=0.15, right=0.99, top=0.95, wspace=0.2, hspace=0.55)
         plt.savefig(os.path.join(self.path, "activity.png"), facecolor=fig.get_facecolor())
         plt.clf()
+        plt.close()
 
-    @user_metrics.before_loop
+    @tasks.loop(seconds=300)
+    async def save_metrics(self):
+        with open(os.path.join(self.path, "usermetrics.csv"), "a") as f:
+            f.write("{},{},{},{}\n".format(int(time.time()), *self.activity(self.guild)))
+
+    @draw_graphs.before_loop
+    @save_metrics.before_loop
     async def metric_setup(self):
         await self.bot.wait_until_ready()
         if not self.guild:
             self.guild = self.bot.get_guild(bot_config.guild_id)
 
-    @user_metrics.error
-    async def metric_error(self, ctx, error):
-        if isinstance(error, UserWarning):
-            pass
-        raise error
 
 
 def setup(bot):

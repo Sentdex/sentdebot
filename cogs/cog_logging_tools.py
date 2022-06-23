@@ -1,8 +1,7 @@
 """Cog to logging handler"""
 import time
-
-import discord
-from discord.ext import commands
+import nextcord as discord
+from nextcord.ext import commands, tasks
 
 from bot_config import BotConfig
 

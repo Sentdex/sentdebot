@@ -1,12 +1,13 @@
 """Cog to randomly assign vanity roles"""
 import random
+import nextcord as discord
+from nextcord.ext import commands, tasks
 
-import discord
-from discord.ext import commands
 from bot_config import BotConfig
 
 config = BotConfig.get_config('sentdebot')
 
+blocked_attachment_extensions = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff', 'svg']
 
 class RoleLottery(commands.Cog):
     def __init__(self, bot):
@@ -39,7 +40,6 @@ class RoleLottery(commands.Cog):
             if len(matches) == 0:
                 try:
                     role_id_choice = random.choice(vanity_roles)
-                    # if role does not exist, create it
                     actual_role_choice = guild.get_role(role_id_choice)
                     if actual_role_choice is None:
                         actual_role_choice = discord.utils.get(guild.roles, id=role_id_choice)
@@ -59,11 +59,13 @@ class RoleLottery(commands.Cog):
                     print('EDITING ROLES ISSUE:', str(e))
         # if message author does not have a vanity role and they are posting an image, block them
         if len(author_roles) == 0:
-            if message.attachments:
-                await message.delete()
-                await message.author.send(
-                    'Please interact with the community more to do that.'
-                )
+            # if the message has image attachemnts, remove them from the message
+            if len(message.attachments) > 0:
+                for attachment in message.attachments:
+                    if attachment.filename.split('.')[-1] in blocked_attachment_extensions:
+                        await attachment.delete()
+
+
 
 def setup(bot):
     bot.add_cog(RoleLottery(bot))

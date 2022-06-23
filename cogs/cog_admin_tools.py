@@ -1,8 +1,6 @@
 """Cog to handle admin tools, such as reloading cogs, restarting and logging out the bot."""
-import discord
-from discord.ext import commands
-
-
+import nextcord as discord
+from nextcord.ext import commands
 # todo: make it so the file names are not forced to be one word lower case
 
 class AdminTools(commands.Cog):

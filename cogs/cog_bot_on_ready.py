@@ -1,7 +1,8 @@
 """Cog to handle initial setup of the bot"""
 
-import discord
-from discord.ext import commands
+import nextcord as discord
+from nextcord.ext import commands
+
 from bot_config import BotConfig
 
 config = BotConfig.get_config('sentdebot')
@@ -19,8 +20,8 @@ class BotOnReady(commands.Cog):
             status=discord.Status.online,
             activity=discord.Game(
                 'help(sentdebot)',
-                type=discord.ActivityType.watching),
-            afk=True)
+                type=discord.ActivityType.watching)
+    )
 
 
 def setup(bot):

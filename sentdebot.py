@@ -1,7 +1,7 @@
 import os
 
-import discord
-from discord.ext import commands
+import nextcord as discord
+from nextcord.ext import commands
 
 from bot_config import BotConfig
 

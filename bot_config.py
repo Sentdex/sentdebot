@@ -85,4 +85,4 @@ __all__ = ['BotConfig']
 
 if __name__ == '__main__':
     BotConfig.setup_config('sentdebot')
-    print('Config setup complete.')
+    print('ReadOnlyConfig setup complete.')

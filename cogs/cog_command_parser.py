@@ -1,8 +1,7 @@
 """Cog that handles command parsing for any command that has a query"""
-import discord
-import requests
-from discord.ext import commands
-from discord.ext.commands import CommandNotFound
+import nextcord as discord
+from nextcord.ext import commands
+from nextcord.ext.commands import CommandNotFound
 from pyston import PystonClient, File
 from requests_html import HTMLSession, AsyncHTMLSession
 
@@ -19,7 +18,7 @@ class CommandParser(commands.Cog):
         self.search_commands = {
             'search': (self.search, 'search site for query'),
             'search_youtube': (self.search_youtube, 'search youtube for query'),
-            'eval': (self.eval, 'evaluate code')
+            'eval': (self.eval, 'evaluate code, use a discord code block with the language tag like eval(```python print(32)```)'),
         }
         print(f'Loaded {self.__class__.__name__}')
         print(f'Loaded commands: {list(self.search_commands.keys())}')
@@ -83,17 +82,23 @@ class CommandParser(commands.Cog):
             query = query.replace(" ", "%20")
             url = f"https://www.youtube.com/c/{bot_config.yt_channel_id}/search?query={query}"
             response = await session.get(url)
-            await response.html.arender(sleep=1, keep_page=True, scrolldown=0, timeout=30)
+            # reply searching
+            message = await message.channel.send(f"Searching for '{query}'")
+            await response.html.arender(sleep=0.2, scrolldown=1, timeout=60)
             found = response.html.find('a#video-title')
             if len(found) > 0:
-                for links in found[:5]:
-                    link = links.attrs['href']
+                # edit message to add "."
+                embeds = []
+                for i, links in enumerate(found[:5], 1):
+                    await message.edit(content=f"Searching for '{query}'"+"."*i)
+                    link = "https://www.youtube.com" + links.attrs['href']
+                    text = links.text
+                    embeds.append((text, link))
+                embed = discord.Embed(title=f"Results")
+                for data in embeds:
+                    embed.add_field(name=data[0], value=data[1], inline=False)
+                await message.edit(content=f"Results for '{query}'", embed=embed)
 
-                    # find embed link
-                    # make discord watchable embed with title, description, and thumbnail
-                    embed = discord.Embed(title=links.text, description=links.text, url=link, color=0x00ff00, type='link')
-                    embed.set_thumbnail(url=f"https://img.youtube.com/vi/{link.split('=')[1]}/0.jpg")
-                    await message.channel.send(embed=embed)
             else:
                 await message.channel.send(f"""```py
             Traceback (most recent call last):
@@ -104,7 +109,8 @@ class CommandParser(commands.Cog):
             await message.channel.send(f"""```py
         Traceback (most recent call last):
           File "<stdin>", line 1, in <module>
-        NotFoundError: {query} not found```""")
+        NotFoundError: {query} not found: {e}```""")
+            raise e
 
     async def eval(self, message, code):
         """Evaluates code"""

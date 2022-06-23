@@ -2,10 +2,10 @@
 
 import io
 import aiohttp
-import discord
 import requests
-from discord.ext import commands, tasks
 
+import nextcord as discord
+from nextcord.ext import commands, tasks
 
 class DailyDog(discord.ext.commands.Cog):
     def __init__(self, bot):
@@ -13,7 +13,7 @@ class DailyDog(discord.ext.commands.Cog):
         self.daily_dog.start()
 
 
-    @tasks.loop(seconds=86400)
+    @tasks.loop(hours=12)
     async def daily_dog(self):
         await self.bot.wait_until_ready()
 
