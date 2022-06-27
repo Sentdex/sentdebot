@@ -1,3 +1,13 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+/csv-plugin.xml
+/dbnavigator.xml
+/discord.xml
+/markdown.xml
+/misc.xml
+/modules.xml
+/inspectionProfiles/profiles_settings.xml
+/inspectionProfiles/Project_Default.xml
+/sentdebot.iml
+/vcs.xml

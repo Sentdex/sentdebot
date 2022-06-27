@@ -1,6 +1,8 @@
 """Cog to handle admin tools, such as reloading cogs, restarting and logging out the bot."""
 import nextcord as discord
 from nextcord.ext import commands
+
+
 # todo: make it so the file names are not forced to be one word lower case
 
 class AdminTools(commands.Cog):
@@ -75,7 +77,8 @@ class AdminTools(commands.Cog):
     async def logout(self, ctx):
         """logout bot"""
         await ctx.send('Logging out')
-        await self.bot.logout()
+        await self.bot.loop.run_in_executor(None, self.bot.logout)
+        await self.bot.close()
 
     @commands.command(name='restart()', help='restart', aliases=['restart_bot()'], hidden=True)
     @commands.is_owner()

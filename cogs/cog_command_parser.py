@@ -1,13 +1,11 @@
 """Cog that handles command parsing for any command that has a query"""
+import re
+
 import nextcord as discord
 from nextcord.ext import commands
 from nextcord.ext.commands import CommandNotFound
 from pyston import PystonClient, File
 from requests_html import HTMLSession, AsyncHTMLSession
-
-from bot_config import BotConfig
-
-bot_config = BotConfig.get_config('sentdebot')
 
 session = AsyncHTMLSession()
 
@@ -18,7 +16,7 @@ class CommandParser(commands.Cog):
         self.search_commands = {
             'search': (self.search, 'search site for query'),
             'search_youtube': (self.search_youtube, 'search youtube for query'),
-            'eval': (self.eval, 'evaluate code, use a discord code block with the language tag like eval(```python print(32)```)'),
+            'eval': (self.eval, 'evaluate code, use a markdown code block with the language tag'),
         }
         print(f'Loaded {self.__class__.__name__}')
         print(f'Loaded commands: {list(self.search_commands.keys())}')
@@ -50,6 +48,8 @@ class CommandParser(commands.Cog):
     @staticmethod
     async def search(message, query):
         """Searches the sentdex website for the query"""
+
+
         query = query.strip('"').strip("'")
         qsearch = query.replace(" ", "%20")
         full_link = f"https://pythonprogramming.net/search/?q={qsearch}"
@@ -80,7 +80,7 @@ class CommandParser(commands.Cog):
         try:
             query = query.strip('"').strip("'")
             query = query.replace(" ", "%20")
-            url = f"https://www.youtube.com/c/{bot_config.yt_channel_id}/search?query={query}"
+            url = f"https://www.youtube.com/c/sentdex/search?query={query}"
             response = await session.get(url)
             # reply searching
             message = await message.channel.send(f"Searching for '{query}'")

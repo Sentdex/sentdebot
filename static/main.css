@@ -1,0 +1,12 @@
+body {
+    background-color: #23272A;
+    color: #FFFFFF;
+}
+
+/* style for class "title" */
+.title {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+

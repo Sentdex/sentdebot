@@ -2,10 +2,6 @@
 import nextcord as discord
 from nextcord.ext import commands, tasks
 
-from bot_config import BotConfig
-
-config = BotConfig.get_config('sentdebot')
-
 
 class Voter(commands.Cog):
     def __init__(self, bot):

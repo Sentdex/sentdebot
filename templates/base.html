@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='main.css')}}">
+      <meta charset="UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Dashboard</title>
+  </head>
+  <body>
+    <h1 class="title">Dashboard for {{bot_name}}</h1>
+    <ol class="nav_bar">
+      <li><a href="/dashboard/bot_settings/">Bot Settings</a></li>
+      <li><a href="/dashboard/cog_settings/">Cog Settings</a></li>
+      <li><a href="/dashboard/command_settings">Command Settings</a></li>
+      <li><a href="/dashboard/logs/">Logs</a></li>
+    </ol>
+    {% block content %}
+    {% endblock %}
+  </body>
+</html>

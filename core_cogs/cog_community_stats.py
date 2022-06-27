@@ -12,25 +12,44 @@ import matplotlib.ticker as mticker
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+from bot_config_manager import ReadOnlyConfig
 
-from bot_config import BotConfig
-from bot_definitions import get_all_channels_by_tag
-
-bot_config = BotConfig.get_config('sentdebot')
+config = ReadOnlyConfig()
 
 
 class CommunityStats(commands.Cog):
     def __init__(self, bot):
-        self.guild = None
-        self.COMMUNITY_BASED_CHANNELS = self.COMMUNITY_BASED_CHANNELS = [c.name for c in
-                                                                         get_all_channels_by_tag('community')]
-        self.HELP_CHANNELS = [c.name for c in get_all_channels_by_tag('help')]
+        self.guild = bot.get_guild(config.get('guild_id'))
+        self.COMMUNITY_BASED_CHANNELS = ["__main__",
+                                         "help",
+                                         "help_0",
+                                         "help_1",
+                                         "help_2",
+                                         "help_3",
+                                         "voice-channel-text",
+                                         "__init__",
+                                         "hello_technical_questions",
+                                         "help_overflow",
+                                         "dogs",
+                                         "show_and_tell", "politics_enter_at_own_risk"]
+
+        self.HELP_CHANNELS = ["help",
+                              "hello_technical_questions",
+                              "help_0",
+                              "help_1",
+                              "help_2",
+                              "help_3",
+                              "help_overflow"]
+
         self.DISCORD_BG_COLOR = '#36393E'
-        self.MOST_COMMON_INT = bot_config.top_user_count
+        self.MOST_COMMON_INT = 10
         self.bot = bot
-        self.path = bot_config.path
-        self.DAYS_BACK = bot_config.days_to_keep
-        self.RESAMPLE = bot_config.resample_interval
+        self.path = "./data/"
+        # if path not exist, create
+        os.makedirs(self.path, exist_ok=True)
+        self.DAYS_BACK = 21
+        self.RESAMPLE = '30min'
+
         self.draw_graphs.start()
 
     @commands.command(name='member_count()', help='get the member count')
@@ -42,7 +61,7 @@ class CommunityStats(commands.Cog):
     async def community_report(self, ctx):
         online, idle, offline = self.activity(ctx.guild)
 
-        file = discord.File(f"{bot_config.path}/online.png", filename=f"{bot_config.path}/online.png")
+        file = discord.File(f"{self.path}/online.png", filename=f"{self.path}/online.png")
         await ctx.send("", file=file)
         await ctx.send(
             f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')
@@ -72,12 +91,17 @@ class CommunityStats(commands.Cog):
 
     @commands.command(name='user_activity()', help='See some stats on top users')
     async def user_activity(self, ctx):
-        await ctx.send(file=discord.File(os.path.join(bot_config.path, 'activity.png'), filename='activity.png'))
+        await ctx.send(file=discord.File(os.path.join(self.path, 'activity.png'), filename='activity.png'))
 
     @tasks.loop(hours=1)  # because really, do we need to redraw this every 300s given the timescales?
     async def draw_graphs(self):
+        msgs_file = os.path.join(self.path, "msgs.csv")
+        # if msgs file not exist, create
+        if not os.path.exists(msgs_file):
+            with open(msgs_file, 'w') as f:
+                f.write("")
+        df_msgs = pd.read_csv(msgs_file, names=['time', 'uid', 'channel'])
 
-        df_msgs = pd.read_csv(os.path.join(self.path, "msgs.csv"), names=['time', 'uid', 'channel'])
         df_msgs = df_msgs[(df_msgs['time'] > time.time() - (86400 * self.DAYS_BACK))]
         df_msgs['count'] = 1
         df_msgs['date'] = pd.to_datetime(df_msgs['time'], unit='s')
@@ -98,8 +122,12 @@ class CommunityStats(commands.Cog):
 
         uids_in_help = Counter(df_no_dup[df_no_dup['channel'].isin(self.HELP_CHANNELS)]['uid'].values).most_common(
             self.MOST_COMMON_INT)
-
-        df = pd.read_csv(os.path.join(self.path, "usermetrics.csv"), names=['time', 'online', 'idle', 'offline'])
+        usermetrics_path = os.path.join(self.path, "usermetrics.csv")
+        # if usermetrics file not exist, create
+        if not os.path.exists(usermetrics_path):
+            with open(usermetrics_path, 'w') as f:
+                f.write("")
+        df = pd.read_csv(usermetrics_path, names=['time', 'online', 'idle', 'offline'])
         df = df[(df['time'] > time.time() - (86400 * self.DAYS_BACK))]
         df['date'] = pd.to_datetime(df['time'], unit='s')
         df['total'] = df['online'] + df['offline'] + df['idle']
@@ -196,8 +224,7 @@ class CommunityStats(commands.Cog):
     async def metric_setup(self):
         await self.bot.wait_until_ready()
         if not self.guild:
-            self.guild = self.bot.get_guild(bot_config.guild_id)
-
+            self.guild = self.bot.get_guild(self.guild_id)
 
 
 def setup(bot):

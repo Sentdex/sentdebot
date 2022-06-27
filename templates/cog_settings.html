@@ -1,0 +1,5 @@
+<ol>
+{% for cog in bot.client.cogs %}
+    <li><a href="/dashboard/cog_settings/{{cog}}">{{cog}}</a></li>
+    {% endfor %}
+</ol>

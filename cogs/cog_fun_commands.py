@@ -58,18 +58,6 @@ class FunCommands(commands.Cog):
             await ctx.send(embed=embed)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 def setup(bot):
     fc = FunCommands(bot)
     bot.add_cog(fc)
