@@ -8,9 +8,9 @@ from typing import Protocol, Any
 # ALL ENTRIES IN CLASS READ_ONLY
 default_config = {
 
-    "discord_client_id": "",
-    "discord_client_secret": "",
-    "discord_redirect_uri": "",
+    "nextcord_client_id": "",
+    "nextcord_client_secret": "",
+    "nextcord_redirect_uri": "",
 
     "bot_token": "",  # bot token from oauth.com/developers/applications/
     "bot_name": "",  # bot name

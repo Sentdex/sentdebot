@@ -4,10 +4,10 @@ import io
 import aiohttp
 import requests
 
-import nextcord as discord
+import nextcord
 from nextcord.ext import commands, tasks
 
-class DailyDog(discord.ext.commands.Cog):
+class DailyDog(nextcord.ext.commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.daily_dog.start()
@@ -17,7 +17,7 @@ class DailyDog(discord.ext.commands.Cog):
     async def daily_dog(self):
         await self.bot.wait_until_ready()
 
-        dogs_channel = discord.utils.get(self.bot.get_all_channels(), name='dogs')
+        dogs_channel = nextcord.utils.get(self.bot.get_all_channels(), name='dogs')
         if dogs_channel is None:
             return
         # check to see if there was already a daily dog in the last 24 hours
@@ -33,7 +33,7 @@ class DailyDog(discord.ext.commands.Cog):
                     return await dogs_channel.send('Could not download file...')
                 data = io.BytesIO(await resp.read())
                 # send here is your daily dog
-                await dogs_channel.send("Here's your daily dog!", file=discord.File(data, 'cool_image.png'))
+                await dogs_channel.send("Here's your daily dog!", file=nextcord.File(data, 'cool_image.png'))
 
 
 def setup(bot):

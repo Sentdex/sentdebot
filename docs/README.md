@@ -1,6 +1,6 @@
 # sentdebot rev 2
 
-Code for Sentdebot in the [Sentdex discord channel](discord.gg/sentdex)
+Code for Sentdebot in the [Sentdex nextcord channel](nextcord.gg/sentdex)
 
 Original can be found here [Sentdex / sentdebot](https://github.com/Sentdex/sentdebot)
 

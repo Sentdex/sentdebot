@@ -1,5 +1,5 @@
 """Cog to provide a daily challenge to the daily-challenge channel"""
-import nextcord as discord
+import nextcord
 from nextcord.ext import commands, tasks
 
 
@@ -16,7 +16,7 @@ class DailyChallenge(commands.Cog):
     @tasks.loop(hours=12)
     async def daily_challenge(self):
         await self.bot.wait_until_ready()
-        channels = discord.utils.get(self.bot.get_all_channels(), name='daily-challenge')
+        channels = nextcord.utils.get(self.bot.get_all_channels(), name='daily-challenge')
         if channels is not None:
             soup = BeautifulSoup(requests.get('https://projecteuler.net/recent').text, 'html.parser')
             href = soup.find('table', {'id': 'problems_table'}).find_all('tr')[1].find('a')['href']
@@ -30,7 +30,7 @@ class DailyChallenge(commands.Cog):
                 if message.author == self.bot.user:
                     if message.content.startswith('Here is your daily challenge!'):
                         return
-            await channels.send("Here is your daily challenge!", embed=discord.Embed(description=challenge))
+            await channels.send("Here is your daily challenge!", embed=nextcord.Embed(description=challenge))
 
 
 def setup(bot):

@@ -1,5 +1,5 @@
 """Cog to handle admin tools, such as reloading cogs, restarting and logging out the bot."""
-import nextcord as discord
+import nextcord
 from nextcord.ext import commands
 
 
@@ -62,7 +62,7 @@ class AdminTools(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def list_cogs(self, ctx):
         # embed a list of loaded cogs
-        embed = discord.Embed(title='Loaded cogs', color=0x00ff00)
+        embed = nextcord.Embed(title='Loaded cogs', color=0x00ff00)
         for extension in self.bot.extensions:
             embed.add_field(
                 name=self.file_to_class(extension),
@@ -77,8 +77,7 @@ class AdminTools(commands.Cog):
     async def logout(self, ctx):
         """logout bot"""
         await ctx.send('Logging out')
-        await self.bot.loop.run_in_executor(None, self.bot.logout)
-        await self.bot.close()
+        self.bot.close()
 
     @commands.command(name='restart()', help='restart', aliases=['restart_bot()'], hidden=True)
     @commands.is_owner()

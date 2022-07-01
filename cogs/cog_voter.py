@@ -1,5 +1,5 @@
 """cog to enable polling, voting, and other features"""
-import nextcord as discord
+import nextcord
 from nextcord.ext import commands, tasks
 
 
@@ -19,7 +19,7 @@ class Voter(commands.Cog):
             emoji_list = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
 
             # we need to arrange as an embed to send to the channel, and then we need to add a reaction for each option
-            embed = discord.Embed(title=question, color=0x00ff00)
+            embed = nextcord.Embed(title=question, color=0x00ff00)
             for i in range(len(options)):
                 embed.add_field(name=options[i] + ':', value=emoji_list[i])
             out = await ctx.send('Vote:', embed=embed)
@@ -31,7 +31,7 @@ class Voter(commands.Cog):
             # ping @here in thread
             try:
                 await thread.send(f"@here")
-            except discord.HTTPException:
+            except nextcord.HTTPException:
                 pass
             # delete original message
             await out.delete()

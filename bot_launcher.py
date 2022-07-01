@@ -6,6 +6,7 @@ from bot_config_manager import ReadOnlyConfig
 from bot_main import Bot
 from bot_dashboard import BotDashboard
 
+
 def main():
     config = ReadOnlyConfig()
     bot = Bot(config)
@@ -14,7 +15,6 @@ def main():
     bot.run()
     dashboard.stop_dashboard()
     exit(0)
-
 
 
 if __name__ == '__main__':

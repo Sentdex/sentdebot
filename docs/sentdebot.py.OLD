@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import matplotlib.dates as mdates
 import asyncio
-import discord
+import nextcord
 import pandas as pd
 import random
 import numpy as np
@@ -47,11 +47,11 @@ HELP_CHANNELS = ["help",
                  "help_3",
                  "help_overflow"]
 
-DISCORD_BG_COLOR = '#36393E'
+nextcord_BG_COLOR = '#36393E'
 
-intents = discord.Intents.all()
+intents = nextcord.Intents.all()
 
-client = discord.Client(intents=intents)
+client = nextcord.Client(intents=intents)
 
 token = open(f"{path}/token.txt", "r").read().split('\n')[0]
 
@@ -181,17 +181,17 @@ async def user_metrics_background_task():
             df.dropna(inplace=True)
             # print(df.head())
 
-            fig = plt.figure(facecolor=DISCORD_BG_COLOR)
+            fig = plt.figure(facecolor=nextcord_BG_COLOR)
             ax1 = plt.subplot2grid((2, 1), (0, 0))
             plt.ylabel("Active Users")
             plt.title("Community Report")
-            ax1.set_facecolor(DISCORD_BG_COLOR)
+            ax1.set_facecolor(nextcord_BG_COLOR)
             ax1v = ax1.twinx()
             plt.ylabel("Message Volume")
-            # ax1v.set_facecolor(DISCORD_BG_COLOR)
+            # ax1v.set_facecolor(nextcord_BG_COLOR)
             ax2 = plt.subplot2grid((2, 1), (1, 0))
             plt.ylabel("Total Users")
-            ax2.set_facecolor(DISCORD_BG_COLOR)
+            ax2.set_facecolor(nextcord_BG_COLOR)
 
             ax1.plot(df.index, df.online, label="Active Users\n(Not Idle)")
             # ax1v.bar(df.index, df["count"], width=0.01)
@@ -217,12 +217,12 @@ async def user_metrics_background_task():
             plt.savefig(f"{path}/online.png", facecolor=fig.get_facecolor())
             plt.clf()
 
-            fig = plt.figure(facecolor=DISCORD_BG_COLOR)
+            fig = plt.figure(facecolor=nextcord_BG_COLOR)
             ax1 = plt.subplot2grid((2, 1), (0, 0))
 
             plt.xlabel("Message Volume")
             plt.title(f"General User Activity (past {DAYS_BACK} days)")
-            ax1.set_facecolor(DISCORD_BG_COLOR)
+            ax1.set_facecolor(nextcord_BG_COLOR)
 
             users = []
             msgs = []
@@ -242,7 +242,7 @@ async def user_metrics_background_task():
             ax2 = plt.subplot2grid((2, 1), (1, 0))
             plt.title(f"Help Channel Activity (past {DAYS_BACK} days)")
             plt.xlabel("Help Channel\nMsg Volume")
-            ax2.set_facecolor(DISCORD_BG_COLOR)
+            ax2.set_facecolor(nextcord_BG_COLOR)
 
             users = []
             msgs = []
@@ -276,7 +276,7 @@ async def user_metrics_background_task():
 @client.event  # event decorator/wrapper
 async def on_ready():
     print(f"We have logged in as {client.user}")
-    await client.change_presence(status=discord.Status.online, activity=discord.Game('help(sentdebot)'))
+    await client.change_presence(status=nextcord.Status.online, activity=nextcord.Game('help(sentdebot)'))
 
 
 @client.event
@@ -320,7 +320,7 @@ async def on_message(message):
     elif "sentdebot.community_report()" == message.content.lower() and message.channel.id in image_chan_ids:
         online, idle, offline = community_report(sentdex_guild)
 
-        file = discord.File(f"{path}/online.png", filename=f"{path}/online.png")
+        file = nextcord.File(f"{path}/online.png", filename=f"{path}/online.png")
         await message.channel.send("", file=file)
 
         await message.channel.send(
@@ -333,7 +333,7 @@ async def on_message(message):
 
     elif "sentdebot.user_activity()" == message.content.lower() and message.channel.id in image_chan_ids:  # and len([r for r in author_roles if r.id in admins_mods_ids]) > 0:
 
-        file = discord.File(f"{path}/activity.png", filename=f"{path}/activity.png")
+        file = nextcord.File(f"{path}/activity.png", filename=f"{path}/activity.png")
         await message.channel.send("", file=file)
 
         # await message.channel.send(f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')

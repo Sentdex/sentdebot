@@ -1,7 +1,7 @@
 """Cog that handles command parsing for any command that has a query"""
 import re
 
-import nextcord as discord
+import nextcord
 from nextcord.ext import commands
 from nextcord.ext.commands import CommandNotFound
 from pyston import PystonClient, File
@@ -14,7 +14,7 @@ class CommandParser(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.search_commands = {
-            'search': (self.search, 'search site for query'),
+            'search': (self.search, 'search pythonprogramming.net for query'),
             'search_youtube': (self.search_youtube, 'search youtube for query'),
             'eval': (self.eval, 'evaluate code, use a markdown code block with the language tag'),
         }
@@ -54,18 +54,17 @@ class CommandParser(commands.Cog):
         qsearch = query.replace(" ", "%20")
         full_link = f"https://pythonprogramming.net/search/?q={qsearch}"
         session = HTMLSession()
-        r = session.get(full_link)
+        r = await session.get(full_link)
 
         specific_tutorials = [(
             tut.text, list(tut.links)[0])
-            for tut in r.html.find("a")
+            for tut in await r.html.find("a")
             if "collection-item" in tut.html]
 
         if len(specific_tutorials) > 0:
             return_str = "\n---------------------------------------\n".join(
                 f'{tut[0]}: <https://pythonprogramming.net{tut[1]}>' for tut in specific_tutorials[:3])
             return_str = f"```Searching for '{query}'```\n" + return_str + f"\n----\n...More results: <{full_link}>"
-
             await message.channel.send(return_str)
         else:
             await message.channel.send(f"""```py
@@ -94,7 +93,7 @@ class CommandParser(commands.Cog):
                     link = "https://www.youtube.com" + links.attrs['href']
                     text = links.text
                     embeds.append((text, link))
-                embed = discord.Embed(title=f"Results")
+                embed = nextcord.Embed(title=f"Results")
                 for data in embeds:
                     embed.add_field(name=data[0], value=data[1], inline=False)
                 await message.edit(content=f"Results for '{query}'", embed=embed)
@@ -167,7 +166,7 @@ class CommandParser(commands.Cog):
         try:
             await ctx.message.delete()
             await ctx.author.send(prefix + commands_list + suffix)
-        except discord.Forbidden:
+        except nextcord.Forbidden:
             await ctx.send(f'{ctx.author.mention} I do not have permission to send messages in {ctx.channel.mention}')
 
 

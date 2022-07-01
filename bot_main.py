@@ -32,6 +32,7 @@ class Bot:
         self.logger.addHandler(console_handler)
         self.logger.setLevel(self.config.get('log_level'))
         self.client = commands.Bot(command_prefix=self.config.get('bot_prefix'), intents=nextcord.Intents.all())
+        self.client.remove_command('help')
 
     def cog_loader(self):
         try:
@@ -41,8 +42,8 @@ class Bot:
                 if file.startswith('cog_') and file.endswith('.py'):
                     self.client.load_extension(f'core_cogs.{file[:-3]}')
         except Exception as e:
-            self.logger.error(f"Failed to load core cogs: {e}")
-            quit()
+            # self.logger.error(f"Failed to load core cogs: {e}")
+            raise e
         if not os.path.exists('cogs'):
             os.makedirs('cogs')
         for file in os.listdir('./cogs'):
@@ -50,7 +51,8 @@ class Bot:
                 try:
                     self.client.load_extension(f'cogs.{file[:-3]}')
                 except Exception as e:
-                    self.logger.error(f"Failed to load cogs: {e}")
+                    # self.logger.error(f"Failed to load cogs: {e}")
+                    raise e
 
     def __enter__(self):
         self.run()

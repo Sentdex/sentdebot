@@ -4,7 +4,7 @@ import re
 import time
 from collections import Counter
 
-import nextcord as discord
+import nextcord
 from nextcord.ext import commands, tasks
 
 import matplotlib.dates as mdates
@@ -41,7 +41,7 @@ class CommunityStats(commands.Cog):
                               "help_3",
                               "help_overflow"]
 
-        self.DISCORD_BG_COLOR = '#36393E'
+        self.nextcord_BG_COLOR = '#36393E'
         self.MOST_COMMON_INT = 10
         self.bot = bot
         self.path = "./data/"
@@ -61,7 +61,7 @@ class CommunityStats(commands.Cog):
     async def community_report(self, ctx):
         online, idle, offline = self.activity(ctx.guild)
 
-        file = discord.File(f"{self.path}/online.png", filename=f"{self.path}/online.png")
+        file = nextcord.File(f"{self.path}/online.png", filename=f"{self.path}/online.png")
         await ctx.send("", file=file)
         await ctx.send(
             f'```py\n{{\n\t"Online": {online},\n\t"Idle/busy/dnd": {idle},\n\t"Offline": {offline}\n}}```')
@@ -91,7 +91,7 @@ class CommunityStats(commands.Cog):
 
     @commands.command(name='user_activity()', help='See some stats on top users')
     async def user_activity(self, ctx):
-        await ctx.send(file=discord.File(os.path.join(self.path, 'activity.png'), filename='activity.png'))
+        await ctx.send(file=nextcord.File(os.path.join(self.path, 'activity.png'), filename='activity.png'))
 
     @tasks.loop(hours=1)  # because really, do we need to redraw this every 300s given the timescales?
     async def draw_graphs(self):
@@ -139,17 +139,17 @@ class CommunityStats(commands.Cog):
 
         df.dropna(inplace=True)
 
-        fig = plt.figure(facecolor=self.DISCORD_BG_COLOR)
+        fig = plt.figure(facecolor=self.nextcord_BG_COLOR)
         ax1 = plt.subplot2grid((2, 1), (0, 0))
         plt.ylabel("Active Users")
         plt.title("Community Report")
-        ax1.set_facecolor(self.DISCORD_BG_COLOR)
+        ax1.set_facecolor(self.nextcord_BG_COLOR)
         ax1v = ax1.twinx()
         plt.ylabel("Message Volume")
-        # ax1v.set_facecolor(self.DISCORD_BG_COLOR)
+        # ax1v.set_facecolor(self.nextcord_BG_COLOR)
         ax2 = plt.subplot2grid((2, 1), (1, 0))
         plt.ylabel("Total Users")
-        ax2.set_facecolor(self.DISCORD_BG_COLOR)
+        ax2.set_facecolor(self.nextcord_BG_COLOR)
 
         ax1.plot(df.index, df.online, label="Active Users\n(Not Idle)")
         # ax1v.bar(df.index, df["count"], width=0.01)
@@ -172,12 +172,12 @@ class CommunityStats(commands.Cog):
         plt.savefig(os.path.join(self.path, "online.png"), facecolor=fig.get_facecolor())
         plt.clf()
 
-        fig = plt.figure(facecolor=self.DISCORD_BG_COLOR)
+        fig = plt.figure(facecolor=self.nextcord_BG_COLOR)
         ax1 = plt.subplot2grid((2, 1), (0, 0))
 
         plt.xlabel("Message Volume")
         plt.title(f"General User Activity (past {self.DAYS_BACK} days)")
-        ax1.set_facecolor(self.DISCORD_BG_COLOR)
+        ax1.set_facecolor(self.nextcord_BG_COLOR)
 
         users = []
         msgs = []
@@ -192,7 +192,7 @@ class CommunityStats(commands.Cog):
         ax2 = plt.subplot2grid((2, 1), (1, 0))
         plt.title(f"Help Channel Activity (past {self.DAYS_BACK} days)")
         plt.xlabel("Help Channel\nMsg Volume")
-        ax2.set_facecolor(self.DISCORD_BG_COLOR)
+        ax2.set_facecolor(self.nextcord_BG_COLOR)
 
         users = []
         msgs = []

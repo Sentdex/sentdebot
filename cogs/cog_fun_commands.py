@@ -2,7 +2,7 @@
 import asyncio
 
 import requests
-import nextcord as discord
+import nextcord
 from nextcord.ext import commands, tasks
 
 
@@ -54,7 +54,7 @@ class FunCommands(commands.Cog):
         with requests.Session() as s:
             download = s.get(url)
             data = download.json()
-            embed = discord.Embed(title=data['title'], description=data['description'], color=0x00ff00)
+            embed = nextcord.Embed(title=data['title'], description=data['description'], color=0x00ff00)
             await ctx.send(embed=embed)
 
 
