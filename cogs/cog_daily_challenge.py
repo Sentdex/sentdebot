@@ -2,7 +2,6 @@
 import nextcord
 from nextcord.ext import commands, tasks
 
-
 import requests
 from bs4 import BeautifulSoup
 
@@ -12,6 +11,15 @@ class DailyChallenge(commands.Cog):
     # a cog to download the daily challenge from project euler
     def __init__(self, bot):
         self.bot = bot
+
+    # on ready, check to see if all guilds have a daily challenge channel
+    # if not, create one
+    @commands.Cog.listener()
+    async def on_ready(self):
+        for guild in self.bot.guilds:
+            if not nextcord.utils.get(guild.text_channels, name='daily-challenge'):
+                await guild.create_text_channel('daily-challenge')
+        await self.daily_challenge.start()
 
     @tasks.loop(hours=12)
     async def daily_challenge(self):
@@ -34,6 +42,4 @@ class DailyChallenge(commands.Cog):
 
 
 def setup(bot):
-    dc = DailyChallenge(bot)
-    bot.add_cog(dc)
-    dc.daily_challenge.start()
+    bot.add_cog(DailyChallenge(bot))

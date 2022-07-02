@@ -1,12 +1,6 @@
 body {
     background-color: #23272A;
     color: #FFFFFF;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 14px;
-    line-height: 1.42857143;
-    margin: 0;
-    padding: 0;
-    width: 100%;
 }
 
 /* style for class "title" */
@@ -15,11 +9,4 @@ body {
     font-weight: bold;
     text-align: center;
 }
-
-a {
-    color: #FFFFFF;
-    text-decoration: none;
-}
-
-
 

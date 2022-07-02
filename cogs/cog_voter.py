@@ -3,7 +3,7 @@ import nextcord
 from nextcord.ext import commands, tasks
 
 
-class Voter(commands.Cog):
+class Voter(commands.Cog, name="Democracy Cog"):
     def __init__(self, bot):
         self.bot = bot
 
@@ -17,7 +17,6 @@ class Voter(commands.Cog):
             return
         else:
             emoji_list = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
-
             # we need to arrange as an embed to send to the channel, and then we need to add a reaction for each option
             embed = nextcord.Embed(title=question, color=0x00ff00)
             for i in range(len(options)):

@@ -10,12 +10,11 @@ class FunCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='dev_joke()', help='get a silly joke')
+    @commands.command(name='dev_joke', help='get a silly joke')
     async def dev_joke(self, ctx):
         # get joke from https://backend-omega-seven.vercel.app/api/getjoke
         # send the 'question', wait 1 sec for every 3 words in question, then send the 'punchline'
         joke = requests.get('https://backend-omega-seven.vercel.app/api/getjoke').json()[0]
-        print(joke)
 
         question = joke['question']
         punchline = joke['punchline']
@@ -24,7 +23,7 @@ class FunCommands(commands.Cog):
         await asyncio.sleep(len(question.split()) // 2)
         await ctx.send(punchline)
 
-    @commands.command(name='zen()', help='get some python zen')
+    @commands.command(name='zen', help='get some python zen')
     async def zen(self, ctx):
         await ctx.send("""```return 
     Beautiful is better than ugly.
@@ -48,7 +47,7 @@ class FunCommands(commands.Cog):
     Namespaces are one honking great idea -- let's do more of those!
     —Tim Peters```""")
 
-    @commands.command(name='inspire()', help='get some inspiration')
+    @commands.command(name='inspire', help='get some inspiration')
     async def inspire(self, ctx):
         url = "https://what-to-code.com/api/ideas/random"
         with requests.Session() as s:
@@ -57,7 +56,13 @@ class FunCommands(commands.Cog):
             embed = nextcord.Embed(title=data['title'], description=data['description'], color=0x00ff00)
             await ctx.send(embed=embed)
 
+    @commands.command(name='math_trivia', help='get some math trivia')
+    async def math_trivia(self, ctx):
+        url = "http://numbersapi.com/random/math"
+        with requests.Session() as s:
+            download = s.get(url)
+            data = download.text
+            await ctx.send(data)
 
 def setup(bot):
-    fc = FunCommands(bot)
-    bot.add_cog(fc)
+    bot.add_cog(FunCommands(bot))

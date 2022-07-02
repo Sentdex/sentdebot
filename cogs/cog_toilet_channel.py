@@ -5,7 +5,7 @@ from nextcord import NotFound
 from nextcord.ext import commands, tasks
 
 
-class ToiletChannel(commands.Cog):
+class ToiletChannel(commands.Cog, name="Toilet Channel"):
     def __init__(self, bot):
         self.bot = bot
 

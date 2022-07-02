@@ -38,27 +38,27 @@ class AdminTools(commands.Cog):
                 output_string += file_name[i]
         return output_string
 
-    @commands.command(name='load_cog()', help='load a cog', hidden=True, aliases=['load_cog'])
+    @commands.command(name='load_cog', help='load a cog', hidden=True)
     @commands.has_permissions(administrator=True)
     async def load_cog(self, ctx, cog_name):
         """Load a cog"""
         self.bot.load_extension(f'cogs.{self.class_to_file(cog_name)}')
         await ctx.send(f'{cog_name} loaded')
 
-    @commands.command(name='unload_cog()', help='unload a cog', hidden=True, aliases=['unload_cog'])
+    @commands.command(name='unload_cog', help='unload a cog', hidden=True)
     @commands.has_permissions(administrator=True)
     async def unload_cog(self, ctx, cog_name):
         """Unload a cog"""
         self.bot.unload_extension(f'cogs.{self.class_to_file(cog_name)}')
         await ctx.send(f'{cog_name} unloaded')
 
-    @commands.command(name='reload_cog()', help='reload a cog', hidden=True, aliases=['reload_cog'])
+    @commands.command(name='reload_cog', help='reload a cog')
     @commands.has_permissions(administrator=True)
     async def reload_cog(self, ctx, cog_name):
         self.bot.reload_extension(f'cogs.{self.class_to_file(cog_name)}')
         await ctx.send(f'{cog_name} reloaded')
 
-    @commands.command(name='list_cogs()', help='gives a list of loaded extensions', hidden=True, aliases=['list_cogs'])
+    @commands.command(name='list_cogs', help='gives a list of loaded extensions', hidden=True)
     @commands.has_permissions(administrator=True)
     async def list_cogs(self, ctx):
         # embed a list of loaded cogs
@@ -72,14 +72,14 @@ class AdminTools(commands.Cog):
                 inline=False)
         await ctx.send(embed=embed)
 
-    @commands.command(name='logout()', help='logout', aliases=['gtfo()'], hidden=True)
+    @commands.command(name='logout', help='logout', aliases=['gtfo'], hidden=True)
     @commands.is_owner()
     async def logout(self, ctx):
         """logout bot"""
         await ctx.send('Logging out')
-        self.bot.close()
+        self.bot.logout()
 
-    @commands.command(name='restart()', help='restart', aliases=['restart_bot()'], hidden=True)
+    @commands.command(name='restart', help='restart', aliases=['restart_bot'], hidden=True)
     @commands.is_owner()
     async def restart(self, ctx):
         """restart bot"""
