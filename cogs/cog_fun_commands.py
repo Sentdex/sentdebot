@@ -1,4 +1,7 @@
-"""Cog to add silly bot functions like jokes, etc."""
+"""Cog to add silly bot functions like jokes, etc.
+If a function has no function besides some humour and is a one function command,
+it likely belongs here"""
+
 import asyncio
 
 import requests

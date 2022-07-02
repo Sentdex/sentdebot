@@ -17,7 +17,7 @@ class Config(Protocol):
 
 
 class ReadOnlyConfig:
-
+    """Creates a restricted read only dictionary mapping"""
     def __init__(self, filename, config_mapping):
         self.filename = filename
         config = config_mapping
@@ -52,7 +52,8 @@ class ReadOnlyConfig:
 
 
 class BoundConfig:
-    # similar to read only config, except mutable and writes config changes directly to file
+    # similar to read only config, except mutable and writes config changes directly to file, ugly, risy you probably shouldn't use this outside of testing purposes
+
     def __init__(self, filename, config_mapping):
         self.filename = filename
         config = config_mapping
@@ -94,3 +95,7 @@ class BoundConfig:
         self.config[key] = value
         with open(f'configs/{self.filename}.json', 'w') as config_file:
             config_file.write(dumps(self.config, indent=4))
+
+    # print copy pasteable dict representation of config
+    def __str__(self):
+        return dumps(self.config, indent=4)

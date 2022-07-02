@@ -7,21 +7,11 @@ import requests
 import nextcord
 from nextcord.ext import commands, tasks
 
+
 class DailyDog(nextcord.ext.commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.daily_dog.start()
-
-
-    # on ready, check to see if all guilds have a daily dog channel
-    # if not, create one
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        for guild in self.bot.guilds:
-            if not nextcord.utils.get(guild.text_channels, name='dogs'):
-                await guild.create_text_channel('dogs')
-
 
     @tasks.loop(hours=12)
     async def daily_dog(self):

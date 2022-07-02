@@ -1,4 +1,5 @@
-"""cog to create and maintain a channel called toilet, that only holds a history of 10 messages, older ones get deleted.
+"""cog to create and maintain a channel called toilet, that only holds a history of 10 messages,
+older ones get deleted.
 For development purposes (bot spam etc.)"""
 import nextcord
 from nextcord import NotFound

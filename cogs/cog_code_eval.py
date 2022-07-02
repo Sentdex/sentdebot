@@ -1,12 +1,18 @@
+"""A pyston rest api powered code evaluator"""
 from nextcord.ext import commands
 from pyston import PystonClient, File
-
 
 class CodeEval(commands.Cog, name="Code Evaluator"):
 
     @commands.command(name='eval', help='Evaluates code')
     async def eval(self, ctx, *, code):
-        """Evaluates code"""
+        """Evaluates code
+        Usage example:
+        'bot_prefix eval
+        ```python
+        print("Hello World")
+        ```
+        """
         try:
             client = PystonClient()  # new client for each eval so no pollution
             lang, code = map(str.strip, code.strip('"\'`\n').split('\n', 1))

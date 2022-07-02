@@ -8,7 +8,7 @@ class LockDown(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="lockdown_channel", aliases=["ld"])
+    @commands.command(name="lockdown_channel", aliases=["ld"], help="Lockdown a channel", hidden=True)
     @commands.has_permissions(administrator=True)
     async def lockdown(self, ctx, channel=None):
         # if channel == None, lockdown the current channel
@@ -23,6 +23,20 @@ class LockDown(commands.Cog):
         else:
             await channel.set_permissions(ctx.guild.default_role, send_messages=True)
             await ctx.send(f"{channel.mention} is now unlocked.")
+
+    @commands.command(name="lockdown_server", aliases=["lds"], help="Lockdown the server", hidden=True)
+    @commands.has_permissions(administrator=True)
+    async def lockdown_server(self, ctx, state):
+        if state == "on":
+            for channel in ctx.guild.text_channels:
+                await channel.set_permissions(ctx.guild.default_role, send_messages=False)
+            await ctx.send("Server is now locked down.")
+        elif state == "off":
+            for channel in ctx.guild.text_channels:
+                await channel.set_permissions(ctx.guild.default_role, send_messages=True)
+            await ctx.send("Server is now unlocked.")
+        else:
+            await ctx.send("Please use either `on` or `off`.")
 
 
 def setup(bot):

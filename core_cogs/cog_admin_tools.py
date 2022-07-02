@@ -1,4 +1,5 @@
-"""Cog to handle admin tools, such as reloading cogs, restarting and logging out the bot."""
+"""Cog to handle admin tools, such as reloading cogs, restarting and logging out the bot.
+Sorely need a rewrite, but it works for now."""
 import nextcord
 from nextcord.ext import commands
 
@@ -42,21 +43,31 @@ class AdminTools(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def load_cog(self, ctx, cog_name):
         """Load a cog"""
-        self.bot.load_extension(f'cogs.{self.class_to_file(cog_name)}')
-        await ctx.send(f'{cog_name} loaded')
+        try:
+            self.bot.load_extension(f'cogs.{self.class_to_file(cog_name)}')
+            await ctx.send(f'{cog_name} loaded')
+        except Exception as e:
+            await ctx.send(f'Error loading {cog_name}: {e}')
 
     @commands.command(name='unload_cog', help='unload a cog', hidden=True)
     @commands.has_permissions(administrator=True)
     async def unload_cog(self, ctx, cog_name):
         """Unload a cog"""
-        self.bot.unload_extension(f'cogs.{self.class_to_file(cog_name)}')
-        await ctx.send(f'{cog_name} unloaded')
+        try:
+            self.bot.unload_extension(f'cogs.{self.class_to_file(cog_name)}')
+            await ctx.send(f'{cog_name} unloaded')
+        except Exception as e:
+            await ctx.send(f'Error: {e}')
 
     @commands.command(name='reload_cog', help='reload a cog')
     @commands.has_permissions(administrator=True)
     async def reload_cog(self, ctx, cog_name):
-        self.bot.reload_extension(f'cogs.{self.class_to_file(cog_name)}')
-        await ctx.send(f'{cog_name} reloaded')
+        try:
+            self.bot.reload_extension(f'cogs.{self.class_to_file(cog_name)}')
+            await ctx.send(f'{cog_name} reloaded')
+        except Exception as e:
+            await ctx.send(f'Error: {e}')
+
 
     @commands.command(name='list_cogs', help='gives a list of loaded extensions', hidden=True)
     @commands.has_permissions(administrator=True)

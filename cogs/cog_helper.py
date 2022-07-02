@@ -1,3 +1,4 @@
+"""Cog to handle various kinds of help messages that are not cog specific"""
 from nextcord.ext import commands
 
 

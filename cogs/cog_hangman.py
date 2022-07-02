@@ -1,4 +1,5 @@
-"""Cog to play a game of hangman with the bot."""
+"""Cog to play a game of hangman with the bot.
+intended to be used as a learning module to understand how interacting with the discord/nextcord api works"""
 
 from nextcord.ext import commands
 

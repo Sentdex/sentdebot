@@ -1,3 +1,5 @@
+"""Cog that simply checks the speed of the bot"""
+
 from nextcord.ext import commands
 
 class CheckSpeed(commands.Cog, name="Speed Test"):

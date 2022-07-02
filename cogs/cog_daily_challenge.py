@@ -1,10 +1,12 @@
-"""Cog to provide a daily challenge to the daily-challenge channel"""
+"""
+Cog to provide a daily challenge to the daily-challenge channel
+Parses from projecteuler.net/recent
+"""
 import nextcord
 from nextcord.ext import commands, tasks
 
 import requests
 from bs4 import BeautifulSoup
-
 
 
 class DailyChallenge(commands.Cog):

@@ -1,5 +1,5 @@
 """cog to collect exchange rates from https://api.coingecko.com/api/v3/exchange_rates
-and send them to the bot as formatted embed"""
+and send them to the bot as formatted embed for @Swank"""
 
 
 import nextcord

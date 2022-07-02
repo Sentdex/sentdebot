@@ -16,28 +16,9 @@ default_bot_config = {
     "bot_prefix": "",  # bot prefix
     "bot_prefix_allow_trim_white_space": False,  # allow bot prefix to be trimmed of whitespace after prefix
     "bot_prefix_case_insensitive": True,  # bot prefix is case-insensitive
-
     "bot_presence_comment": "",  # bot presence is enabled
-
-    "default_channel_layout": {  # default channel layout
-        "general": [  # Category -> [Channel, ...]
-            ("chat", "text"),  # Channel -> (Name, Type)
-            ("off_topic", "text"),
-            ("announcements", "text"),
-            ("bot_commands", "text"),
-            ("voice_chat", "voice")
-        ]
-    },
-
-    "default_roles": {  # default roles
-        "admin": "admin",
-        "moderator": "moderator",
-        "bot_admin": "bot",
-        "bot_moderator": "bot"
-    },
-
-    "cog_folder": "cogs",
-    "secret_key": "",
+    "cog_folder": "cogs", # folder where cogs are located
+    "secret_key": "", # secret key for flask/quart session
 
     "guild_id": 0
 }
