@@ -77,17 +77,6 @@ class DataCollector(commands.Cog, name="Metric Tool"):
             for query in self.db_creation_queries:
                 await db.execute(query)
             await db.commit()
-            print("Database created.")
-            print("Database path: {}".format(self.path))
-            print("Database size: {}".format(os.path.getsize(self.path)))
-            print("\n")
-            # print each table in the database
-            async for row in await db.execute("SELECT * FROM sqlite_master WHERE type='table'"):
-                print(row)
-            print("\n")
-            # print Triggers
-            async for row in await db.execute("SELECT * FROM sqlite_master WHERE type='trigger'"):
-                print(row)
         guild_id = self.bot.config.get("guild_id")
         guild = self.bot.get_guild(guild_id)
         if guild:
@@ -104,16 +93,6 @@ class DataCollector(commands.Cog, name="Metric Tool"):
                 message = await messages.get()
                 await self.add_message(message)
 
-            async with aiosqlite.connect(self.path) as db:
-                async for row in await db.execute("SELECT * FROM users"):
-                    print(row)
-                print("\n")
-                async for row in await db.execute("SELECT * FROM channels"):
-                    print(row)
-                print("\n")
-                async for row in await db.execute("SELECT * FROM messages"):
-                    print(row)
-                print("\n")
 
     async def add_user(self, member):
         async with aiosqlite.connect(self.path) as db:

@@ -1,7 +1,0 @@
-<ol>
-{% for cog in bot.client.cogs %}
-    <! have cog href and a toggle button for each cog -->
-    <li><a href="/dashboard/cog_settings/{{cog}}">{{cog}}</a>
-        <button onclick="toggleCog('{{cog}}')">Toggle</button>
-    {% endfor %}
-</ol>
