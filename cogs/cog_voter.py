@@ -33,8 +33,6 @@ class Voter(commands.Cog, name="Democracy Cog"):
                 await thread.send(f"@here")
             except nextcord.HTTPException:
                 pass
-            # delete original message
-            await out.delete()
 
 
 def setup(bot):

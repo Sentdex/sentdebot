@@ -74,9 +74,9 @@ class Bot(commands.Bot):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
-    def run(self):
+    def start_client(self):
         self.cog_loader()
-        super().run(self.config.get('bot_token'))
+        self.run(self.config.get('bot_token'))
 
     def logout(self):
         self.loop.stop()
@@ -84,5 +84,4 @@ class Bot(commands.Bot):
 
 
 if __name__ == '__main__':
-    bot = Bot()
-    bot.run()
+    Bot().start_client()
