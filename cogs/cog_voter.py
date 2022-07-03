@@ -7,8 +7,9 @@ class Voter(commands.Cog, name="Democracy Cog"):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='vote', help='create a vote')
+    @commands.command(name='vote', help='create a vote', usage='"Question" option1 option2 option3')
     async def vote(self, ctx, question, *options):
+
         if len(options) < 2:
             await ctx.send('You need at least 2 options to create a vote')
             return
