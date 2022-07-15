@@ -1,0 +1,3 @@
+disnake~=2.5.1
+toml~=0.10.2
+coloredlogs~=15.0.1

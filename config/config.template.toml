@@ -1,0 +1,20 @@
+# <env> means this will be loaded from os environment variable with name <section>_<key>
+# for example: "base_discord_api_key" for discord api key
+
+[base]
+discord_api_key = "<env>"
+command_prefixes = ["!"]
+status_message = "Sentdebot V2"
+
+log_to_file = true
+log_channel_id = -1
+
+error_duration = 30
+success_duration = 30
+
+[ids]
+admin_role_id = -1
+mod_role_id = -1
+
+[cogs]
+protected_cogs = ["system", "errors", "help"]
