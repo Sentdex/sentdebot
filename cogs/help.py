@@ -1,3 +1,5 @@
+# Custom help cog
+
 import math
 import disnake as discord
 from disnake.ext import commands

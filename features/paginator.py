@@ -1,3 +1,5 @@
+# Basic embed page scroller
+
 import disnake as discord
 from disnake.ext.commands import Context
 from collections import OrderedDict

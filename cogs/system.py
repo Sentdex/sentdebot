@@ -1,3 +1,5 @@
+# Administration extension
+
 import disnake as discord
 from disnake.ext import commands
 import asyncio

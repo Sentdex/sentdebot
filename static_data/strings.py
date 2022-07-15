@@ -1,3 +1,5 @@
+# Storage for all static strings
+
 from config import config
 
 class Strings:

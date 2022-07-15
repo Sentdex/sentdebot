@@ -1,3 +1,5 @@
+# Parsing and storing of config
+
 import toml
 from typing import List
 import os
@@ -9,6 +11,8 @@ def get_attr(toml_config: dict, section: str, attr_key: str):
   return val
 
 def get_config() -> dict:
+  # Get config
+  # If config is not present try to load template of config
   try:
     return dict(toml.load("config/config.toml", _dict=dict))
   except:

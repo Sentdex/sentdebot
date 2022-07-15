@@ -1,3 +1,5 @@
+# Store for essential functions
+
 import math
 import disnake
 from disnake.ext import commands

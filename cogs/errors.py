@@ -1,3 +1,5 @@
+# Error handling extension
+
 import disnake as discord
 from disnake.ext import commands
 import traceback

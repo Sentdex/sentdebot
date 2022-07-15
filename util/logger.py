@@ -1,3 +1,5 @@
+# Custom logger for some beutiful consol logs
+
 import logging
 import coloredlogs
 from config import config
