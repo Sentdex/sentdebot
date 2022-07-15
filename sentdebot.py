@@ -4,12 +4,16 @@ from disnake.ext import commands
 
 from config import config
 from util.logger import setup_custom_logger
+from database.database_manipulation import init_tables
 
 logger = setup_custom_logger(__name__)
 
 if config.key is None:
   logger.error("Discord API key is missing!")
   exit(-1)
+
+# Init database tables
+init_tables()
 
 intents = Intents.none()
 intents.guilds = True

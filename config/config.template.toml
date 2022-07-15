@@ -7,6 +7,8 @@ discord_api_key = "<env>"
 command_prefixes = ["!"]
 status_message = "Sentdebot V2"
 
+database_connect_string = ""
+
 # If true warning and error logs will also be logged in file discord.log
 log_to_file = true
 # Channle id to which error messages will be send
@@ -25,7 +27,7 @@ mod_role_id = []
 # Cogs that will be loaded on startup and unable to be unloaded
 protected_cogs = ["system", "errors", "help"]
 # Cogs automatically loaded after start
-defaul_loaded_cogs = ["common", "random_role_giver"]
+defaul_loaded_cogs = ["common", "random_role_giver", "stats"]
 
 [random_role_giver]
 role_ids = []

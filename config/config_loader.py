@@ -29,6 +29,7 @@ class Config:
   log_channel_id: int = get_attr(raw_config, "base", "log_channel_id")
   error_duration: int = get_attr(raw_config, "base", "error_duration")
   success_duration: int = get_attr(raw_config, "base", "success_duration")
+  database_connect_string: str = get_attr(raw_config, "base", "database_connect_string")
 
   admin_role_ids: List[int] = get_attr(raw_config, "ids", "admin_role_ids")
   mod_role_ids: List[int] = get_attr(raw_config, "ids", "mod_role_ids")
