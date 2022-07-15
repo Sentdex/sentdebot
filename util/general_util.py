@@ -13,19 +13,27 @@ def is_administrator(ctx: commands.Context):
   if not isinstance(ctx.author, disnake.Member):
     return False
 
-  if disnake.utils.get(ctx.author.roles, id=config.admin_role_id) is not None or ctx.author.id == ctx.guild.owner_id:
+  if ctx.author.id == ctx.guild.owner_id:
     return True
+
+  for role_id in config.admin_role_ids:
+    if disnake.utils.get(ctx.author.roles, id=role_id) is not None:
+      return True
   return False
 
 def is_mod(ctx: commands.Context):
   if not isinstance(ctx.author, disnake.Member):
     return False
 
+  if ctx.author.id == ctx.guild.owner_id:
+    return True
+
   if is_administrator(ctx):
     return True
 
-  if disnake.utils.get(ctx.author.roles, id=config.mod_role_id) is not None:
-    return True
+  for role_id in config.mod_role_id:
+    if disnake.utils.get(ctx.author.roles, id=role_id) is not None:
+      return True
   return False
 
 def get_cogs_in_folder():

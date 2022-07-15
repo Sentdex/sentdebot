@@ -22,6 +22,8 @@ class Strings:
 
   system_cogs_brief = "Show all extensions and their states"
 
+  system_logout_brief = "Turn off bot"
+
   # Help
   help_brief = "Show all commands and help for them"
   help_help = "Also you can specify module to show help only for specific module"
@@ -35,6 +37,12 @@ class Strings:
   error_bad_argument = f'Some arguments of command missing or wrong, use {config.command_prefixes[0]}help to get more info'
   error_max_concurrency_reached = "Bot is busy, try it later"
   error_no_private_message = "This command can't be used in private channel"
+
+  # Common
+  common_member_count_brief = "Show number of members on server"
+
+  common_search_brief = "Search on Sentdex webpage"
+  common_search_nothing_found = "Nothing found for search term `{term}`"
 
   @staticmethod
   def populate_string(message_name, *args, **kwargs):

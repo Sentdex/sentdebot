@@ -1,6 +1,6 @@
 # Administration extension
 
-import disnake as discord
+import disnake
 from disnake.ext import commands
 import asyncio
 import math
@@ -28,7 +28,7 @@ class System(Base_Cog):
     cogs_in_folder = general_util.get_cogs_in_folder()
 
     if extension_name.lower() == "all":
-      final_embed = discord.Embed(title="Extensions loaded", color=discord.Color.green(), description="Failed extensions:")
+      final_embed = disnake.Embed(title="Extensions loaded", color=disnake.Color.green(), description="Failed extensions:")
 
       for cog in cogs_in_folder:
         if str(cog) not in loaded_cogs:
@@ -38,7 +38,7 @@ class System(Base_Cog):
             await asyncio.sleep(0)
           except Exception as e:
             final_embed.description += f"\n{str(cog)}"
-            final_embed.colour = discord.Color.orange()
+            final_embed.colour = disnake.Color.orange()
 
             await general_util.generate_error_message(ctx, Strings.populate_string("system_unable_to_load_cog", cog=str(cog), e=e))
 
@@ -64,7 +64,7 @@ class System(Base_Cog):
       return await general_util.generate_error_message(ctx, Strings.populate_string("system_unload_protected_cog", extension=extension_name))
 
     if extension_name.lower() == "all":
-      final_embed = discord.Embed(title="Extensions unload", color=discord.Color.green(), description="Failed extensions:")
+      final_embed = disnake.Embed(title="Extensions unload", color=disnake.Color.green(), description="Failed extensions:")
 
       for cog in loaded_cogs:
         if cog not in config.protected_cogs:
@@ -74,7 +74,7 @@ class System(Base_Cog):
             await asyncio.sleep(0)
           except Exception as e:
             final_embed.description += f"\n{str(cog)}"
-            final_embed.colour = discord.Color.orange()
+            final_embed.colour = disnake.Color.orange()
 
             await general_util.generate_error_message(ctx, Strings.populate_string("system_unable_to_unload_cog", cog=cog, e=e))
 
@@ -96,7 +96,7 @@ class System(Base_Cog):
     loaded_cogs = [cog.file for cog in self.bot.cogs.values()]
 
     if extension_name.lower() == "all":
-      final_embed = discord.Embed(title="Extensions reloaded", color=discord.Color.green(), description="Failed extensions:")
+      final_embed = disnake.Embed(title="Extensions reloaded", color=disnake.Color.green(), description="Failed extensions:")
 
       for cog in loaded_cogs:
         try:
@@ -105,7 +105,7 @@ class System(Base_Cog):
           await asyncio.sleep(0)
         except Exception as e:
           final_embed.description += f"\n{str(cog)}"
-          final_embed.colour = discord.Color.orange()
+          final_embed.colour = disnake.Color.orange()
 
           await general_util.generate_error_message(ctx, Strings.populate_string("system_unable_to_reload_cog", cog=cog, e=e))
 
@@ -133,7 +133,7 @@ class System(Base_Cog):
 
     pages = []
     for batch in cogs_in_folder_batches:
-      embed = discord.Embed(title="Cogs", description="List of all loaded and unloaded cogs", color=discord.Color.dark_magenta())
+      embed = disnake.Embed(title="Cogs", description="List of all loaded and unloaded cogs", color=disnake.Color.dark_magenta())
 
       for idx, cog in enumerate(batch):
         status = "🔒 *protected*" if cog in config.protected_cogs else ("✅ **loaded**" if cog in loaded_cogs else "❌ **unloaded**")
@@ -143,6 +143,14 @@ class System(Base_Cog):
 
     p_session = PaginatorSession(self.bot, ctx, pages=pages)
     await p_session.run()
+
+  @commands.command(brief=Strings.system_logout_brief, aliases=["gtfo"])
+  @commands.check(general_util.is_administrator)
+  @commands.guild_only()
+  async def logout(self, ctx: commands.Context):
+    await general_util.delete_message(self.bot, ctx)
+    await ctx.send("Cya :wave:")
+    await self.bot.close()
 
 def setup(bot):
   bot.add_cog(System(bot))

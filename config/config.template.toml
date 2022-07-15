@@ -2,6 +2,7 @@
 # for example: "base_discord_api_key" for discord api key
 
 [base]
+main_guild_id = -1
 discord_api_key = "<env>"
 command_prefixes = ["!"]
 status_message = "Sentdebot V2"
@@ -16,10 +17,16 @@ error_duration = 30
 success_duration = 30
 
 [ids]
-# Control role ids, -1 means unset
-admin_role_id = -1
-mod_role_id = -1
+# Control role ids
+admin_role_id = []
+mod_role_id = []
 
 [cogs]
 # Cogs that will be loaded on startup and unable to be unloaded
 protected_cogs = ["system", "errors", "help"]
+# Cogs automatically loaded after start
+defaul_loaded_cogs = ["common", "random_role_giver"]
+
+[random_role_giver]
+role_ids = []
+chance = 0.2

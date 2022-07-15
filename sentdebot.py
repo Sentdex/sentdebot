@@ -52,4 +52,13 @@ for cog in config.protected_cogs:
     logger.warning(f"Failed to load {cog} module\n{output}")
 logger.info("Protected modules loaded")
 
+for cog in config.defaul_loaded_cogs:
+  try:
+    bot.load_extension(f"cogs.{cog}")
+    logger.info(f"{cog} loaded")
+  except:
+    output = traceback.format_exc()
+    logger.warning(f"Failed to load {cog} module\n{output}")
+logger.info("Defaul modules loaded")
+
 bot.run(config.key)

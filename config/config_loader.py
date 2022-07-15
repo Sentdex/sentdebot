@@ -21,6 +21,7 @@ def get_config() -> dict:
 class Config:
   raw_config = get_config()
 
+  main_guild_id = get_attr(raw_config, "base", "main_guild_id")
   key: str = get_attr(raw_config, "base", "discord_api_key")
   status_message: str = get_attr(raw_config, "base", "status_message")
   command_prefixes: List[str] = get_attr(raw_config, "base", "command_prefixes")
@@ -29,7 +30,11 @@ class Config:
   error_duration: int = get_attr(raw_config, "base", "error_duration")
   success_duration: int = get_attr(raw_config, "base", "success_duration")
 
-  admin_role_id: int = get_attr(raw_config, "ids", "admin_role_id")
-  mod_role_id: int = get_attr(raw_config, "ids", "mod_role_id")
+  admin_role_ids: List[int] = get_attr(raw_config, "ids", "admin_role_ids")
+  mod_role_ids: List[int] = get_attr(raw_config, "ids", "mod_role_ids")
 
   protected_cogs: List[str] = get_attr(raw_config, "cogs", "protected_cogs")
+  defaul_loaded_cogs: List[str] = get_attr(raw_config, "cogs", "defaul_loaded_cogs")
+
+  role_giver_role_ids: List[int] = get_attr(raw_config, "random_role_giver", "role_ids")
+  role_giver_give_chance: float = get_attr(raw_config, "random_role_giver", "chance")
