@@ -46,16 +46,17 @@ class Strings:
   common_search_brief = "Search on Sentdex webpage"
   common_search_nothing_found = "Nothing found for search term `{term}`"
 
-  common_project_get_brief = "Get project by name"
-  common_project_get_not_found = "Project `{name}` is not in database"
+  # Projects
+  projects_project_get_brief = "Get project by name"
+  projects_project_get_not_found = "Project `{name}` is not in database"
 
-  common_add_project_brief = "Add project to database of projects"
-  common_add_project_added = "Project `{name}` added to database of projects"
-  common_add_project_failed = "Project `{name}` already exists in database"
+  projects_add_project_brief = "Add project to database of projects"
+  projects_add_project_added = "Project `{name}` added to database of projects"
+  projects_add_project_failed = "Project `{name}` already exists in database"
 
-  common_remove_project_brief = "Remove project from database of projects"
-  common_remove_project_removed = "Project `{name}` removed from database of projects"
-  common_remove_project_failed = "Project `{name}` not found for removal"
+  projects_remove_project_brief = "Remove project from database of projects"
+  projects_remove_project_removed = "Project `{name}` removed from database of projects"
+  projects_remove_project_failed = "Project `{name}` not found for removal"
 
   # Stats
   stats_user_activity_brief = "Show recent user activity in channels"
