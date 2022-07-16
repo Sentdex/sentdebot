@@ -78,7 +78,8 @@ class Stats(Base_Cog):
     if message.author.bot: return
     if message.guild is None: return
 
-    message_metrics_repo.add_message_metrics(message)
+    if message_metrics_repo.get_author_of_last_message(message.channel.id) != message.author.id:
+      message_metrics_repo.add_message_metrics(message)
 
   @commands.command(brief=Strings.stats_user_activity_brief)
   @cooldowns.long_cooldown
@@ -94,14 +95,8 @@ class Stats(Base_Cog):
     dataframe.set_index("date", inplace=True)
     dataframe.drop("timestamp", axis=1, inplace=True)
 
-    df_no_dup = dataframe.copy()
-    df_no_dup['author_id2'] = df_no_dup['author_id'].shift(-1)
-    df_no_dup['author_id_rm_dups'] = list(map(df_match, df_no_dup['author_id'], df_no_dup['author_id2']))
-
-    df_no_dup.dropna(inplace=True)
-
-    user_id_counts_overall = Counter(df_no_dup[df_no_dup["channel_id"].isin(self.all_channels)]["author_id"].values).most_common(10)
-    uids_in_help = Counter(df_no_dup[df_no_dup["channel_id"].isin(config.stats_help_channel_ids)]["author_id"].values).most_common(10)
+    user_id_counts_overall = Counter(dataframe[dataframe["channel_id"].isin(self.all_channels)]["author_id"].values).most_common(10)
+    uids_in_help = Counter(dataframe[dataframe["channel_id"].isin(config.stats_help_channel_ids)]["author_id"].values).most_common(10)
 
     fig = plt.figure(facecolor=DISCORD_BG_COLOR)
     ax1 = plt.subplot2grid((2, 1), (0, 0))
