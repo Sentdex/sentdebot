@@ -27,7 +27,7 @@ mod_role_id = []
 # Cogs that will be loaded on startup and unable to be unloaded
 protected_cogs = ["system", "errors", "help"]
 # Cogs automatically loaded after start
-defaul_loaded_cogs = ["common", "random_role_giver", "stats"]
+defaul_loaded_cogs = ["common", "projects", "random_role_giver", "stats"]
 
 [random_role_giver]
 role_ids = [] # Ids of roles that will be randomly given to users
