@@ -1,3 +1,5 @@
+import math
+
 import disnake
 from disnake.ext import commands
 from requests_html import HTMLSession
@@ -6,6 +8,8 @@ from config import cooldowns
 from static_data.strings import Strings
 from features.base_cog import Base_Cog
 from util import general_util
+from database import projects_repo
+from features.paginator import PaginatorSession
 
 class Common(Base_Cog):
   def __init__(self, bot: commands.Bot):
@@ -40,6 +44,64 @@ class Common(Base_Cog):
       await ctx.send(embed=embed)
     else:
       await general_util.generate_error_message(ctx, Strings.populate_string("common_search_nothing_found", term=search_term))
+
+  @commands.group(pass_context=True, brief=Strings.common_projects_brief)
+  async def projects(self, ctx: commands.Context):
+    if ctx.invoked_subcommand is None:
+      all_projects = projects_repo.get_all()
+
+      number_of_projects = len(all_projects)
+      number_of_batches = math.ceil(number_of_projects / 5)
+      batches = [all_projects[i * 5: i * 5 + 5] for i in range(number_of_batches)]
+
+      pages = []
+      for batch in batches:
+        embed = disnake.Embed(title="List of projects", color=disnake.Color.dark_blue())
+        general_util.add_author_footer(embed, ctx.author)
+
+        for project in batch:
+          embed.add_field(name=project.name, value=project.description, inline=False)
+        pages.append(embed)
+
+      if not pages:
+        await general_util.generate_error_message(ctx, Strings.common_projects_empty)
+      else:
+        await PaginatorSession(self.bot, ctx, timeout=120, pages=pages).run()
+
+  @projects.command(name="get", brief=Strings.common_project_get_brief)
+  async def get_project(self, ctx: commands.Context, project_name: str):
+    await general_util.delete_message(self.bot, ctx)
+
+    project = projects_repo.get_by_name(project_name)
+    if project is None:
+      return await general_util.generate_error_message(ctx, Strings.populate_string("common_project_get_not_found", name=project_name))
+
+    embed = disnake.Embed(title=project.name, description=project.description, color=disnake.Color.dark_blue())
+    general_util.add_author_footer(embed, ctx.author)
+
+    await ctx.send(embed=embed)
+
+  @projects.command(name="add", brief=Strings.common_add_project_brief, help=Strings.common_add_project_help)
+  @commands.check(general_util.is_mod)
+  async def add_project(self, ctx: commands.Context, project_name: str, *, project_description: str):
+    await general_util.delete_message(self.bot, ctx)
+
+    project = projects_repo.add_project(project_name, project_description)
+    if project is None:
+      await general_util.generate_error_message(ctx, Strings.populate_string("common_add_project_failed", name=project_name))
+    else:
+      await general_util.generate_success_message(ctx, Strings.populate_string("common_add_project_added", name=project_name))
+
+  @projects.command(name="remove", brief=Strings.common_remove_project_brief, help=Strings.common_remove_project_help)
+  @commands.check(general_util.is_mod)
+  async def remove_project(self, ctx: commands.Context, project_name: str):
+    await general_util.delete_message(self.bot, ctx)
+
+    if projects_repo.remove_project(project_name):
+      await general_util.generate_success_message(ctx, Strings.populate_string("common_remove_project_removed", name=project_name))
+    else:
+      await general_util.generate_error_message(ctx, Strings.populate_string("common_remove_project_failed", name=project_name))
+
 
 def setup(bot):
   bot.add_cog(Common(bot))
