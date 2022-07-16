@@ -37,3 +37,7 @@ chance = 0.2 # Chance on message to receive role
 [stats]
 days_back = 21
 help_channel_ids = [] # Channels that cound as help channels
+
+[auto_threader]
+# Channels where all messages will be converted to threads
+channel_ids = []

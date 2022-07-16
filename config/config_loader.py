@@ -42,3 +42,5 @@ class Config:
 
   stats_days_back: int = get_attr(raw_config, "stats", "days_back")
   stats_help_channel_ids: List[int] = get_attr(raw_config, "stats", "help_channel_ids")
+
+  auto_threader_channel_ids: List[int] = get_attr(raw_config, "auto_threader", "channel_ids")
