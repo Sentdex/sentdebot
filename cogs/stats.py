@@ -38,8 +38,10 @@ class Stats(Base_Cog):
 
   def late_init(self):
     self.main_guild = self.bot.get_guild(config.main_guild_id) if config.main_guild_id != -1 or config.main_guild_id is not None else None
-    self.all_channels = [channel.id for channel in self.main_guild.channels]
-    self.user_stats_task.start()
+    self.all_channels = [channel.id for channel in self.main_guild.channels] if self.main_guild is not None else []
+
+    if not self.user_stats_task.is_running():
+      self.user_stats_task.start()
 
   def cog_unload(self) -> None:
     if self.user_stats_task.is_running():
@@ -72,9 +74,13 @@ class Stats(Base_Cog):
     if self.main_guild is not None:
       online, idle, offline = self.get_user_stats()
       user_metrics_repo.add_user_metrics(online, idle, offline)
+    else:
+      self.late_init()
 
   @commands.Cog.listener()
   async def on_message(self, message: disnake.Message):
+    if self.main_guild is None: return
+    if self.main_guild.id != message.guild.id: return
     if message.author.bot: return
     if message.guild is None: return
 
