@@ -1,18 +1,19 @@
 # <env> means this will be loaded from os environment variable with name <section>_<key>
 # for example: "base_discord_api_key" for discord api key
+# Ids should be unset by setting them to -1 but some may be required
 
 [base]
-main_guild_id = -1
+main_guild_id = "<env>"
 discord_api_key = "<env>"
-command_prefixes = ["!"]
+command_prefixes = ["?"]
 status_message = "Sentdebot V2"
 
-database_connect_string = ""
+database_connect_string = "<env>"
 
 # If true warning and error logs will also be logged in file discord.log
-log_to_file = true
+log_to_file = false
 # Channle id to which error messages will be send
-log_channel_id = -1
+log_channel_id = "<env>"
 
 # Duration of error and success messages
 error_duration = 30
@@ -20,8 +21,8 @@ success_duration = 30
 
 [ids]
 # Control role ids
-admin_role_id = []
-mod_role_id = []
+admin_role_ids = []
+mod_role_ids = []
 
 [cogs]
 # Cogs that will be loaded on startup and unable to be unloaded
