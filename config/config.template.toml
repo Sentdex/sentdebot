@@ -19,6 +19,8 @@ log_channel_id = "<env>"
 error_duration = 30
 success_duration = 30
 
+help_channel_ids = [] # Channels that count as help channels
+
 [ids]
 # Control role ids
 admin_role_ids = []
@@ -28,7 +30,7 @@ mod_role_ids = []
 # Cogs that will be loaded on startup and unable to be unloaded
 protected_cogs = ["system", "errors", "help"]
 # Cogs automatically loaded after start
-defaul_loaded_cogs = ["common", "projects", "random_role_giver", "stats"]
+defaul_loaded_cogs = ["common", "projects", "random_role_giver", "stats", "help_threader"]
 
 [random_role_giver]
 role_ids = [] # Ids of roles that will be randomly given to users
@@ -36,8 +38,3 @@ chance = 0.2 # Chance on message to receive role
 
 [stats]
 days_back = 21
-help_channel_ids = [] # Channels that cound as help channels
-
-[auto_threader]
-# Channels where all messages will be converted to threads
-channel_ids = []

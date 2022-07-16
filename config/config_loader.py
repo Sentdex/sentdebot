@@ -30,6 +30,7 @@ class Config:
   error_duration: int = get_attr(raw_config, "base", "error_duration")
   success_duration: int = get_attr(raw_config, "base", "success_duration")
   database_connect_string: str = get_attr(raw_config, "base", "database_connect_string")
+  base_help_channel_ids: List[int] = get_attr(raw_config, "base", "help_channel_ids")
 
   admin_role_ids: List[int] = get_attr(raw_config, "ids", "admin_role_ids")
   mod_role_ids: List[int] = get_attr(raw_config, "ids", "mod_role_ids")
@@ -41,6 +42,3 @@ class Config:
   role_giver_give_chance: float = get_attr(raw_config, "random_role_giver", "chance")
 
   stats_days_back: int = get_attr(raw_config, "stats", "days_back")
-  stats_help_channel_ids: List[int] = get_attr(raw_config, "stats", "help_channel_ids")
-
-  auto_threader_channel_ids: List[int] = get_attr(raw_config, "auto_threader", "channel_ids")

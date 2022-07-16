@@ -104,7 +104,7 @@ class Help(Base_Cog):
         pages.extend(cog_pages)
 
     if pages:
-      await EmbedView(ctx.author, embeds=pages, perma_lock=True).run(ctx)
+      await EmbedView(ctx.author, embeds=pages, perma_lock=True, remove_on_timeout=True).run(ctx)
     else:
       emb = discord.Embed(title="Help", description="*No help available*", colour=discord.Color.green())
       await ctx.send(embed=emb, delete_after=120)

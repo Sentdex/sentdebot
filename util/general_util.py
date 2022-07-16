@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 from config import config
 
-def is_administrator(ctx: Union[commands.Context, disnake.ApplicationCommandInteraction]):
+def is_administrator(ctx):
   if not isinstance(ctx.author, disnake.Member):
     return False
 
@@ -21,7 +21,7 @@ def is_administrator(ctx: Union[commands.Context, disnake.ApplicationCommandInte
       return True
   return False
 
-def is_mod(ctx: Union[commands.Context, disnake.ApplicationCommandInteraction]):
+def is_mod(ctx):
   if not isinstance(ctx.author, disnake.Member):
     return False
 

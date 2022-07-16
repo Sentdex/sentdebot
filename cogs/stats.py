@@ -102,7 +102,7 @@ class Stats(Base_Cog):
     dataframe.drop("timestamp", axis=1, inplace=True)
 
     user_id_counts_overall = Counter(dataframe[dataframe["channel_id"].isin(self.all_channels)]["author_id"].values).most_common(10)
-    uids_in_help = Counter(dataframe[dataframe["channel_id"].isin(config.stats_help_channel_ids)]["author_id"].values).most_common(10)
+    uids_in_help = Counter(dataframe[dataframe["channel_id"].isin(config.base_help_channel_ids)]["author_id"].values).most_common(10)
 
     fig = plt.figure(facecolor=DISCORD_BG_COLOR)
     ax1 = plt.subplot2grid((2, 1), (0, 0))
