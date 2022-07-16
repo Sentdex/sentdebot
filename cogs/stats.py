@@ -157,6 +157,9 @@ class Stats(Base_Cog):
   async def community_report(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
 
+    if self.main_guild is None:
+      return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
+
     message_history = message_metrics_repo.get_message_metrics(config.stats_days_back)
     message_dataframe = pd.DataFrame.from_records(message_history, columns=["message_id", "timestamp", "author_id", "channel_id"])
     message_dataframe['count'] = 1
