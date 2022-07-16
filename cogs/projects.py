@@ -15,12 +15,13 @@ class Projects(Base_Cog):
     pass
 
   @projects.sub_command(name="add", description=Strings.common_add_project_brief)
+  @commands.check(general_util.is_mod)
   async def add_project(self, inter: disnake.CommandInteraction):
     await inter.response.send_modal(modal=disnake.ui.Modal(title="Add project", custom_id="add_project_modal",
                                                            components=
                                                            [
                                                              disnake.ui.TextInput(label="Name", custom_id="name", max_length=128, min_length=1),
-                                                             disnake.ui.TextInput(label="Description", custom_id="description", max_length=4000, min_length=1)
+                                                             disnake.ui.TextInput(label="Description", custom_id="description", max_length=4000, min_length=1, style=disnake.TextInputStyle.multi_line)
                                                            ]))
 
   @staticmethod
@@ -32,6 +33,7 @@ class Projects(Base_Cog):
     return [project_name for project_name in project_names if search_string in project_name]
 
   @projects.sub_command(name="remove", description=Strings.common_remove_project_brief)
+  @commands.check(general_util.is_mod)
   async def remove_project(self, inter: disnake.CommandInteraction, project_name: str = commands.Param(autocomplete=projects_list_autocomplete, description="Name of project to delete")):
     if projects_repo.remove_project(project_name):
       await general_util.generate_success_message(inter, Strings.populate_string("common_remove_project_removed", name=project_name))
