@@ -10,7 +10,7 @@ from util.logger import setup_custom_logger
 logger = setup_custom_logger(__name__)
 
 
-def have_vanity_role(member: disnake.Member):
+def have_random_role(member: disnake.Member):
   for role in member.roles:
     if role.id in config.role_giver_role_ids:
       return True
@@ -28,7 +28,7 @@ class RandomRoleGiver(Base_Cog):
   async def on_message(self, message: disnake.Message):
     if config.main_guild_id == -1 or config.main_guild_id != message.guild.id: return
     if message.author.bot: return
-    if have_vanity_role(message.author): return
+    if have_random_role(message.author): return
     if self.chance == 0: return
 
     guild = self.bot.get_guild(config.main_guild_id)
