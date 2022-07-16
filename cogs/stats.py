@@ -1,3 +1,5 @@
+# Collect and show stats of main guild
+
 import disnake
 from disnake.ext import commands, tasks
 from typing import Optional, List

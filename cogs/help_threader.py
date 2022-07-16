@@ -1,3 +1,5 @@
+# Manager for help threads
+
 import disnake
 from disnake.ext import commands
 import math

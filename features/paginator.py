@@ -1,3 +1,5 @@
+# Basic scroller for embeds
+
 import disnake
 from typing import List
 

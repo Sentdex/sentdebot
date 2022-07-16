@@ -1,3 +1,5 @@
+# Basic general use command
+
 import disnake
 from disnake.ext import commands
 from requests_html import HTMLSession
