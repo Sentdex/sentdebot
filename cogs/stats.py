@@ -31,14 +31,14 @@ class Stats(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(Stats, self).__init__(bot, __file__)
 
-    self.not_help_channel_ids: List[int] = []
+    self.all_channels: List[int] = []
     self.main_guild: Optional[disnake.Guild] = None
     if self.bot.is_ready():
       self.late_init()
 
   def late_init(self):
     self.main_guild = self.bot.get_guild(config.main_guild_id) if config.main_guild_id != -1 or config.main_guild_id is not None else None
-    self.not_help_channel_ids = [channel.id for channel in self.main_guild.channels if channel.id not in config.stats_help_channel_ids]
+    self.all_channels = [channel.id for channel in self.main_guild.channels]
     self.user_stats_task.start()
 
   def cog_unload(self) -> None:
@@ -100,7 +100,7 @@ class Stats(Base_Cog):
 
     df_no_dup.dropna(inplace=True)
 
-    user_id_counts_overall = Counter(df_no_dup[df_no_dup["channel_id"].isin(self.not_help_channel_ids)]["author_id"].values).most_common(10)
+    user_id_counts_overall = Counter(df_no_dup[df_no_dup["channel_id"].isin(self.all_channels)]["author_id"].values).most_common(10)
     uids_in_help = Counter(df_no_dup[df_no_dup["channel_id"].isin(config.stats_help_channel_ids)]["author_id"].values).most_common(10)
 
     fig = plt.figure(facecolor=DISCORD_BG_COLOR)

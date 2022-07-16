@@ -30,9 +30,9 @@ protected_cogs = ["system", "errors", "help"]
 defaul_loaded_cogs = ["common", "random_role_giver", "stats"]
 
 [random_role_giver]
-role_ids = []
-chance = 0.2
+role_ids = [] # Ids of roles that will be randomly given to users
+chance = 0.2 # Chance on message to receive role
 
 [stats]
 days_back = 21
-help_channel_ids = []
+help_channel_ids = [] # Channels that cound as help channels
