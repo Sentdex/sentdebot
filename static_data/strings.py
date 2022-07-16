@@ -13,7 +13,7 @@ class Strings:
   system_unload_help = "Instead of extension name can be used \"all\" to unload all extensions at once"
   system_unload_protected_cog = "Unable to unload {extension} extension - protected"
   system_unable_to_unload_cog = "Unable to unload {cog} extension\n`{e}`"
-  sytem_cog_unloaded = "Extension {extension} unloaded"
+  system_cog_unloaded = "Extension {extension} unloaded"
 
   system_reload_brief = "Reload loaded extension"
   system_reload_help = "Instead of extension name can be used \"all\" to reload all extensions at once"
