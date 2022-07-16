@@ -39,6 +39,8 @@ class Strings:
   error_no_private_message = "This command can't be used in private channel"
 
   # Common
+  common_ping_brief = "Ping the bot and get bot and api latency"
+
   common_member_count_brief = "Show number of members on server"
 
   common_search_brief = "Search on Sentdex webpage"

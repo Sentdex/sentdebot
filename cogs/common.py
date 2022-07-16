@@ -1,6 +1,7 @@
 import disnake
 from disnake.ext import commands
 from requests_html import HTMLSession
+import time
 
 from config import cooldowns
 from static_data.strings import Strings
@@ -10,6 +11,21 @@ from util import general_util
 class Common(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(Common, self).__init__(bot, __file__)
+
+  @commands.command(brief=Strings.common_ping_brief)
+  @cooldowns.default_cooldown
+  async def ping(self, ctx: commands.Context):
+    await general_util.delete_message(self.bot, ctx)
+
+    em = disnake.Embed(color=disnake.Color.dark_blue(), title="Pong!")
+    general_util.add_author_footer(em, ctx.message.author)
+
+    start_time = time.time()
+    message:disnake.Message = await ctx.channel.send(embed=em)
+    end_time = time.time()
+
+    em.description = em.description = f'Bot: {round(self.bot.latency * 1000)} ms\nAPI: {round((end_time - start_time) * 1000)}ms'
+    await message.edit(embed=em)
 
   @commands.command(brief=Strings.common_member_count_brief)
   @cooldowns.default_cooldown

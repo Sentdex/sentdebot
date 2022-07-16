@@ -35,8 +35,7 @@ class EmbedView(disnake.ui.View):
       perma_lock: bool = False,
       roll_arroud: bool = True,
       end_arrow: bool = True,
-      timeout: int = 300,
-      remove_on_timeout: bool = False
+      timeout: int = 300
   ):
 
     self.message = None
@@ -47,7 +46,6 @@ class EmbedView(disnake.ui.View):
     self.perma_lock = perma_lock
     self.embeds = embeds
     self.max_page = len(embeds)
-    self.remove_on_timeout = remove_on_timeout
     super().__init__(timeout=timeout)
 
     self.add_item(
@@ -128,7 +126,4 @@ class EmbedView(disnake.ui.View):
 
   async def on_timeout(self):
     self.clear_items()
-    if self.remove_on_timeout:
-      await self.message.remove()
-    else:
-      await self.message.edit(view=self)
+    await self.message.edit(view=self)

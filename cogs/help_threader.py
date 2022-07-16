@@ -26,10 +26,13 @@ class HelpThreader(Base_Cog):
     if message.channel.id in config.base_help_channel_ids:
 
       # Auto archive set to 3 days
-      thread = await message.create_thread(name="Automatic thread", auto_archive_duration=4320, reason="Automatic thread")
-      help_threads_repo.create_thread(message.channel.id, message.id, message.author.id)
-      await thread.send(Strings.help_threader_announcement)
-      await thread.leave()
+      try:
+        thread = await message.create_thread(name="Automatic thread", auto_archive_duration=4320, reason="Automatic thread")
+        help_threads_repo.create_thread(message.channel.id, message.id, message.author.id)
+        await thread.send(Strings.help_threader_announcement)
+        await thread.leave()
+      except disnake.HTTPException:
+        pass
 
   @commands.slash_command(name="help_requests")
   async def help_requests(self, inter: disnake.CommandInteraction):
@@ -96,7 +99,7 @@ class HelpThreader(Base_Cog):
         embed.add_field(name=f"{thread.name}", value=f"Owner: {owner.name}\n[Link]({thread.jump_url})", inline=False)
       pages.append(embed)
 
-    await EmbedView(inter.author, pages, remove_on_timeout=True).run(inter)
+    await EmbedView(inter.author, pages).run(inter)
 
   @help_requests.sub_command(name="solved", description=Strings.help_threader_request_solved_brief)
   async def help_requests_solved(self, inter: disnake.CommandInteraction):
