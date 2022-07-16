@@ -76,10 +76,10 @@ class Strings:
   help_threader_request_solved_not_owner = "You are not owner of this help request\nThis command should be called in your own opened help request thread to mark it as solved"
   help_threader_request_solved_closed = "Help request marked as solved"
 
-  @staticmethod
-  def populate_string(message_name, *args, **kwargs):
+  @classmethod
+  def populate_string(cls, message_name, *args, **kwargs):
     try:
-      template = getattr(Strings, message_name)
+      template = getattr(cls, message_name)
       return template.format(*args, **kwargs)
     except AttributeError:
       raise ValueError(f"Invalid template {message_name}")
