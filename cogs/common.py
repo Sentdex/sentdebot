@@ -85,7 +85,7 @@ class Common(Base_Cog):
   async def on_modal_submit(self, inter: disnake.ModalInteraction):
     if inter.custom_id == "add_project_modal":
       project = projects_repo.add_project(project_name=inter.text_values["name"], project_description=inter.text_values["description"])
-      if project is not None:
+      if project is None:
         await general_util.generate_error_message(inter, Strings.populate_string("common_add_project_failed", name=inter.text_values["name"]))
       else:
         await general_util.generate_success_message(inter, Strings.populate_string("common_add_project_added", name=inter.text_values["name"]))
