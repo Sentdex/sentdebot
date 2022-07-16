@@ -2,7 +2,7 @@ import disnake
 from disnake.ext import commands
 from requests_html import HTMLSession
 
-from config import config
+from config import cooldowns
 from static_data.strings import Strings
 from features.base_cog import Base_Cog
 from util import general_util
@@ -12,12 +12,14 @@ class Common(Base_Cog):
     super(Common, self).__init__(bot, __file__)
 
   @commands.command(brief=Strings.common_member_count_brief)
+  @cooldowns.default_cooldown
   @commands.guild_only()
   async def member_count(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
     await ctx.send(embed=disnake.Embed(title="Member count", description=f"{ctx.guild.member_count} :monkey:", color=disnake.Color.dark_blue()))
 
   @commands.command(brief=Strings.common_search_brief)
+  @cooldowns.default_cooldown
   async def search(self, ctx: commands.Context, *, search_term: str):
     await general_util.delete_message(self.bot, ctx)
 

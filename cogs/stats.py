@@ -12,6 +12,7 @@ import io
 
 style.use("dark_background")
 
+from config import cooldowns
 from util import general_util
 from config import config
 from features.base_cog import Base_Cog
@@ -80,6 +81,7 @@ class Stats(Base_Cog):
     message_metrics_repo.add_message_metrics(message)
 
   @commands.command(brief=Strings.stats_user_activity_brief)
+  @cooldowns.long_cooldown
   async def user_activity(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
 
@@ -144,9 +146,13 @@ class Stats(Base_Cog):
     buf.seek(0)
     plt.clf()
 
-    await ctx.send(file=disnake.File(buf, "user_activity.png"))
+    embed = disnake.Embed(title="User activity", color=disnake.Color.dark_blue())
+    general_util.add_author_footer(embed, ctx.author)
+    embed.set_image(file=disnake.File(buf, "user_activity.png"))
+    await ctx.send(embed=embed)
 
   @commands.command(brief=Strings.stats_community_report_brief)
+  @cooldowns.long_cooldown
   async def community_report(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
 
@@ -209,9 +215,10 @@ class Stats(Base_Cog):
     plt.clf()
 
     online, idle, offline = self.get_user_stats()
-    embed = disnake.Embed(title="Current users", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
+    embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
     general_util.add_author_footer(embed, ctx.author)
-    await ctx.send(embed=embed, file=disnake.File(buf, "community_report.png"))
+    embed.set_image(file=disnake.File(buf, "community_report.png"))
+    await ctx.send(embed=embed)
 
 def setup(bot):
   bot.add_cog(Stats(bot))
