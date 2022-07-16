@@ -6,3 +6,4 @@ SQLAlchemy~=1.4.39
 pandas~=1.4.3
 numpy~=1.23.1
 matplotlib~=3.5.2
+psycopg2>=2.9.3
