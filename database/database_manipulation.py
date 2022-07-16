@@ -1,6 +1,7 @@
 from database import session, database
 
 from database.tables import user_metrics
+from database.tables import message_metrics
 
 from util.logger import setup_custom_logger
 

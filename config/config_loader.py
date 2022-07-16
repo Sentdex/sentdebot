@@ -39,3 +39,6 @@ class Config:
 
   role_giver_role_ids: List[int] = get_attr(raw_config, "random_role_giver", "role_ids")
   role_giver_give_chance: float = get_attr(raw_config, "random_role_giver", "chance")
+
+  stats_days_back: int = get_attr(raw_config, "stats", "days_back")
+  stats_help_channel_ids: List[int] = get_attr(raw_config, "stats", "help_channel_ids")

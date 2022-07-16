@@ -3,3 +3,6 @@ toml~=0.10.2
 coloredlogs~=15.0.1
 requests-html~=0.10.0
 SQLAlchemy~=1.4.39
+pandas~=1.4.3
+numpy~=1.23.1
+matplotlib~=3.5.2

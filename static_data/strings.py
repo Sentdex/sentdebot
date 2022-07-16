@@ -44,6 +44,13 @@ class Strings:
   common_search_brief = "Search on Sentdex webpage"
   common_search_nothing_found = "Nothing found for search term `{term}`"
 
+  # Stats
+  stats_user_activity_brief = "Show recent user activity in channels"
+
+  stats_community_report_brief = "Show recent numbers of users on server"
+
+  stats_main_guild_not_set = "Main guild is not loaded"
+
   @staticmethod
   def populate_string(message_name, *args, **kwargs):
     try:
