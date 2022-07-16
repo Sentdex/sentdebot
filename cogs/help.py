@@ -7,7 +7,7 @@ from disnake.ext import commands
 from config import config
 from static_data.strings import Strings
 from util import general_util
-from features.paginator import PaginatorSession
+from features.paginator import EmbedView
 from features.base_cog import Base_Cog
 from util.logger import setup_custom_logger
 from typing import Union, List
@@ -104,8 +104,7 @@ class Help(Base_Cog):
         pages.extend(cog_pages)
 
     if pages:
-      p_session = PaginatorSession(bot=self.bot, ctx=ctx, timeout=120, pages=pages)
-      await p_session.run()
+      await EmbedView(ctx.author, embeds=pages, perma_lock=True).run(ctx)
     else:
       emb = discord.Embed(title="Help", description="*No help available*", colour=discord.Color.green())
       await ctx.send(embed=emb, delete_after=120)

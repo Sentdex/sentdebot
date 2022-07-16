@@ -1,115 +1,129 @@
-# Basic embed page scroller
+import disnake
+from typing import List
 
-import disnake as discord
-from disnake.ext.commands import Context
-from collections import OrderedDict
-import asyncio
-from typing import Union, List, Optional
+from util import general_util
 
-class PaginatorSession:
-  def __init__(self, bot, ctx:Context, timeout=60, pages:Optional[List[discord.Embed]]=None, footer:Union[str, None]=None, delete_after:bool=True):
-    self.bot = bot
+def pagination_next(id: str, page: int, max_page: int, roll_around: bool = True):
+  if 'next' in id:
+    next_page = page + 1
+  elif 'prev' in id:
+    next_page = page - 1
+  elif 'start' in id:
+    next_page = 1
+  elif 'end' in id:
+    next_page = max_page
+  else:
+    return 0
 
-    self.footer = footer  # footer message
-    self.ctx = ctx  # ctx
-    self.timeout = timeout  # when the reactions get cleared, int[seconds]
-    self.pages = pages  # the list of embeds list[discord.Embed, discord.Embed]
-    self.running = False  # currently running, bool
-    self.message = None  # current message being paginated, discord.Message
-    self.current = 0  # current page index, int
-    self.delete_after = delete_after
+  if 1 <= next_page <= max_page:
+    return next_page
+  elif roll_around and next_page == 0:
+    return max_page
+  elif roll_around and next_page > max_page:
+    return 1
+  else:
+    return 0
 
-    self.reactions = OrderedDict({
-      '⏮': self.__first_page,
-      '◀': self.__previous_page,
-      '⏹': self.__close,
-      '▶': self.__next_page,
-      '⏭': self.__last_page
-    })
+reaction_ids = ["embed:start_page", "embed:prev_page", "embed:next_page", "embed:end_page"]
 
-  def __valid_page(self, index):
-    val_check = 0 <= index < len(self.pages)
-    return val_check  # checks if input index is valid
+class EmbedView(disnake.ui.View):
 
-  async def __show_page(self, index: int):
-    if not self.__valid_page(index):
-      return  # checks for a valid page
+  def __init__(
+      self,
+      author: disnake.User,
+      embeds: List[disnake.Embed],
+      perma_lock: bool = False,
+      roll_arroud: bool = True,
+      end_arrow: bool = True,
+      timeout: int = 300
+  ):
 
-    self.current = index
-    page = self.pages[index]  # gets the page
-    if self.footer is not None:
-      page.set_footer(text=self.footer)  # sets footer
+    self.message = None
+    self.page = 1
+    self.author = author
+    self.locked = False
+    self.roll_arroud = roll_arroud
+    self.perma_lock = perma_lock
+    self.embeds = embeds
+    self.max_page = len(embeds)
+    super().__init__(timeout=timeout)
 
-    page.set_author(name=f"{index + 1}/{len(self.pages)}")
+    self.add_item(
+      disnake.ui.Button(
+        emoji="⏪",
+        custom_id="embed:start_page",
+        style=disnake.ButtonStyle.primary
+      )
+    )
+    self.add_item(
+      disnake.ui.Button(
+        emoji="◀",
+        custom_id="embed:prev_page",
+        style=disnake.ButtonStyle.primary
+      )
+    )
+    self.add_item(
+      disnake.ui.Button(
+        emoji="▶",
+        custom_id="embed:next_page",
+        style=disnake.ButtonStyle.primary
+      )
+    )
+    if end_arrow:
+      self.add_item(
+        disnake.ui.Button(
+          emoji="⏩",
+          custom_id="embed:end_page",
+          style=disnake.ButtonStyle.primary
+        )
+      )
+    if not perma_lock:
+      # if permanent lock is applied, dynamic lock is removed from buttons
+      self.lock_button = disnake.ui.Button(
+        emoji="🔓",
+        custom_id="embed:lock",
+        style=disnake.ButtonStyle.success
+      )
+      self.add_item(self.lock_button)
 
-    if self.running:
-      # if the first embed was sent, it edits it
-      await self.message.edit(embed=page)
-    else:
-      self.running = True
-      # sends the message
-      self.message = await self.ctx.send(embed=page)
+  def embed(self):
+    page = self.embeds[self.page - 1]
+    page.set_author(name=f"{self.page}/{self.max_page}")
+    return page
 
-      # adds reactions
-      for reaction in self.reactions.keys():
-        if len(self.pages) <= 2 and reaction in '⏮⏭':
-          continue  # ignores 2 page embed first and last emojis
-        if len(self.pages) == 1 and reaction != '⏹':
-          continue
-        await self.message.add_reaction(reaction)
+  async def run(self, ctx):
+    self.message = await ctx.send(embed=self.embed(), view=self)
+    return self.message
 
-  def __react_check(self, reaction, user):
-    if reaction.message.id != self.message.id:
-      return False  # not the same message
-    if user.id != self.ctx.author.id:
-      return False  # not the same user
-    if reaction.emoji in self.reactions.keys():
-      return True  # reaction was one of the pagination emojis
+  async def interaction_check(self, interaction: disnake.ApplicationCommandInteraction) -> None:
+    if interaction.data.custom_id == "embed:lock":
+      if interaction.author.id == self.author.id:
+        self.locked = not self.locked
+        if self.locked:
+          self.lock_button.style = disnake.ButtonStyle.danger
+          self.lock_button.emoji = "🔒"
+        else:
+          self.lock_button.style = disnake.ButtonStyle.success
+          self.lock_button.emoji = "🔓"
+        await interaction.response.edit_message(view=self)
+      else:
+        await general_util.generate_error_message(interaction, "You are not author of this embed")
+      return
 
-  async def run(self):
-    if not self.running:
-      await self.__show_page(0)
+    if interaction.data.custom_id not in reaction_ids or self.max_page <= 1:
+      return
+    if (self.perma_lock or self.locked) and interaction.author.id != self.author.id:
+      await general_util.generate_error_message(interaction, "You are not author of this embed")
+      return
 
-    while self.running:
-      try:
-        # waits for reaction using react_check
-        reaction, user = await self.ctx.bot.wait_for('reaction_add', check=self.__react_check, timeout=self.timeout)
+    self.page = pagination_next(
+      interaction.data.custom_id,
+      self.page,
+      self.max_page,
+      self.roll_arroud
+    )
+    await interaction.response.edit_message(embed=self.embed())
 
-        try:
-          await self.message.remove_reaction(reaction, user)
-        except:
-          pass
-
-        try:
-          action = self.reactions[reaction.emoji]
-          if action is not None:
-            await action()
-        except:
-          pass
-      except asyncio.TimeoutError:
-        self.running = False
-        await self.__close()
-        break
-
-  # all functions with await must be async
-  async def __first_page(self):
-    if self.current == 0: return
-    return await self.__show_page(0)
-
-  async def __last_page(self):
-    if self.current == len(self.pages) - 1: return
-    return await self.__show_page(len(self.pages) - 1)
-
-  async def __next_page(self):
-    return await self.__show_page(self.current + 1)
-
-  async def __previous_page(self):
-    return await self.__show_page(self.current - 1)
-
-  async def __close(self):
-    self.running = False
-    try:
-      if self.delete_after:
-        await self.message.delete()
-    except:
-      pass
+  async def on_timeout(self):
+    self.clear_items()
+    await self.message.edit(view=self)

@@ -10,7 +10,7 @@ from features.base_cog import Base_Cog
 from util import general_util
 from util.logger import setup_custom_logger
 from static_data.strings import Strings
-from features.paginator import PaginatorSession
+from features.paginator import EmbedView
 
 logger = setup_custom_logger(__name__)
 
@@ -141,8 +141,7 @@ class System(Base_Cog):
 
       pages.append(embed)
 
-    p_session = PaginatorSession(self.bot, ctx, pages=pages)
-    await p_session.run()
+    await EmbedView(ctx.author, pages, perma_lock=True).run(ctx)
 
   @commands.command(brief=Strings.system_logout_brief, aliases=["gtfo"])
   @commands.check(general_util.is_administrator)
