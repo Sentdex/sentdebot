@@ -6,11 +6,14 @@ import toml
 
 class Config:
   @classmethod
-  def parse(cls, dct):
+  def parse(cls, dct, crumbs=None):
+    crumbs = crumbs or []
     result = cls()
     for k,v in dct.items():
       if isinstance(v, dict):
-        v = cls.parse(v)
+        v = cls.parse(v, [*crumbs, k])
+      if v == '<env>':
+        v = os.getenv('_'.join((*crumbs, k)))
       setattr(result, k, v)
     return result
 
