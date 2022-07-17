@@ -4,7 +4,7 @@
 
 [base]
 discord_api_key = "<env>"
-command_prefixes = ["?"]
+command_prefixes = ["!"]
 status_message = "Sentdebot V2"
 
 database_connect_string = "<env>"
