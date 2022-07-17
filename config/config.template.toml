@@ -18,20 +18,20 @@ success_duration = 30
 
 
 [ids]
-main_guild_id = 988202173152260176
+main_guild = 988202173152260176
 # Channel that count as help channel
-help_channel_id = 988498939818934272
+help_channel = 988498939818934272
 # Control role ids
-admin_role_ids = []
-mod_role_ids = []
+admin_role = []
+mod_role = []
 # Channle id to which error messages will be send
-log_channel_id = 838455904571621427
+log_channel = 838455904571621427
 
 [cogs]
 # Cogs that will be loaded on startup and unable to be unloaded
-protected_cogs = ["system", "errors", "help"]
+protected = ["system", "errors", "help"]
 # Cogs automatically loaded after start
-defaul_loaded_cogs = ["common", "code_execute", "projects", "random_role_giver", "stats", "help_threader"]
+defaul_loaded = ["common", "code_execute", "projects", "random_role_giver", "stats", "help_threader"]
 
 [random_role_giver]
 # Ids of roles that will be randomly given to users

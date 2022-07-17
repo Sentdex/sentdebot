@@ -39,7 +39,7 @@ class Stats(Base_Cog):
       self.late_init()
 
   def late_init(self):
-    self.main_guild = self.bot.get_guild(config.main_guild_id) if config.main_guild_id != -1 or config.main_guild_id is not None else None
+    self.main_guild = self.bot.get_guild(config.ids.main_guild)
     self.all_channels = [channel.id for channel in self.main_guild.channels] if self.main_guild is not None else []
 
     if not self.user_stats_task.is_running():
@@ -87,7 +87,7 @@ class Stats(Base_Cog):
     if message.guild is None: return
 
     help_req = help_threads_repo.get_thread(message.channel.id)
-    channel_id = config.help_channel_id if help_req is not None else message.channel.id
+    channel_id = config.ids.help_channel if help_req is not None else message.channel.id
 
     messages_repo.add_message(message.id, channel_id, message.author.id, message.content, use_for_metrics=messages_repo.get_author_of_last_message_metric(channel_id) != message.author.id)
 
@@ -106,20 +106,20 @@ class Stats(Base_Cog):
     if self.main_guild is None:
       return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
 
-    message_history = messages_repo.get_message_metrics(config.stats_days_back)
+    message_history = messages_repo.get_message_metrics(config.stats.days_back)
     dataframe = pd.DataFrame.from_records(message_history, columns=["message_id", "timestamp", "author_id", "channel_id"])
     dataframe["date"] = pd.to_datetime(dataframe["timestamp"], unit="s")
     dataframe.set_index("date", inplace=True)
     dataframe.drop("timestamp", axis=1, inplace=True)
 
     user_id_counts_overall = Counter(dataframe[dataframe["channel_id"].isin(self.all_channels)]["author_id"].values).most_common(10)
-    uids_in_help = Counter(dataframe[dataframe["channel_id"].isin([config.help_channel_id])]["author_id"].values).most_common(10)
+    uids_in_help = Counter(dataframe[dataframe["channel_id"].isin([config.ids.help_channel])]["author_id"].values).most_common(10)
 
     fig = plt.figure(facecolor=DISCORD_BG_COLOR)
     ax1 = plt.subplot2grid((2, 1), (0, 0))
 
     plt.xlabel("Message Volume")
-    plt.title(f"General User Activity (past {config.stats_days_back} days)")
+    plt.title(f"General User Activity (past {config.stats.days_back} days)")
     ax1.set_facecolor(DISCORD_BG_COLOR)
 
     users = []
@@ -135,7 +135,7 @@ class Stats(Base_Cog):
     plt.yticks(y_pos, users)
 
     ax2 = plt.subplot2grid((2, 1), (1, 0))
-    plt.title(f"Help Channel Activity (past {config.stats_days_back} days)")
+    plt.title(f"Help Channel Activity (past {config.stats.days_back} days)")
     plt.xlabel("Help Channel\nMsg Volume")
     ax2.set_facecolor(DISCORD_BG_COLOR)
 
@@ -171,7 +171,7 @@ class Stats(Base_Cog):
     if self.main_guild is None:
       return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
 
-    message_history = messages_repo.get_message_metrics(config.stats_days_back)
+    message_history = messages_repo.get_message_metrics(config.stats.days_back)
     message_dataframe = pd.DataFrame.from_records(message_history, columns=["message_id", "timestamp", "author_id", "channel_id"])
     message_dataframe['count'] = 1
     message_dataframe["date"] = pd.to_datetime(message_dataframe["timestamp"], unit="s")
@@ -180,7 +180,7 @@ class Stats(Base_Cog):
 
     message_volume = message_dataframe["count"].resample("60min").sum()
 
-    users_metrics = user_metrics_repo.get_user_metrics(config.stats_days_back)
+    users_metrics = user_metrics_repo.get_user_metrics(config.stats.days_back)
     users_metrics_dataframe = pd.DataFrame.from_records(users_metrics, columns=["timestamp", "online", "idle", "offline"])
     users_metrics_dataframe['date'] = pd.to_datetime(users_metrics_dataframe['timestamp'], unit='s')
     users_metrics_dataframe.set_index("date", inplace=True)

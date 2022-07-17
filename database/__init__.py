@@ -10,13 +10,13 @@ logger = setup_custom_logger(__name__)
 
 class Database:
   def __init__(self):
-    if config.database_connect_string is None or config.database_connect_string == "":
+    if config.base.database_connect_string is None or config.base.database_connect_string == "":
       logger.error("Database connect string is empty!")
       exit(-1)
 
     try:
       self.base = declarative_base()
-      self.db = create_engine(config.database_connect_string)
+      self.db = create_engine(config.base.database_connect_string)
 
     except Exception as e:
       logger.error(f"Failed to create database connection\n{e}")

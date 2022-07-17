@@ -19,7 +19,7 @@ def is_administrator(ctx):
   if ctx.author.id == ctx.guild.owner_id:
     return True
 
-  for role_id in config.admin_role_ids:
+  for role_id in config.ids.admin_role:
     if disnake.utils.get(ctx.author.roles, id=role_id) is not None:
       return True
   return False
@@ -37,7 +37,7 @@ def is_mod(ctx):
   if is_administrator(ctx):
     return True
 
-  for role_id in config.mod_role_id:
+  for role_id in config.ids.mod_role:
     if disnake.utils.get(ctx.author.roles, id=role_id) is not None:
       return True
   return False
@@ -50,14 +50,14 @@ async def generate_error_message(ctx: Union[commands.Context, disnake.ModalInter
   if isinstance(ctx, disnake.ModalInteraction) or isinstance(ctx, disnake.CommandInteraction):
     return await ctx.send(embed=response_embed, ephemeral=True)
   else:
-    return await ctx.send(embed=response_embed, delete_after=config.error_duration)
+    return await ctx.send(embed=response_embed, delete_after=config.base.error_duration)
 
 async def generate_success_message(ctx: Union[commands.Context, disnake.ModalInteraction, disnake.CommandInteraction], text):
   response_embed = disnake.Embed(color=disnake.Color.green(), title=":white_check_mark: | Success", description=text)
   if isinstance(ctx, disnake.ModalInteraction) or isinstance(ctx, disnake.CommandInteraction):
     return await ctx.send(embed=response_embed, ephemeral=True)
   else:
-    return await ctx.send(embed=response_embed, delete_after=config.success_duration)
+    return await ctx.send(embed=response_embed, delete_after=config.base.success_duration)
 
 def split_to_parts(items: str, length: int):
   result = []

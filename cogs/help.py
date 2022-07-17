@@ -40,7 +40,7 @@ def add_command_help(embed, com):
   if len(output) > 4096:
     logger.warning(f"Description for command {com.name} is too long")
   else:
-    embed.add_field(name=f"{config.command_prefixes[0]}{general_util.get_command_signature(com)}", value=output, inline=False)
+    embed.add_field(name=f"{config.base.command_prefixes[0]}{general_util.get_command_signature(com)}", value=output, inline=False)
 
 
 def generate_help_for_cog(cog: Base_Cog, ctx: commands.Context) -> Union[None, List[discord.Embed]]:

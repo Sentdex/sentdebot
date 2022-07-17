@@ -8,7 +8,7 @@ from database.database_manipulation import init_tables
 
 logger = setup_custom_logger(__name__)
 
-if config.key is None:
+if config.base.discord_api_key is None:
   logger.error("Discord API key is missing!")
   exit(-1)
 
@@ -26,7 +26,7 @@ intents.presences = True
 intents.typing = True
 
 bot = commands.Bot(
-  command_prefix=commands.when_mentioned_or(*config.command_prefixes),
+  command_prefix=commands.when_mentioned_or(*config.base.command_prefixes),
   help_command=None,
   case_insensitive=True,
   allowed_mentions=AllowedMentions(roles=False, everyone=False, users=True),
@@ -44,10 +44,10 @@ async def on_ready():
   is_initialized = True
 
   logger.info('Logged in as: {0} (ID: {0.id})'.format(bot.user))
-  await bot.change_presence(activity=Game(name=config.status_message, type=0), status=Status.online)
+  await bot.change_presence(activity=Game(name=config.base.status_message, type=0), status=Status.online)
   logger.info('Ready!')
 
-for cog in config.protected_cogs:
+for cog in config.cogs.protected:
   try:
     bot.load_extension(f"cogs.{cog}")
     logger.info(f"{cog} loaded")
@@ -56,7 +56,7 @@ for cog in config.protected_cogs:
     logger.warning(f"Failed to load {cog} module\n{output}")
 logger.info("Protected modules loaded")
 
-for cog in config.defaul_loaded_cogs:
+for cog in config.cogs.defaul_loaded:
   try:
     bot.load_extension(f"cogs.{cog}")
     logger.info(f"{cog} loaded")
@@ -65,4 +65,4 @@ for cog in config.defaul_loaded_cogs:
     logger.warning(f"Failed to load {cog} module\n{output}")
 logger.info("Defaul modules loaded")
 
-bot.run(config.key)
+bot.run(config.base.discord_api_key)

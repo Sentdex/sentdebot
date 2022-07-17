@@ -46,7 +46,7 @@ async def loaded_cogs_autocomplete(_, search: str):
 
 
 async def loaded_cogs_not_protected_autocomplete(_, search: str):
-  loaded_cogs = [str(cog.file) for cog in global_bot_reference.cogs.values() if str(cog.file) not in config.protected_cogs]
+  loaded_cogs = [str(cog.file) for cog in global_bot_reference.cogs.values() if str(cog.file) not in config.cogs.protected]
 
   if search is None or search == "":
     loaded_cogs.append("all")
@@ -102,7 +102,7 @@ class System(Base_Cog):
   @commands.check(general_util.is_administrator)
   @commands.guild_only()
   async def unload(self, inter: disnake.CommandInteraction, extension_name: str=commands.Param(autocomplete=loaded_cogs_not_protected_autocomplete, description="Name of extension to unload")):
-    if extension_name in config.protected_cogs:
+    if extension_name in config.cogs.protected:
       return await general_util.generate_error_message(inter, Strings.system_unload_protected_cog(extension=extension_name))
 
     if extension_name.lower() == "all":
@@ -111,7 +111,7 @@ class System(Base_Cog):
       loaded_cogs = [cog.file for cog in self.bot.cogs.values()]
 
       for cog in loaded_cogs:
-        if cog not in config.protected_cogs:
+        if cog not in config.cogs.protected:
           try:
             self.bot.unload_extension(f"cogs.{cog}")
             logger.info(f'{cog} unloaded')
@@ -176,7 +176,7 @@ class System(Base_Cog):
       embed = disnake.Embed(title="Cogs", description="List of all loaded and unloaded cogs", color=disnake.Color.dark_magenta())
 
       for idx, cog in enumerate(batch):
-        status = "🔒 *protected*" if cog in config.protected_cogs else ("✅ **loaded**" if cog in loaded_cogs else "❌ **unloaded**")
+        status = "🔒 *protected*" if cog in config.cogs.protected else ("✅ **loaded**" if cog in loaded_cogs else "❌ **unloaded**")
         embed.add_field(name=cog, value=status)
 
       pages.append(embed)

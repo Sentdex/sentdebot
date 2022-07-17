@@ -1,44 +1,22 @@
 # Parsing and storing of config
 
-import toml
-from typing import List
 import os
+import toml
 
-def get_attr(toml_config: dict, section: str, attr_key: str):
-  val = toml_config[section][attr_key]
-  if val == "<env>":
-    val = os.getenv(f"{section}_{attr_key}")
-  return val
-
-def get_config() -> dict:
-  # Get config
-  # If config is not present try to load template of config
-  try:
-    return dict(toml.load("config/config.toml", _dict=dict))
-  except:
-    return dict(toml.load("config/config.template.toml", _dict=dict))
 
 class Config:
-  raw_config = get_config()
+  @classmethod
+  def parse(cls, dct):
+    result = cls()
+    for k,v in dct.items():
+      if isinstance(v, dict):
+        v = cls.parse(v)
+      setattr(result, k, v)
+    return result
 
-  key: str = get_attr(raw_config, "base", "discord_api_key")
-  status_message: str = get_attr(raw_config, "base", "status_message")
-  command_prefixes: List[str] = get_attr(raw_config, "base", "command_prefixes")
-  log_to_file: bool = get_attr(raw_config, "base", "log_to_file")
-  error_duration: int = get_attr(raw_config, "base", "error_duration")
-  success_duration: int = get_attr(raw_config, "base", "success_duration")
-  database_connect_string: str = get_attr(raw_config, "base", "database_connect_string")
-
-  main_guild_id = get_attr(raw_config, "ids", "main_guild_id")
-  help_channel_id: int = get_attr(raw_config, "ids", "help_channel_id")
-  admin_role_ids: List[int] = get_attr(raw_config, "ids", "admin_role_ids")
-  mod_role_ids: List[int] = get_attr(raw_config, "ids", "mod_role_ids")
-  log_channel_id: int = get_attr(raw_config, "ids", "log_channel_id")
-
-  protected_cogs: List[str] = get_attr(raw_config, "cogs", "protected_cogs")
-  defaul_loaded_cogs: List[str] = get_attr(raw_config, "cogs", "defaul_loaded_cogs")
-
-  role_giver_role_ids: List[int] = get_attr(raw_config, "random_role_giver", "role_ids")
-  role_giver_give_chance: float = get_attr(raw_config, "random_role_giver", "chance")
-
-  stats_days_back: int = get_attr(raw_config, "stats", "days_back")
+  @classmethod
+  def from_toml(cls, *paths, **kwargs):
+    existing_paths = [*filter(os.path.exists, paths)]
+    if len(existing_paths) == 0:
+      raise ValueError(f'none of {paths} were found')
+    return cls.parse(toml.load(existing_paths[0], **kwargs))
