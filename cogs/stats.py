@@ -18,7 +18,7 @@ from config import cooldowns
 from util import general_util
 from config import config
 from features.base_cog import Base_Cog
-from database import user_metrics_repo, message_metrics_repo
+from database import user_metrics_repo, message_metrics_repo, help_threads_repo
 from static_data.strings import Strings
 
 DISCORD_BG_COLOR = '#36393E'
@@ -86,8 +86,11 @@ class Stats(Base_Cog):
     if message.author.bot: return
     if message.guild is None: return
 
-    if message_metrics_repo.get_author_of_last_message(message.channel.id) != message.author.id:
-      message_metrics_repo.add_message_metrics(message)
+    help_req = help_threads_repo.get_thread(message.channel.id)
+    channel_id = config.help_channel_id if help_req is not None else message.channel.id
+
+    if message_metrics_repo.get_author_of_last_message(channel_id) != message.author.id:
+      message_metrics_repo.add_message_metrics(message.id, channel_id, message.author.id)
 
   @commands.command(brief=Strings.stats_user_activity_brief)
   @cooldowns.long_cooldown

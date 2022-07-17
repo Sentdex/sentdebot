@@ -34,7 +34,7 @@ class HelpThreader(Base_Cog):
       thread = await help_channel.create_thread(name=title, message=message, auto_archive_duration=4320, reason=f"Help request from {interaction.author}")
       await thread.add_user(interaction.author)
 
-      help_threads_repo.create_thread(message.id, interaction.author.id, tags)
+      help_threads_repo.create_thread(thread.id, interaction.author.id, tags)
 
       await thread.send(Strings.help_threader_announcement)
     except disnake.HTTPException:
