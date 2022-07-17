@@ -47,7 +47,7 @@ class HelpThreader(Base_Cog):
     pass
 
   @help_requests.sub_command(name="create", description=Strings.help_threader_request_create_brief)
-  @cooldowns.long_cooldown
+  @cooldowns.huge_cooldown
   async def help_requests_create(self, inter: disnake.CommandInteraction):
     await inter.response.send_modal(HelpRequestModal(self.create_new_help_thread))
 
