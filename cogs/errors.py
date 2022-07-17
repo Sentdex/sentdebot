@@ -50,6 +50,8 @@ class Errors(Base_Cog):
       await general_util.generate_error_message(ctx, Strings.error_no_private_message)
     elif isinstance(error, disnake.InteractionTimedOut):
       await general_util.generate_error_message(ctx, Strings.error_interaction_timeout)
+    elif isinstance(error, disnake.Forbidden):
+      await general_util.generate_error_message(ctx, Strings.error_forbiden)
     else:
       output = "".join(traceback.format_exception(type(error), error, error.__traceback__))
       logger.error(output)

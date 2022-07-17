@@ -50,6 +50,7 @@ class Strings(metaclass=formattable):
   error_max_concurrency_reached = "Bot is busy, try it later"
   error_no_private_message = "This command can't be used in private channel"
   error_interaction_timeout = "Interaction took more than 3 seconds to be responded to. Try again later."
+  error_forbiden = "Bot can't do this action"
 
   # Common
   common_ping_brief = "Ping the bot and get bot and api latency"

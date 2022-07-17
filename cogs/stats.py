@@ -18,7 +18,7 @@ from config import cooldowns
 from util import general_util
 from config import config
 from features.base_cog import Base_Cog
-from database import user_metrics_repo, message_metrics_repo, help_threads_repo
+from database import user_metrics_repo, messages_repo, help_threads_repo
 from static_data.strings import Strings
 
 DISCORD_BG_COLOR = '#36393E'
@@ -89,8 +89,7 @@ class Stats(Base_Cog):
     help_req = help_threads_repo.get_thread(message.channel.id)
     channel_id = config.help_channel_id if help_req is not None else message.channel.id
 
-    if message_metrics_repo.get_author_of_last_message(channel_id) != message.author.id:
-      message_metrics_repo.add_message_metrics(message.id, channel_id, message.author.id)
+    messages_repo.add_message(message.id, channel_id, message.author.id, message.content, use_for_metrics=messages_repo.get_author_of_last_message_metric(channel_id) != message.author.id)
 
   @commands.command(brief=Strings.stats_user_activity_brief)
   @cooldowns.long_cooldown
@@ -100,7 +99,7 @@ class Stats(Base_Cog):
     if self.main_guild is None:
       return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
 
-    message_history = message_metrics_repo.get_message_metrics(config.stats_days_back)
+    message_history = messages_repo.get_message_metrics(config.stats_days_back)
     dataframe = pd.DataFrame.from_records(message_history, columns=["message_id", "timestamp", "author_id", "channel_id"])
     dataframe["date"] = pd.to_datetime(dataframe["timestamp"], unit="s")
     dataframe.set_index("date", inplace=True)
@@ -165,7 +164,7 @@ class Stats(Base_Cog):
     if self.main_guild is None:
       return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
 
-    message_history = message_metrics_repo.get_message_metrics(config.stats_days_back)
+    message_history = messages_repo.get_message_metrics(config.stats_days_back)
     message_dataframe = pd.DataFrame.from_records(message_history, columns=["message_id", "timestamp", "author_id", "channel_id"])
     message_dataframe['count'] = 1
     message_dataframe["date"] = pd.to_datetime(message_dataframe["timestamp"], unit="s")
