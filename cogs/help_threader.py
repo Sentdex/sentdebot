@@ -40,7 +40,7 @@ class HelpThreader(Base_Cog):
     except disnake.HTTPException:
       return await general_util.generate_error_message(interaction, Strings.help_threader_request_create_failed)
 
-    await general_util.generate_success_message(interaction, Strings.populate_string("help_threader_request_create_passed", link=thread.jump_url))
+    await general_util.generate_success_message(interaction, Strings.help_threader_request_create_passed(link=thread.jump_url))
 
   @commands.slash_command(name="help_requests")
   async def help_requests(self, inter: disnake.CommandInteraction):

@@ -1,6 +1,6 @@
 # Error handling extension
 
-import disnake as discord
+import disnake
 from disnake.ext import commands
 import traceback
 
@@ -30,16 +30,16 @@ class Errors(Base_Cog):
       await general_util.generate_error_message(ctx, Strings.error_unknown_command)
     elif isinstance(error, commands.CommandOnCooldown):
       await general_util.delete_message(self.bot, ctx)
-      await general_util.generate_error_message(ctx, Strings.populate_string("error_command_on_cooldown", remaining=round(error.retry_after, 2)))
+      await general_util.generate_error_message(ctx, Strings.error_command_on_cooldown(remaining=round(error.retry_after, 2)))
     elif isinstance(error, commands.MissingPermissions):
       await general_util.delete_message(self.bot, ctx)
       await general_util.generate_error_message(ctx, Strings.error_missing_permission)
     elif isinstance(error, commands.MissingRole):
       await general_util.delete_message(self.bot, ctx)
-      await general_util.generate_error_message(ctx, Strings.populate_string("error_missing_role", role=error.missing_role))
+      await general_util.generate_error_message(ctx, Strings.error_missing_role(role=error.missing_role))
     elif isinstance(error, commands.MissingRequiredArgument):
       await general_util.delete_message(self.bot, ctx)
-      await general_util.generate_error_message(ctx, Strings.populate_string("error_missing_argument", argument=error.param, signature=general_util.get_command_signature(ctx)))
+      await general_util.generate_error_message(ctx, Strings.error_missing_argument(argument=error.param, signature=general_util.get_command_signature(ctx)))
     elif isinstance(error, commands.BadArgument):
       await general_util.delete_message(self.bot, ctx)
       await general_util.generate_error_message(ctx, Strings.error_bad_argument)
@@ -48,6 +48,8 @@ class Errors(Base_Cog):
       await general_util.generate_error_message(ctx, Strings.error_max_concurrency_reached)
     elif isinstance(error, commands.NoPrivateMessage):
       await general_util.generate_error_message(ctx, Strings.error_no_private_message)
+    elif isinstance(error, disnake.InteractionTimedOut):
+      await general_util.generate_error_message(ctx, Strings.error_interaction_timeout)
     else:
       output = "".join(traceback.format_exception(type(error), error, error.__traceback__))
       logger.error(output)
@@ -55,12 +57,12 @@ class Errors(Base_Cog):
       log_channel = self.bot.get_channel(config.log_channel_id) if config.log_channel_id != -1 else None
       if log_channel is None: return
 
-      if isinstance(ctx, discord.ApplicationCommandInteraction):
-        embed = discord.Embed(title=f"Ignoring exception in application interaction {ctx.application_command}", color=0xFF0000)
+      if isinstance(ctx, disnake.ApplicationCommandInteraction):
+        embed = disnake.Embed(title=f"Ignoring exception in application interaction {ctx.application_command}", color=0xFF0000)
         embed.add_field(name="Autor", value=str(ctx.author))
         embed.add_field(name="Type", value=str(type(error)))
       else:
-        embed = discord.Embed(title=f"Ignoring exception in command {ctx.command}", color=0xFF0000)
+        embed = disnake.Embed(title=f"Ignoring exception in command {ctx.command}", color=0xFF0000)
         embed.add_field(name="Message", value=ctx.message.content[:1000])
         embed.add_field(name="Autor", value=str(ctx.author))
         embed.add_field(name="Type", value=str(type(error)))
@@ -116,7 +118,7 @@ class Errors(Base_Cog):
           message = arg.message_id
         user = str(user)
 
-      embed = discord.Embed(title=f"Ignoring exception in event '{event_method}'", color=0xFF0000)
+      embed = disnake.Embed(title=f"Ignoring exception in event '{event_method}'", color=0xFF0000)
       embed.add_field(name="Message", value=message, inline=False)
       embed.add_field(name="Guild", value=event_guild)
 
@@ -128,7 +130,7 @@ class Errors(Base_Cog):
       embed.add_field(name="Reaction", value=arg.emoji)
       embed.add_field(name="Type", value=arg.event_type)
       if arg.guild_id:
-        link = f"https://discord.com/channels/{arg.guild_id}/{arg.channel_id}/{arg.message_id}"
+        link = f"https://disnake.com/channels/{arg.guild_id}/{arg.channel_id}/{arg.message_id}"
         embed.add_field(name="Link", value=link, inline=False)
       embeds.append(embed)
 

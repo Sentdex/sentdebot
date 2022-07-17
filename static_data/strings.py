@@ -2,7 +2,22 @@
 
 from config import config
 
-class Strings:
+
+class callable_string(str):
+  __call__ = str.format
+
+class formattable(type):
+  def __init__(cls, clsname, superclasses, attributedict):
+    cls.clsname = clsname
+
+  def __getattribute__(cls, key):
+    try:
+      return callable_string(object.__getattribute__(cls, key))
+    except AttributeError:
+      raise AttributeError(f'{cls.clsname} class has no attribute {key}')
+
+
+class Strings(metaclass=formattable):
   # System
   system_load_brief = "Load unloaded extension"
   system_load_help = "Instead of extension name can be used \"all\" to load all extensions at once"
@@ -37,6 +52,7 @@ class Strings:
   error_bad_argument = f'Some arguments of command missing or wrong, use {config.command_prefixes[0]}help to get more info'
   error_max_concurrency_reached = "Bot is busy, try it later"
   error_no_private_message = "This command can't be used in private channel"
+  error_interaction_timeout = "Interaction took more than 3 seconds to be responded to. Try again later."
 
   # Common
   common_ping_brief = "Ping the bot and get bot and api latency"
@@ -81,11 +97,3 @@ class Strings:
   help_threader_request_solved_closed = "Help request marked as solved"
 
   help_threader_help_channel_not_found = "Help channel not found"
-
-  @classmethod
-  def populate_string(cls, message_name, *args, **kwargs):
-    try:
-      template = getattr(cls, message_name)
-      return template.format(*args, **kwargs)
-    except AttributeError:
-      raise ValueError(f"Invalid template {message_name}")

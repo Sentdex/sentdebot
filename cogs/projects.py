@@ -38,15 +38,15 @@ class Projects(Base_Cog):
   @commands.check(general_util.is_mod)
   async def remove_project(self, inter: disnake.CommandInteraction, project_name: str = commands.Param(autocomplete=projects_list_autocomplete, description="Name of project to delete")):
     if projects_repo.remove_project(project_name):
-      await general_util.generate_success_message(inter, Strings.populate_string("projects_remove_project_removed", name=project_name))
+      await general_util.generate_success_message(inter, Strings.projects_remove_project_removed(name=project_name))
     else:
-      await general_util.generate_error_message(inter, Strings.populate_string("projects_remove_project_failed", name=project_name))
+      await general_util.generate_error_message(inter, Strings.projects_remove_project_failed(name=project_name))
 
   @projects.sub_command(name="get", description=Strings.projects_project_get_brief)
   async def project_get(self, inter: disnake.CommandInteraction, project_name: str = commands.Param(autocomplete=projects_list_autocomplete, description="Name of project to show")):
     project = projects_repo.get_by_name(project_name)
     if project is None:
-      return await general_util.generate_error_message(inter, Strings.populate_string("projects_project_get_not_found", name=project_name))
+      return await general_util.generate_error_message(inter, Strings.projects_project_get_not_found(name=project_name))
 
     embed = disnake.Embed(title=project.name, description=project.description, color=disnake.Color.dark_blue())
     general_util.add_author_footer(embed, inter.author)
@@ -58,9 +58,9 @@ class Projects(Base_Cog):
     if inter.custom_id == "add_project_modal":
       project = projects_repo.add_project(project_name=inter.text_values["name"], project_description=inter.text_values["description"])
       if project is None:
-        await general_util.generate_error_message(inter, Strings.populate_string("projects_add_project_failed", name=inter.text_values["name"]))
+        await general_util.generate_error_message(inter, Strings.projects_add_project_failed(name=inter.text_values["name"]))
       else:
-        await general_util.generate_success_message(inter, Strings.populate_string("projects_add_project_added", name=inter.text_values["name"]))
+        await general_util.generate_success_message(inter, Strings.projects_add_project_added(name=inter.text_values["name"]))
 
 def setup(bot):
   bot.add_cog(Projects(bot))

@@ -57,7 +57,7 @@ class Common(Base_Cog):
 
       await ctx.send(embed=embed)
     else:
-      await general_util.generate_error_message(ctx, Strings.populate_string("common_search_nothing_found", term=search_term))
+      await general_util.generate_error_message(ctx, Strings.common_search_nothing_found(term=search_term))
 
 def setup(bot):
   bot.add_cog(Common(bot))

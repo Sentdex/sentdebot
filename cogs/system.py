@@ -40,7 +40,7 @@ class System(Base_Cog):
             final_embed.description += f"\n{str(cog)}"
             final_embed.colour = disnake.Color.orange()
 
-            await general_util.generate_error_message(ctx, Strings.populate_string("system_unable_to_load_cog", cog=str(cog), e=e))
+            await general_util.generate_error_message(ctx, Strings.system_unable_to_load_cog(cog=str(cog), e=e))
 
       await ctx.send(embed=final_embed, delete_after=config.success_duration)
     else:
@@ -48,9 +48,9 @@ class System(Base_Cog):
         self.bot.load_extension(f"cogs.{extension_name}")
         logger.info(f"{extension_name} loaded")
 
-        await general_util.generate_success_message(ctx, Strings.populate_string("system_cog_loaded", extension=extension_name))
+        await general_util.generate_success_message(ctx, Strings.system_cog_loaded(extension=extension_name))
       except Exception as e:
-        await general_util.generate_error_message(ctx, Strings.populate_string("system_unable_to_load_cog", cog=extension_name, e=e))
+        await general_util.generate_error_message(ctx, Strings.system_unable_to_load_cog(cog=extension_name, e=e))
 
   @commands.command(brief=Strings.system_unload_brief, help=Strings.system_unload_help)
   @commands.check(general_util.is_administrator)
@@ -61,7 +61,7 @@ class System(Base_Cog):
     loaded_cogs = [cog.file for cog in self.bot.cogs.values()]
 
     if extension_name in config.protected_cogs:
-      return await general_util.generate_error_message(ctx, Strings.populate_string("system_unload_protected_cog", extension=extension_name))
+      return await general_util.generate_error_message(ctx, Strings.system_unload_protected_cog(extension=extension_name))
 
     if extension_name.lower() == "all":
       final_embed = disnake.Embed(title="Extensions unload", color=disnake.Color.green(), description="Failed extensions:")
@@ -76,16 +76,16 @@ class System(Base_Cog):
             final_embed.description += f"\n{str(cog)}"
             final_embed.colour = disnake.Color.orange()
 
-            await general_util.generate_error_message(ctx, Strings.populate_string("system_unable_to_unload_cog", cog=cog, e=e))
+            await general_util.generate_error_message(ctx, Strings.system_unable_to_unload_cog(cog=cog, e=e))
 
       await ctx.send(embed=final_embed, delete_after=config.success_duration)
     else:
       try:
         self.bot.unload_extension(f"cogs.{extension_name}")
         logger.info(f'{extension_name} unloaded')
-        await general_util.generate_success_message(ctx, Strings.populate_string("system_cog_unloaded", extension=extension_name))
+        await general_util.generate_success_message(ctx, Strings.system_cog_unloaded(extension=extension_name))
       except Exception as e:
-        await general_util.generate_error_message(ctx, Strings.populate_string("system_unable_to_unload_cog", cog=extension_name, e=e))
+        await general_util.generate_error_message(ctx, Strings.system_unable_to_unload_cog(cog=extension_name, e=e))
 
   @commands.command(brief=Strings.system_reload_brief, help=Strings.system_reload_help)
   @commands.check(general_util.is_administrator)
@@ -107,7 +107,7 @@ class System(Base_Cog):
           final_embed.description += f"\n{str(cog)}"
           final_embed.colour = disnake.Color.orange()
 
-          await general_util.generate_error_message(ctx, Strings.populate_string("system_unable_to_reload_cog", cog=cog, e=e))
+          await general_util.generate_error_message(ctx, Strings.system_unable_to_reload_cog(cog=cog, e=e))
 
       await ctx.send(embed=final_embed, delete_after=config.success_duration)
     else:
@@ -115,9 +115,9 @@ class System(Base_Cog):
         self.bot.reload_extension(f"cogs.{extension_name}")
         logger.info(f"{extension_name} reloaded")
 
-        await general_util.generate_success_message(ctx, Strings.populate_string("system_cog_reloaded", extension=extension_name))
+        await general_util.generate_success_message(ctx, Strings.system_cog_reloaded(extension=extension_name))
       except Exception as e:
-        await general_util.generate_error_message(ctx, Strings.populate_string("system_unable_to_reload_cog", cog=extension_name, e=e))
+        await general_util.generate_error_message(ctx, Strings.system_unable_to_reload_cog(cog=extension_name, e=e))
 
   @commands.command(brief=Strings.system_cogs_brief, aliases=["extensions"])
   @commands.check(general_util.is_administrator)
