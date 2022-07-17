@@ -18,13 +18,14 @@ success_duration = 30
 
 
 [ids]
-main_guild_id = "<env>"
-help_channel_id = -1 # Channel that count as help channel
+main_guild_id = 988202173152260176
+# Channel that count as help channel
+help_channel_id = 988498939818934272
 # Control role ids
 admin_role_ids = []
 mod_role_ids = []
 # Channle id to which error messages will be send
-log_channel_id = "<env>"
+log_channel_id = 838455904571621427
 
 [cogs]
 # Cogs that will be loaded on startup and unable to be unloaded
@@ -33,8 +34,9 @@ protected_cogs = ["system", "errors", "help"]
 defaul_loaded_cogs = ["common", "code_execute", "projects", "random_role_giver", "stats", "help_threader"]
 
 [random_role_giver]
-role_ids = [] # Ids of roles that will be randomly given to users
-chance = 0.2 # Chance on message to receive role
+# Ids of roles that will be randomly given to users
+role_ids = [988796853757812786, 988796949467627520, 988796952319758356, 988796951300571146]
+chance = 0.2 # Chance on message to receive role in percents
 
 [stats]
 days_back = 21

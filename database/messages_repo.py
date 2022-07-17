@@ -10,6 +10,9 @@ def add_message(message_id: int, channel_id: int, author_id: int, content: str, 
   session.commit()
   return item
 
+def get_message(message_id: int) -> Optional[Message]:
+  return session.query(Message).filter(Message.message_id == str(message_id)).one_or_none()
+
 def get_message_metrics(days_back: int) -> List[Tuple[int, datetime.datetime, int, int]]:
   threshold_date = datetime.datetime.utcnow() - datetime.timedelta(days=days_back)
   data:List[Message] = session.query(Message).filter(and_(Message.timestamp > threshold_date, Message.use_for_metric == True)).order_by(Message.timestamp.desc()).all()
