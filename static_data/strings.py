@@ -97,3 +97,12 @@ class Strings(metaclass=formattable):
   help_threader_request_solved_closed = "Help request marked as solved"
 
   help_threader_help_channel_not_found = "Help channel not found"
+
+  # Code Execute
+  code_execute_run_brief = "Evaluate code"
+  code_execute_run_help = "Code to execute should always be in markdown with specified language\nCode block can be as a part of command (under the command) or the command can be called in reply message to that codeblock"
+  code_execute_run_cant_find_reference_channel = "Can't find reference channel of reply"
+  code_execute_run_cant_find_reference_message = "Can't find reference message of reply"
+  code_execute_run_cant_find_code_block = "Can't find codeblock in message"
+  code_execute_run_cant_find_language_in_code_block = "Can't find language in codeblock"
+  code_execute_run_failed_to_get_api_response = "Failed to get response from API"
