@@ -25,12 +25,12 @@ class HelpThreader(Base_Cog):
     if message.guild is None: return
     if not isinstance(message.channel, disnake.TextChannel): return
 
-    if message.channel.id in config.base_help_channel_ids:
+    if message.channel.id == config.base_help_channel_id:
 
       # Auto archive set to 3 days
       try:
         thread = await message.create_thread(name="Automatic thread", auto_archive_duration=4320, reason="Automatic thread")
-        help_threads_repo.create_thread(message.channel.id, message.id, message.author.id)
+        help_threads_repo.create_thread(message.id, message.author.id)
         await thread.send(Strings.help_threader_announcement)
         await thread.leave()
       except disnake.HTTPException:
@@ -45,19 +45,16 @@ class HelpThreader(Base_Cog):
   async def help_requests_list(self, inter: disnake.CommandInteraction):
     unanswered_threads = []
     all_records = help_threads_repo.get_all()
+    help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.base_help_channel_id)
+
+    if help_channel is None:
+      return await general_util.generate_error_message(inter, Strings.help_threader_list_requests_help_channel_not_found)
 
     for record in all_records:
       message_id = int(record.message_id)
 
-      channel: Optional[disnake.TextChannel] = self.bot.get_channel(int(record.channel_id))
-      if channel is None:
-        # Channel don't exist
-        logger.info(f"Channel {record.channel_id} don't exist")
-        help_threads_repo.delete_all_from_channel(int(record.channel_id))
-        continue
-
       try:
-        message = await channel.fetch_message(message_id)
+        message = await help_channel.fetch_message(message_id)
       except:
         # Message that thread was connected to don't exist
         logger.info(f"Message {message_id} don't exist")

@@ -7,4 +7,3 @@ class HelpThread(database.base):
 
   owner_id = Column(String, index=True)
   message_id = Column(String, primary_key=True, unique=True, index=True)
-  channel_id = Column(String, index=True)

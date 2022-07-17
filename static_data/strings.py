@@ -69,6 +69,7 @@ class Strings:
   help_threader_announcement = "```Help channel now using threads for solving problems so use them and post new message outside of this thread only if thread gets locked (after 3 days) or with different problem. Thank you```"
 
   help_threader_list_requests_brief = "List all opened help requests"
+  help_threader_list_requests_help_channel_not_found = "Help channel not found"
   help_threader_list_requests_no_help_required = "*There are no threads that need help*"
 
   help_threader_request_solved_brief = "Mark current help request as solved"

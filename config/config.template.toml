@@ -19,7 +19,7 @@ log_channel_id = "<env>"
 error_duration = 30
 success_duration = 30
 
-help_channel_ids = [] # Channels that count as help channels
+help_channel_id = -1 # Channel that count as help channel
 
 [ids]
 # Control role ids
