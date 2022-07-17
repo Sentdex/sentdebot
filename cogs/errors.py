@@ -55,13 +55,18 @@ class Errors(Base_Cog):
       log_channel = self.bot.get_channel(config.log_channel_id) if config.log_channel_id != -1 else None
       if log_channel is None: return
 
-      embed = discord.Embed(title=f"Ignoring exception in command {ctx.command}", color=0xFF0000)
-      embed.add_field(name="Message", value=ctx.message.content[:1000])
-      embed.add_field(name="Autor", value=str(ctx.author))
-      embed.add_field(name="Type", value=str(type(error)))
-      if ctx.guild:
-        embed.add_field(name="Guild", value=ctx.guild.name)
-      embed.add_field(name="Link", value=ctx.message.jump_url, inline=False)
+      if isinstance(ctx, discord.ApplicationCommandInteraction):
+        embed = discord.Embed(title=f"Ignoring exception in application interaction {ctx.application_command}", color=0xFF0000)
+        embed.add_field(name="Autor", value=str(ctx.author))
+        embed.add_field(name="Type", value=str(type(error)))
+      else:
+        embed = discord.Embed(title=f"Ignoring exception in command {ctx.command}", color=0xFF0000)
+        embed.add_field(name="Message", value=ctx.message.content[:1000])
+        embed.add_field(name="Autor", value=str(ctx.author))
+        embed.add_field(name="Type", value=str(type(error)))
+        if ctx.guild:
+          embed.add_field(name="Guild", value=ctx.guild.name)
+        embed.add_field(name="Link", value=ctx.message.jump_url, inline=False)
 
       await log_channel.send(embed=embed)
 

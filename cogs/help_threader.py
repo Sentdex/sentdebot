@@ -3,7 +3,7 @@
 import disnake
 from disnake.ext import commands
 import math
-from typing import Optional
+from typing import Optional, Union
 
 from features.base_cog import Base_Cog
 from config import config, cooldowns
@@ -12,6 +12,7 @@ from features.paginator import EmbedView
 from database import help_threads_repo
 from util.logger import setup_custom_logger
 from util import general_util
+from modals.create_help_request import HelpRequestModal
 
 logger = setup_custom_logger(__name__)
 
@@ -19,26 +20,36 @@ class HelpThreader(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(HelpThreader, self).__init__(bot, __file__)
 
-  @commands.Cog.listener()
-  async def on_message(self, message: disnake.Message):
-    if message.author.bot: return
-    if message.guild is None: return
-    if not isinstance(message.channel, disnake.TextChannel): return
+  async def create_new_help_thread(self, interaction: disnake.ModalInteraction, data:dict):
+    title, tags, description = data["title"], data["tags"] if data["tags"] != "" else None, data["description"]
+    help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.base_help_channel_id)
 
-    if message.channel.id == config.base_help_channel_id:
+    if help_channel is None:
+      return await general_util.generate_error_message(interaction, Strings.help_threader_help_channel_not_found)
 
-      # Auto archive set to 3 days
-      try:
-        thread = await message.create_thread(name="Automatic thread", auto_archive_duration=4320, reason="Automatic thread")
-        help_threads_repo.create_thread(message.id, message.author.id)
-        await thread.send(Strings.help_threader_announcement)
-        await thread.leave()
-      except disnake.HTTPException:
-        pass
+    try:
+      completed_message = f"{description}" if tags is None else f"{tags}\n{description}"
+      message = await help_channel.send(completed_message)
+      # Archive after one day
+      thread = await help_channel.create_thread(name=title, message=message, auto_archive_duration=1440, reason=f"Help request from {interaction.author}")
+      await thread.add_user(interaction.author)
+
+      help_threads_repo.create_thread(message.id, interaction.author.id, tags)
+
+      await thread.send(Strings.help_threader_announcement)
+    except disnake.HTTPException:
+      return await general_util.generate_error_message(interaction, Strings.help_threader_request_create_failed)
+
+    await general_util.generate_success_message(interaction, Strings.populate_string("help_threader_request_create_passed", link=thread.jump_url))
 
   @commands.slash_command(name="help_requests")
   async def help_requests(self, inter: disnake.CommandInteraction):
     pass
+
+  @help_requests.sub_command(name="create", description=Strings.help_threader_request_create_brief)
+  @cooldowns.long_cooldown
+  async def help_requests_create(self, inter: disnake.CommandInteraction):
+    await inter.response.send_modal(HelpRequestModal(self.create_new_help_thread))
 
   @help_requests.sub_command(name="list", description=Strings.help_threader_list_requests_brief)
   @cooldowns.long_cooldown
@@ -48,7 +59,7 @@ class HelpThreader(Base_Cog):
     help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.base_help_channel_id)
 
     if help_channel is None:
-      return await general_util.generate_error_message(inter, Strings.help_threader_list_requests_help_channel_not_found)
+      return await general_util.generate_error_message(inter, Strings.help_threader_help_channel_not_found)
 
     for record in all_records:
       message_id = int(record.message_id)
@@ -81,7 +92,7 @@ class HelpThreader(Base_Cog):
         help_threads_repo.delete_thread(message_id)
         continue
 
-      unanswered_threads.append((thread, message, owner))
+      unanswered_threads.append((thread, record.tags, message, owner))
 
     if not unanswered_threads:
       embed = disnake.Embed(title="Help needed", description=Strings.help_threader_list_requests_no_help_required, color=disnake.Color.dark_green())
@@ -94,8 +105,8 @@ class HelpThreader(Base_Cog):
     pages = []
     for batch in batches:
       embed = disnake.Embed(title="Help needed", color=disnake.Color.dark_green())
-      for thread, message, owner in batch:
-        embed.add_field(name=f"{thread.name}", value=f"Owner: {owner.name}\n[Link]({thread.jump_url})", inline=False)
+      for thread, tags, message, owner in batch:
+        embed.add_field(name=f"{thread.name}", value=f"Owner: {owner.name}\nTags: {tags}\n[Link]({thread.jump_url})", inline=False)
       pages.append(embed)
 
     await EmbedView(inter.author, pages).run(inter)
@@ -113,6 +124,15 @@ class HelpThreader(Base_Cog):
 
     help_threads_repo.delete_thread(thread_message_id)
     await general_util.generate_success_message(inter, Strings.help_threader_request_solved_closed)
+
+    try:
+      # Archive thread
+      help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.base_help_channel_id)
+      message = await help_channel.fetch_message(thread_message_id)
+      thread = message.thread
+      await thread.edit(archived=True)
+    except:
+      pass
 
 def setup(bot):
   bot.add_cog(HelpThreader(bot))

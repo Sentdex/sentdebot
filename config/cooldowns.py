@@ -11,3 +11,7 @@ def default_cooldown(f):
 # 1x/20s
 def long_cooldown(f):
     return commands.cooldown(rate=1, per=20.0, type=commands.BucketType.user)(f)
+
+# 1x/5min
+def huge_cooldown(f):
+    return commands.cooldown(rate=1, per=300.0, type=commands.BucketType.user)(f)

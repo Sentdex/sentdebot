@@ -68,14 +68,19 @@ class Strings:
   # Help Threader
   help_threader_announcement = "```Help channel now using threads for solving problems so use them and post new message outside of this thread only if thread gets locked (after 3 days) or with different problem. Thank you```"
 
+  help_threader_request_create_brief = "Create new help request"
+  help_threader_request_create_failed = "Creation of help request failed, try it later"
+  help_threader_request_create_passed = "Your request was created, you were added to that thread and here is your [LINK]({link})"
+
   help_threader_list_requests_brief = "List all opened help requests"
-  help_threader_list_requests_help_channel_not_found = "Help channel not found"
   help_threader_list_requests_no_help_required = "*There are no threads that need help*"
 
   help_threader_request_solved_brief = "Mark current help request as solved"
   help_threader_request_solved_not_found = "Invalid place for this command\nThis command should be called in your own opened help request thread to mark it as solved"
   help_threader_request_solved_not_owner = "You are not owner of this help request\nThis command should be called in your own opened help request thread to mark it as solved"
   help_threader_request_solved_closed = "Help request marked as solved"
+
+  help_threader_help_channel_not_found = "Help channel not found"
 
   @classmethod
   def populate_string(cls, message_name, *args, **kwargs):
