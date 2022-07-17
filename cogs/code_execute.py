@@ -52,17 +52,17 @@ class Code_Execute(Base_Cog):
     if result is None:
       return await general_util.generate_error_message(ctx, Strings.code_execute_run_failed_to_get_api_response)
 
-    await self._send_result(ctx, result, code.rstrip("\n").lstrip("\n"))
+    await self._send_result(ctx, result)
 
   @staticmethod
-  async def _send_result(ctx: commands.Context, result: dict, src:str):
+  async def _send_result(ctx: commands.Context, result: dict):
     if "message" in result:
       # There is error in code execution
       return await general_util.generate_error_message(ctx, result["message"])
 
     output = result["output"]
     output = general_util.split_to_parts(output, 1000)
-    desc = ("**Output shortened**\n" if len(output) > 1 else "") + f"*{src}*"
+    desc = ("**Output shortened**\n" if len(output) > 1 else "")
 
     embed = discord.Embed(title=f"Ran your {result['language']} code", color=discord.Color.green(), description=desc)
     embed.add_field(name="Output", value=output[-1])
