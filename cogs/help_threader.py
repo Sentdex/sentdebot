@@ -62,7 +62,7 @@ class HelpThreader(Base_Cog):
       return await general_util.generate_error_message(inter, Strings.help_threader_help_channel_not_found)
 
     for record in all_records:
-      message_id = int(record.message_id)
+      message_id = int(record.thread_id)
 
       try:
         message = await help_channel.fetch_message(message_id)
@@ -99,8 +99,8 @@ class HelpThreader(Base_Cog):
       return await inter.send(embed=embed, ephemeral=True)
 
     num_of_unanswered_threads = len(unanswered_threads)
-    number_of_batches = math.ceil(num_of_unanswered_threads / 10)
-    batches = [unanswered_threads[i * 10 : i * 10 + 10] for i in range(number_of_batches)]
+    number_of_batches = math.ceil(num_of_unanswered_threads / 5)
+    batches = [unanswered_threads[i * 5 : i * 5 + 5] for i in range(number_of_batches)]
 
     pages = []
     for batch in batches:

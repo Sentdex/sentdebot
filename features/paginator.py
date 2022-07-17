@@ -51,43 +51,44 @@ class EmbedView(disnake.ui.View):
     self.max_page = len(embeds)
     super().__init__(timeout=timeout)
 
-    self.add_item(
-      disnake.ui.Button(
-        emoji="⏪",
-        custom_id="embed:start_page",
-        style=disnake.ButtonStyle.primary
-      )
-    )
-    self.add_item(
-      disnake.ui.Button(
-        emoji="◀",
-        custom_id="embed:prev_page",
-        style=disnake.ButtonStyle.primary
-      )
-    )
-    self.add_item(
-      disnake.ui.Button(
-        emoji="▶",
-        custom_id="embed:next_page",
-        style=disnake.ButtonStyle.primary
-      )
-    )
-    if end_arrow:
+    if self.max_page > 1:
       self.add_item(
         disnake.ui.Button(
-          emoji="⏩",
-          custom_id="embed:end_page",
+          emoji="⏪",
+          custom_id="embed:start_page",
           style=disnake.ButtonStyle.primary
         )
       )
-    if not perma_lock:
-      # if permanent lock is applied, dynamic lock is removed from buttons
-      self.lock_button = disnake.ui.Button(
-        emoji="🔓",
-        custom_id="embed:lock",
-        style=disnake.ButtonStyle.success
+      self.add_item(
+        disnake.ui.Button(
+          emoji="◀",
+          custom_id="embed:prev_page",
+          style=disnake.ButtonStyle.primary
+        )
       )
-      self.add_item(self.lock_button)
+      self.add_item(
+        disnake.ui.Button(
+          emoji="▶",
+          custom_id="embed:next_page",
+          style=disnake.ButtonStyle.primary
+        )
+      )
+      if end_arrow:
+        self.add_item(
+          disnake.ui.Button(
+            emoji="⏩",
+            custom_id="embed:end_page",
+            style=disnake.ButtonStyle.primary
+          )
+        )
+      if not perma_lock:
+        # if permanent lock is applied, dynamic lock is removed from buttons
+        self.lock_button = disnake.ui.Button(
+          emoji="🔓",
+          custom_id="embed:lock",
+          style=disnake.ButtonStyle.success
+        )
+        self.add_item(self.lock_button)
 
   def embed(self):
     page = self.embeds[self.page - 1]

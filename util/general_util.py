@@ -45,16 +45,16 @@ def is_mod(ctx):
 def get_cogs_in_folder():
   return [cog[:-3].lower() for cog in os.listdir("cogs") if str(cog).endswith(".py") and "__init__" not in str(cog)]
 
-async def generate_error_message(ctx: Union[commands.Context, disnake.ModalInteraction, disnake.CommandInteraction], text):
+async def generate_error_message(ctx: Union[commands.Context, disnake.MessageInteraction, disnake.ModalInteraction, disnake.CommandInteraction], text):
   response_embed = disnake.Embed(color=disnake.Color.dark_red(), title=":x: | Error", description=text)
-  if isinstance(ctx, disnake.ModalInteraction) or isinstance(ctx, disnake.CommandInteraction):
+  if isinstance(ctx, disnake.ModalInteraction) or isinstance(ctx, disnake.CommandInteraction) or isinstance(ctx, disnake.MessageInteraction):
     return await ctx.send(embed=response_embed, ephemeral=True)
   else:
     return await ctx.send(embed=response_embed, delete_after=config.base.error_duration)
 
-async def generate_success_message(ctx: Union[commands.Context, disnake.ModalInteraction, disnake.CommandInteraction], text):
+async def generate_success_message(ctx: Union[commands.Context, disnake.MessageInteraction, disnake.ModalInteraction, disnake.CommandInteraction], text):
   response_embed = disnake.Embed(color=disnake.Color.green(), title=":white_check_mark: | Success", description=text)
-  if isinstance(ctx, disnake.ModalInteraction) or isinstance(ctx, disnake.CommandInteraction):
+  if isinstance(ctx, disnake.ModalInteraction) or isinstance(ctx, disnake.CommandInteraction) or isinstance(ctx, disnake.MessageInteraction):
     return await ctx.send(embed=response_embed, ephemeral=True)
   else:
     return await ctx.send(embed=response_embed, delete_after=config.base.success_duration)
