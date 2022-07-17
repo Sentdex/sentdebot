@@ -30,8 +30,8 @@ class HelpThreader(Base_Cog):
     try:
       completed_message = f"{description}" if tags is None else f"{tags}\n{description}"
       message = await help_channel.send(completed_message)
-      # Archive after one day
-      thread = await help_channel.create_thread(name=title, message=message, auto_archive_duration=1440, reason=f"Help request from {interaction.author}")
+      # Archive after 3 day
+      thread = await help_channel.create_thread(name=title, message=message, auto_archive_duration=4320, reason=f"Help request from {interaction.author}")
       await thread.add_user(interaction.author)
 
       help_threads_repo.create_thread(message.id, interaction.author.id, tags)
