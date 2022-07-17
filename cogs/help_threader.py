@@ -22,7 +22,7 @@ class HelpThreader(Base_Cog):
 
   async def create_new_help_thread(self, interaction: disnake.ModalInteraction, data:dict):
     title, tags, description = data["title"], data["tags"] if data["tags"] != "" else None, data["description"]
-    help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.base_help_channel_id)
+    help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.help_channel_id)
 
     if help_channel is None:
       return await general_util.generate_error_message(interaction, Strings.help_threader_help_channel_not_found)
@@ -56,7 +56,7 @@ class HelpThreader(Base_Cog):
   async def help_requests_list(self, inter: disnake.CommandInteraction):
     unanswered_threads = []
     all_records = help_threads_repo.get_all()
-    help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.base_help_channel_id)
+    help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.help_channel_id)
 
     if help_channel is None:
       return await general_util.generate_error_message(inter, Strings.help_threader_help_channel_not_found)
@@ -127,7 +127,7 @@ class HelpThreader(Base_Cog):
 
     try:
       # Archive thread
-      help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.base_help_channel_id)
+      help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.help_channel_id)
       message = await help_channel.fetch_message(thread_message_id)
       thread = message.thread
       await thread.edit(archived=True)

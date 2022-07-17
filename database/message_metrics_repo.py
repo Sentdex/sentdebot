@@ -12,7 +12,7 @@ def add_message_metrics(message: disnake.Message) -> MessageMetrics:
 
 def get_message_metrics(days_back: int) -> List[Tuple[int, datetime.datetime, int, int]]:
   threshold_date = datetime.datetime.utcnow() - datetime.timedelta(days=days_back)
-  data:List[MessageMetrics] = session.query(MessageMetrics).filter(MessageMetrics.timestamp > threshold_date).order_by(MessageMetrics.timestamp).all()
+  data:List[MessageMetrics] = session.query(MessageMetrics).filter(MessageMetrics.timestamp > threshold_date).order_by(MessageMetrics.timestamp.desc()).all()
 
   output = []
   for d in data:
@@ -20,5 +20,5 @@ def get_message_metrics(days_back: int) -> List[Tuple[int, datetime.datetime, in
   return output
 
 def get_author_of_last_message(channel_id: int) -> Optional[int]:
-  user_id = session.query(MessageMetrics.author_id).filter(MessageMetrics.channel_id == str(channel_id)).order_by(MessageMetrics.timestamp).first()
+  user_id = session.query(MessageMetrics.author_id).filter(MessageMetrics.channel_id == str(channel_id)).order_by(MessageMetrics.timestamp.desc()).first()
   return int(user_id[0]) if user_id is not None else None

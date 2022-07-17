@@ -20,18 +20,15 @@ class formattable(type):
 class Strings(metaclass=formattable):
   # System
   system_load_brief = "Load unloaded extension"
-  system_load_help = "Instead of extension name can be used \"all\" to load all extensions at once"
   system_unable_to_load_cog = "Unable to load {cog} extension\n`{e}`"
   system_cog_loaded = "Extension {extension} loaded"
 
   system_unload_brief = "Unload loaded extension"
-  system_unload_help = "Instead of extension name can be used \"all\" to unload all extensions at once"
   system_unload_protected_cog = "Unable to unload {extension} extension - protected"
   system_unable_to_unload_cog = "Unable to unload {cog} extension\n`{e}`"
   system_cog_unloaded = "Extension {extension} unloaded"
 
   system_reload_brief = "Reload loaded extension"
-  system_reload_help = "Instead of extension name can be used \"all\" to reload all extensions at once"
   system_unable_to_reload_cog = "Unable to reload {cog} extension\n`{e}`"
   system_cog_reloaded = "Extension {extension} reloaded"
 
@@ -41,7 +38,7 @@ class Strings(metaclass=formattable):
 
   # Help
   help_brief = "Show all commands and help for them"
-  help_help = "Also you can specify module to show help only for specific module"
+  help_help = "Also you can specify module to show help only for specific module\nSome commands are not in message form but in slash command form so try to type '/' to chat to see more of them"
 
   # Errors
   error_unknown_command = f'Unknown command - use {config.command_prefixes[0]}help for all commands'

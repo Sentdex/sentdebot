@@ -11,7 +11,7 @@ def add_user_metrics(online: int, idle: int, offline: int) -> UserMetrics:
 
 def get_user_metrics(days_back: int) -> List[Tuple[datetime.datetime, int, int, int]]:
   threshold_date = datetime.datetime.utcnow() - datetime.timedelta(days=days_back)
-  data:List[UserMetrics] = session.query(UserMetrics).filter(UserMetrics.timestamp > threshold_date).order_by(UserMetrics.timestamp).all()
+  data:List[UserMetrics] = session.query(UserMetrics).filter(UserMetrics.timestamp > threshold_date).order_by(UserMetrics.timestamp.desc()).all()
 
   output = []
   for d in data:

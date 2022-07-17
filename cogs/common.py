@@ -34,7 +34,9 @@ class Common(Base_Cog):
   @commands.guild_only()
   async def member_count(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
-    await ctx.send(embed=disnake.Embed(title="Member count", description=f"{ctx.guild.member_count} :monkey:", color=disnake.Color.dark_blue()))
+    embed = disnake.Embed(title="Member count", description=f"{ctx.guild.member_count} :monkey:", color=disnake.Color.dark_blue())
+    general_util.add_author_footer(embed, ctx.author)
+    await ctx.send(embed=embed)
 
   @commands.command(brief=Strings.common_search_brief)
   @cooldowns.default_cooldown

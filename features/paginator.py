@@ -1,4 +1,5 @@
 # Basic scroller for embeds
+import asyncio
 
 import disnake
 from typing import List
@@ -127,5 +128,12 @@ class EmbedView(disnake.ui.View):
     await interaction.response.edit_message(embed=self.embed())
 
   async def on_timeout(self):
-    self.clear_items()
-    await self.message.edit(view=self)
+    try:
+      self.clear_items()
+      await self.message.edit(view=self)
+    except:
+      pass
+
+  def __del__(self):
+    loop = asyncio.get_running_loop()
+    asyncio.ensure_future(self.on_timeout(), loop=loop)

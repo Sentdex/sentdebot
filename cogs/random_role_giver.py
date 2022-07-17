@@ -27,14 +27,12 @@ class RandomRoleGiver(Base_Cog):
   @commands.Cog.listener()
   async def on_message(self, message: disnake.Message):
     if not config.role_giver_role_ids: return
-    if config.main_guild_id == -1 or config.main_guild_id != message.guild.id: return
     if message.author.bot: return
     if have_random_role(message.author): return
     if self.chance == 0: return
 
     guild = self.bot.get_guild(config.main_guild_id)
     if guild is None:
-      logger.warning("Failed to get main guild")
       return
 
     roll = random.randint(0, self.range)
@@ -48,6 +46,7 @@ class RandomRoleGiver(Base_Cog):
 
       try:
         await message.author.add_roles(selected_role, reason="Random role assigned by bot")
+        logger.info(f"User {message.author.name} was awarded with {selected_role.name} role")
       except Exception as e:
         logger.error(f"Failed to give user {message.author.display_name} {selected_role.name} ({selected_role_id}) role\n{traceback.format_exc()}")
 

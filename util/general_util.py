@@ -10,6 +10,9 @@ from datetime import datetime, timezone
 from config import config
 
 def is_administrator(ctx):
+  if ctx.bot.owner_id == ctx.author.id:
+    return True
+
   if not isinstance(ctx.author, disnake.Member):
     return False
 
@@ -22,6 +25,9 @@ def is_administrator(ctx):
   return False
 
 def is_mod(ctx):
+  if ctx.bot.owner_id == ctx.author.id:
+    return True
+
   if not isinstance(ctx.author, disnake.Member):
     return False
 

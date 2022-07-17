@@ -21,19 +21,19 @@ def get_config() -> dict:
 class Config:
   raw_config = get_config()
 
-  main_guild_id = get_attr(raw_config, "base", "main_guild_id")
   key: str = get_attr(raw_config, "base", "discord_api_key")
   status_message: str = get_attr(raw_config, "base", "status_message")
   command_prefixes: List[str] = get_attr(raw_config, "base", "command_prefixes")
   log_to_file: bool = get_attr(raw_config, "base", "log_to_file")
-  log_channel_id: int = get_attr(raw_config, "base", "log_channel_id")
   error_duration: int = get_attr(raw_config, "base", "error_duration")
   success_duration: int = get_attr(raw_config, "base", "success_duration")
   database_connect_string: str = get_attr(raw_config, "base", "database_connect_string")
-  base_help_channel_id: int = get_attr(raw_config, "base", "help_channel_id")
 
+  main_guild_id = get_attr(raw_config, "ids", "main_guild_id")
+  help_channel_id: int = get_attr(raw_config, "ids", "help_channel_id")
   admin_role_ids: List[int] = get_attr(raw_config, "ids", "admin_role_ids")
   mod_role_ids: List[int] = get_attr(raw_config, "ids", "mod_role_ids")
+  log_channel_id: int = get_attr(raw_config, "ids", "log_channel_id")
 
   protected_cogs: List[str] = get_attr(raw_config, "cogs", "protected_cogs")
   defaul_loaded_cogs: List[str] = get_attr(raw_config, "cogs", "defaul_loaded_cogs")
