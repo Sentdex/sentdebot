@@ -53,7 +53,8 @@ for cog in config.cogs.protected:
     logger.info(f"{cog} loaded")
   except:
     output = traceback.format_exc()
-    logger.warning(f"Failed to load {cog} module\n{output}")
+    logger.error(f"Failed to load {cog} module\n{output}")
+    exit(-2)
 logger.info("Protected modules loaded")
 
 for cog in config.cogs.defaul_loaded:

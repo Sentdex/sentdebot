@@ -128,3 +128,6 @@ def add_string_until_length(strings:List[str], max_length:int, sep:str) -> Tuple
       break
     output = tmp_output
   return output, strings
+
+def truncate_string(string: str, limit: int=12, ellipsis :str="…") -> str:
+  return string[:limit - len(ellipsis)] + ellipsis if len(string) > limit else string

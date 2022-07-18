@@ -127,7 +127,7 @@ class Stats(Base_Cog):
     for pair in user_id_counts_overall[::-1]:
       member = self.main_guild.get_member(pair[0])
       if member is not None:
-        users.append(member.name)
+        users.append(general_util.truncate_string(member.name, limit=config.stats.name_length_limit))
         msgs.append(pair[1])
 
     y_pos = np.arange(len(users))
@@ -144,7 +144,7 @@ class Stats(Base_Cog):
     for pair in uids_in_help[::-1]:
       member = self.main_guild.get_member(pair[0])
       if member is not None:
-        users.append(member.name)
+        users.append(general_util.truncate_string(member.name, limit=config.stats.name_length_limit))
         msgs.append(pair[1])
 
     y_pos = np.arange(len(users))
@@ -208,7 +208,7 @@ class Stats(Base_Cog):
     ax1.set_facecolor(DISCORD_BG_COLOR)
     ax1v = ax1.twinx()
     plt.ylabel("Message Volume")
-    # ax1v.set_facecolor(DISCORD_BG_COLOR)
+
     ax2 = plt.subplot2grid((2, 1), (1, 0))
     plt.ylabel("Total Users")
     ax2.set_facecolor(DISCORD_BG_COLOR)

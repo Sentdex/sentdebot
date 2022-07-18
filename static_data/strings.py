@@ -1,8 +1,5 @@
 # Storage for all static strings
 
-from config import config
-
-
 class callable_string(str):
   __call__ = str.format
 
@@ -35,6 +32,8 @@ class Strings(metaclass=formattable):
   system_cogs_brief = "Show all extensions and their states"
 
   system_logout_brief = "Turn off bot"
+
+  system_pull_brief = "Pull latest code from github"
 
   # Help
   help_description = "Show all message commands and help for them"

@@ -13,6 +13,8 @@ services:
         build: .
         volumes:
             -   code_data:/sentdebot/
+            - ./config/config.toml:/sentdebot/config/config.toml
+            - ./static_data/:/sentdebot/static_data/
         depends_on:
             - db
 
