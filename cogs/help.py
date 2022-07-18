@@ -87,6 +87,11 @@ class Help(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(Help, self).__init__(bot, __file__)
 
+  @commands.command(brief=Strings.help_dummy_help_brief)
+  async def dummy_help(self, ctx: commands.Context):
+    await general_util.delete_message(self.bot, ctx)
+    await ctx.send(embed=disnake.Embed(title="Help", description=Strings.help_dummy_help_text))
+
   @commands.slash_command(name="help", description=Strings.help_description)
   @cooldowns.short_cooldown
   async def help(self, inter: disnake.CommandInteraction, name: Optional[str]=commands.Param(default=None, description="Name of command or extension you want to search help for")):

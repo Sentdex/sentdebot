@@ -39,6 +39,9 @@ class Strings(metaclass=formattable):
   # Help
   help_description = "Show all message commands and help for them"
 
+  help_dummy_help_brief = "Show description default functions of bot"
+  help_dummy_help_text = "Hello there\nThis is not real help as you can see\nThis is dummy placeholder to tell you how this bot works\nIf you want to see all message commands then use slash commands for thar '/help' and there are more slash commands that you can see after typing '/' to chat\nHave a nice day"
+
   help_commands_list_description = "Show list of all available message commands"
 
   # Errors
