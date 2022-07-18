@@ -45,12 +45,12 @@ class Strings(metaclass=formattable):
   help_commands_list_description = "Show list of all available message commands"
 
   # Errors
-  error_unknown_command = f'Unknown command - use {config.base.command_prefixes[0]}help for all commands'
+  error_unknown_command = f'Unknown command - use /help for all commands'
   error_command_on_cooldown = 'This command is on cooldown. Please wait {remaining}s'
   error_missing_permission = 'You do not have the permissions to use this command.'
   error_missing_role = 'You do not have {role} role to use this command'
   error_missing_argument = 'Missing {argument} argument of command\n{signature}'
-  error_bad_argument = f'Some arguments of command missing or wrong, use {config.base.command_prefixes[0]}help to get more info'
+  error_bad_argument = f'Some arguments of command missing or wrong, use /help to get more info'
   error_max_concurrency_reached = "Bot is busy, try it later"
   error_no_private_message = "This command can't be used in private channel"
   error_interaction_timeout = "Interaction took more than 3 seconds to be responded to. Try again later."
