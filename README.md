@@ -39,8 +39,9 @@ Utils is place for any other extensions, helper functions, etc.
 And many other smaller things
 
 ## Deployment
-Without any container
+Without any container (python version >= 3.8)
 ```
+pip install -r requirements.txt
 python sentdebot.py
 ```
 
