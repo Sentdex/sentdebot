@@ -7,7 +7,9 @@ discord_api_key = "<env>"
 command_prefixes = ["!"]
 status_message = "Sentdebot V2"
 
-database_connect_string = "<env>"
+# Connection string to database with specified engine
+# This address is for usage with docker deployment
+database_connect_string = "postgresql://postgres:postgres@db:5432/postgres" # Example for testing: sqlite://database.db
 
 # If true warning and error logs will also be logged in file discord.log
 log_to_file = false
