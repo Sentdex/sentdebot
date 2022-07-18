@@ -3,7 +3,7 @@
 import math
 import disnake
 from disnake.ext import commands
-from typing import Union, Iterable
+from typing import Union, Iterable, List, Tuple
 import os
 from datetime import datetime, timezone
 
@@ -117,3 +117,14 @@ def add_author_footer(embed: disnake.Embed, author: Union[disnake.User, disnake.
     embed.set_footer(icon_url=author.display_avatar.url, text=str(author))
 
   return embed
+
+def add_string_until_length(strings:List[str], max_length:int, sep:str) -> Tuple[str, List[str]]:
+  output = ""
+  number_of_strings = len(strings)
+  for _ in range(number_of_strings):
+    string = strings.pop(0)
+    tmp_output = (output + string) if output == "" else (output + sep + string)
+    if len(tmp_output) > max_length:
+      break
+    output = tmp_output
+  return output, strings

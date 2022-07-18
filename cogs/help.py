@@ -1,16 +1,16 @@
 # Custom help cog
 
 import math
-import disnake as discord
+import disnake
 from disnake.ext import commands
 
-from config import config
+from config import config, cooldowns
 from static_data.strings import Strings
 from util import general_util
 from features.paginator import EmbedView
 from features.base_cog import Base_Cog
 from util.logger import setup_custom_logger
-from typing import Union, List
+from typing import Union, List, Optional
 
 logger = setup_custom_logger(__name__)
 
@@ -28,6 +28,8 @@ def command_check(com, ctx):
 
   return True
 
+def get_all_commands(bot: commands.Bot, ctx):
+  return [com for cog in bot.cogs.values() for com in cog.walk_commands() if isinstance(com, commands.Command) and not com.hidden and command_check(com, ctx)]
 
 def add_command_help(embed, com):
   help_string = f"**Help**: " + com.help if com.help is not None else ""
@@ -43,7 +45,7 @@ def add_command_help(embed, com):
     embed.add_field(name=f"{config.base.command_prefixes[0]}{general_util.get_command_signature(com)}", value=output, inline=False)
 
 
-def generate_help_for_cog(cog: Base_Cog, ctx: commands.Context) -> Union[None, List[discord.Embed]]:
+def generate_help_for_cog(cog: Base_Cog, ctx) -> Union[None, List[disnake.Embed]]:
   if cog.hidden and not general_util.is_administrator(ctx): return None
 
   coms = [com for com in cog.walk_commands() if isinstance(com, commands.Command) and not com.hidden and command_check(com, ctx)]
@@ -56,7 +58,7 @@ def generate_help_for_cog(cog: Base_Cog, ctx: commands.Context) -> Union[None, L
     batches = [coms[i * 10: i * 10 + 10] for i in range(number_of_batches)]
 
     for idx, batch in enumerate(batches):
-      emb = discord.Embed(title=f'{str(cog.qualified_name).replace("_", " ")} {idx + 1} Help', colour=discord.Color.green())
+      emb = disnake.Embed(title=f'{str(cog.qualified_name).replace("_", " ")} {idx + 1} Help', colour=disnake.Color.green())
       general_util.add_author_footer(emb, ctx.author)
 
       for com in batch:
@@ -67,7 +69,7 @@ def generate_help_for_cog(cog: Base_Cog, ctx: commands.Context) -> Union[None, L
       else:
         pages.append(emb)
   else:
-    emb = discord.Embed(title=f'{str(cog.qualified_name)} Help', colour=discord.Color.green())
+    emb = disnake.Embed(title=f'{str(cog.qualified_name)} Help', colour=disnake.Color.green())
     general_util.add_author_footer(emb, ctx.author)
 
     for com in coms:
@@ -85,30 +87,54 @@ class Help(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(Help, self).__init__(bot, __file__)
 
-  @commands.command(brief=Strings.help_brief, help=Strings.help_help)
-  @commands.cooldown(3, 20, commands.BucketType.user)
-  async def help(self, ctx: commands.Context, *, module_name: str = None):
-    await general_util.delete_message(self.bot, ctx)
-
+  @commands.slash_command(name="help", description=Strings.help_description)
+  @cooldowns.short_cooldown
+  async def help(self, inter: disnake.CommandInteraction, name: Optional[str]=commands.Param(default=None, description="Name of command or extension you want to search help for")):
     pages = []
+    if name is not None:
+      all_commands = get_all_commands(self.bot, inter)
+      command = disnake.utils.get(all_commands, name=name)
+      if command is not None:
+        emb = disnake.Embed(title="Help", colour=disnake.Color.green())
+        general_util.add_author_footer(emb, inter.author)
+        add_command_help(emb, command)
+        return await inter.send(embed=emb, ephemeral=True)
 
     for cog in self.bot.cogs.values():
-      if module_name is not None:
-        if module_name.lower() != cog.qualified_name.lower() and \
-            module_name.lower() != cog.file.lower() and \
-            module_name.lower() != cog.file.lower().replace("_", " "):
+      if name is not None:
+        if name.lower() != cog.qualified_name.lower() and \
+            name.lower() != cog.file.lower() and \
+            name.lower() != cog.file.lower().replace("_", " "):
           continue
 
-      cog_pages = generate_help_for_cog(cog, ctx)
+      cog_pages = generate_help_for_cog(cog, inter)
       if cog_pages is not None:
         pages.extend(cog_pages)
 
     if pages:
-      await EmbedView(ctx.author, embeds=pages, perma_lock=True).run(ctx)
+      await EmbedView(inter.author, embeds=pages, perma_lock=True).run(inter)
     else:
-      emb = discord.Embed(title="Help", description="*No help available*", colour=discord.Color.green())
-      await ctx.send(embed=emb, delete_after=120)
+      emb = disnake.Embed(title="Help", description="*No help available*", colour=disnake.Color.orange())
+      await inter.send(embed=emb, ephemeral=True)
 
+  @commands.slash_command(name="command_list", description=Strings.help_commands_list_description)
+  @cooldowns.short_cooldown
+  async def command_list(self, inter: disnake.CommandInteraction):
+    all_commands = get_all_commands(self.bot, inter)
+    command_strings = [f"{config.base.command_prefixes[0]}{general_util.get_command_signature(com)}" for com in all_commands]
+
+    pages = []
+    while command_strings:
+      output, command_strings = general_util.add_string_until_length(command_strings, 4000, "\n")
+      embed = disnake.Embed(title="Commands list", description=output, colour=disnake.Color.dark_blue())
+      general_util.add_author_footer(embed, inter.author)
+      pages.append(embed)
+
+    if pages:
+      await EmbedView(inter.author, embeds=pages, perma_lock=True).run(inter)
+    else:
+      emb = disnake.Embed(title="Commands list", description="*No commands available*", colour=disnake.Color.orange())
+      await inter.send(embed=emb, ephemeral=True)
 
 def setup(bot):
   bot.add_cog(Help(bot))

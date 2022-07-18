@@ -37,8 +37,9 @@ class Strings(metaclass=formattable):
   system_logout_brief = "Turn off bot"
 
   # Help
-  help_brief = "Show all commands and help for them"
-  help_help = "Also you can specify module to show help only for specific module\nSome commands are not in message form but in slash command form so try to type '/' to chat to see more of them"
+  help_description = "Show all message commands and help for them"
+
+  help_commands_list_description = "Show list of all available message commands"
 
   # Errors
   error_unknown_command = f'Unknown command - use {config.base.command_prefixes[0]}help for all commands'
