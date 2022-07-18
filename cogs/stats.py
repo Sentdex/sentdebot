@@ -99,7 +99,7 @@ class Stats(Base_Cog):
       messages_repo.session.commit()
 
   @commands.command(brief=Strings.stats_user_activity_brief)
-  @cooldowns.long_cooldown
+  @cooldowns.huge_cooldown_guild
   async def user_activity(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
 
@@ -164,7 +164,7 @@ class Stats(Base_Cog):
     await ctx.send(embed=embed)
 
   @commands.command(brief=Strings.stats_community_report_brief)
-  @cooldowns.long_cooldown
+  @cooldowns.huge_cooldown_guild
   async def community_report(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
 

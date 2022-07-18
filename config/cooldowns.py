@@ -15,3 +15,7 @@ def long_cooldown(f):
 # 1x/5min
 def huge_cooldown(f):
     return commands.cooldown(rate=1, per=300.0, type=commands.BucketType.user)(f)
+
+# 2x/5min
+def huge_cooldown_guild(f):
+    return commands.cooldown(rate=2, per=300.0, type=commands.BucketType.guild)(f)
