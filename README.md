@@ -51,6 +51,7 @@ docker-compose up --build
 
 # After code modification rebuild using
 docker-compose down
+docker volume rm sentdebot_code_data
 docker-compose up --build
 
 ## Special cleanup cases ##
