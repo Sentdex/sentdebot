@@ -17,7 +17,7 @@ class Errors(Base_Cog):
     super(Errors, self).__init__(bot, __file__)
 
   @commands.Cog.listener()
-  async def on_message_command_error(self, ctx: commands.Context, error):
+  async def on_command_error(self, ctx, error):
     await self.command_error_handling(ctx, error)
 
   @commands.Cog.listener()
@@ -26,25 +26,18 @@ class Errors(Base_Cog):
 
   async def command_error_handling(self, ctx, error):
     if isinstance(error, commands.CommandNotFound):
-      await general_util.delete_message(self.bot, ctx)
       await general_util.generate_error_message(ctx, Strings.error_unknown_command)
     elif isinstance(error, commands.CommandOnCooldown):
-      await general_util.delete_message(self.bot, ctx)
       await general_util.generate_error_message(ctx, Strings.error_command_on_cooldown(remaining=round(error.retry_after, 2)))
     elif isinstance(error, commands.MissingPermissions):
-      await general_util.delete_message(self.bot, ctx)
       await general_util.generate_error_message(ctx, Strings.error_missing_permission)
     elif isinstance(error, commands.MissingRole):
-      await general_util.delete_message(self.bot, ctx)
       await general_util.generate_error_message(ctx, Strings.error_missing_role(role=error.missing_role))
     elif isinstance(error, commands.MissingRequiredArgument):
-      await general_util.delete_message(self.bot, ctx)
       await general_util.generate_error_message(ctx, Strings.error_missing_argument(argument=error.param, signature=general_util.get_command_signature(ctx)))
     elif isinstance(error, commands.BadArgument):
-      await general_util.delete_message(self.bot, ctx)
       await general_util.generate_error_message(ctx, Strings.error_bad_argument)
     elif isinstance(error, commands.MaxConcurrencyReached):
-      await general_util.delete_message(self.bot, ctx)
       await general_util.generate_error_message(ctx, Strings.error_max_concurrency_reached)
     elif isinstance(error, commands.NoPrivateMessage):
       await general_util.generate_error_message(ctx, Strings.error_no_private_message)
