@@ -90,7 +90,9 @@ class Help(Base_Cog):
   @commands.command(name="help", brief=Strings.help_dummy_help_brief)
   async def dummy_help(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
-    await ctx.send(embed=disnake.Embed(title="Help", description=Strings.help_dummy_help_text, colour=disnake.Color.dark_blue()))
+    embed = disnake.Embed(title="Help", description=Strings.help_dummy_help_text, colour=disnake.Color.dark_blue())
+    general_util.add_author_footer(embed, ctx.author)
+    await ctx.send(embed=embed)
 
   @commands.slash_command(name="help", description=Strings.help_description)
   @cooldowns.short_cooldown
