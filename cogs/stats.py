@@ -10,7 +10,13 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import matplotlib.dates as mdates
 from matplotlib import style
+from matplotlib.font_manager import FontProperties
 import io
+
+style.use("dark_background")
+font_prop = FontProperties()
+font_prop.set_file("static_data/STIXTwoText-Bold.ttf")
+plt.rcParams["font.family"] = font_prop.get_family()
 
 style.use("dark_background")
 
