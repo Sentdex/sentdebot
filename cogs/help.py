@@ -87,10 +87,10 @@ class Help(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(Help, self).__init__(bot, __file__)
 
-  @commands.command(brief=Strings.help_dummy_help_brief)
+  @commands.command(name="help", brief=Strings.help_dummy_help_brief)
   async def dummy_help(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
-    await ctx.send(embed=disnake.Embed(title="Help", description=Strings.help_dummy_help_text))
+    await ctx.send(embed=disnake.Embed(title="Help", description=Strings.help_dummy_help_text, colour=disnake.Color.dark_blue()))
 
   @commands.slash_command(name="help", description=Strings.help_description)
   @cooldowns.short_cooldown
