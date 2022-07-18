@@ -136,5 +136,8 @@ class EmbedView(disnake.ui.View):
       pass
 
   def __del__(self):
-    loop = asyncio.get_running_loop()
-    asyncio.ensure_future(self.on_timeout(), loop=loop)
+    try:
+      loop = asyncio.get_running_loop()
+      asyncio.ensure_future(self.on_timeout(), loop=loop)
+    except:
+      pass

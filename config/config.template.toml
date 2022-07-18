@@ -9,7 +9,7 @@ status_message = "Sentdebot V2"
 
 # Connection string to database with specified engine
 # This address is for usage with docker deployment
-database_connect_string = "<env>" # Example for testing: "sqlite://database.db" For docker workflow "postgresql://postgres:postgres@db:5432/postgres"
+database_connect_string = "<env>" # Example for testing: "sqlite://database.db" For docker workflow: "postgresql://postgres:postgres@db:5432/postgres"
 
 # If true warning and error logs will also be logged in file discord.log
 log_to_file = false

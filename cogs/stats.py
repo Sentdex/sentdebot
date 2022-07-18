@@ -172,25 +172,34 @@ class Stats(Base_Cog):
       return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
 
     message_history = messages_repo.get_message_metrics(config.stats.days_back)
-    message_dataframe = pd.DataFrame.from_records(message_history, columns=["message_id", "timestamp", "author_id", "channel_id"])
-    message_dataframe['count'] = 1
-    message_dataframe["date"] = pd.to_datetime(message_dataframe["timestamp"], unit="s")
-    message_dataframe.set_index("date", inplace=True)
-    message_dataframe.drop("timestamp", axis=1, inplace=True)
-
-    message_volume = message_dataframe["count"].resample("60min").sum()
+    message_df = pd.DataFrame.from_records(
+      message_history,
+      columns=["message_id", "timestamp", "author_id", "channel_id"]
+    )
+    volume_df = (
+      message_df
+      .assign(date=lambda df: pd.to_datetime(df.timestamp, unit='s').dt.floor('H'))
+      .groupby('date')
+      .size()
+    )
 
     users_metrics = user_metrics_repo.get_user_metrics(config.stats.days_back)
-    users_metrics_dataframe = pd.DataFrame.from_records(users_metrics, columns=["timestamp", "online", "idle", "offline"])
-    users_metrics_dataframe['date'] = pd.to_datetime(users_metrics_dataframe['timestamp'], unit='s')
-    users_metrics_dataframe.set_index("date", inplace=True)
-    users_metrics_dataframe.drop("timestamp", axis=1, inplace=True)
-    users_metrics_dataframe['total'] = users_metrics_dataframe['online'] + users_metrics_dataframe['offline'] + users_metrics_dataframe['idle']
-
-    users_metrics_dataframe = users_metrics_dataframe.resample("60min").mean()
-    users_metrics_dataframe = users_metrics_dataframe.join(message_volume)
-
-    users_metrics_dataframe.dropna(inplace=True)
+    users_metrics_df = pd.DataFrame.from_records(
+      users_metrics,
+      columns=["timestamp", "online", "idle", "offline"]
+    )
+    users_metrics_df = (
+      users_metrics_df
+      .assign(date=lambda df: pd.to_datetime(df.timestamp, unit='s').dt.floor('H'),
+              total=lambda df: df.online + df.offline + df.idle)
+      .drop(columns='timestamp')
+      .groupby('date')
+      .mean()
+    )
+    users_metrics_dataframe = pd.concat(
+      [users_metrics_df, volume_df.rename('count')],
+      axis=1
+    ).fillna(0)
 
     fig = plt.figure(facecolor=DISCORD_BG_COLOR)
     ax1 = plt.subplot2grid((2, 1), (0, 0))
