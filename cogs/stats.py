@@ -20,6 +20,7 @@ from config import config
 from features.base_cog import Base_Cog
 from database import user_metrics_repo, messages_repo, help_threads_repo
 from static_data.strings import Strings
+from io import BytesIO
 
 DISCORD_BG_COLOR = '#36393E'
 
@@ -97,6 +98,28 @@ class Stats(Base_Cog):
     if message_item is not None:
       message_item.content = after.content
       messages_repo.session.commit()
+
+  @commands.command()
+  @commands.check(general_util.is_administrator)
+  @commands.guild_only()
+  async def dump_data(self, ctx: commands.Context):
+    message_history = messages_repo.get_message_metrics(config.stats.days_back)
+    message_dataframe = pd.DataFrame.from_records(message_history, columns=["message_id", "timestamp", "author_id", "channel_id"])
+
+    users_metrics = user_metrics_repo.get_user_metrics(config.stats.days_back)
+    users_metrics_dataframe = pd.DataFrame.from_records(users_metrics, columns=["timestamp", "online", "idle", "offline"])
+
+    message_dataframe_buffer = BytesIO()
+    message_dataframe.to_csv(message_dataframe_buffer)
+    message_dataframe_buffer.seek(0)
+    await ctx.send(file=disnake.File(message_dataframe_buffer, filename="message_metrics.csv"))
+    del message_dataframe_buffer
+
+    users_metrics_dataframe_buffer = BytesIO()
+    users_metrics_dataframe.to_csv(users_metrics_dataframe_buffer)
+    users_metrics_dataframe_buffer.seek(0)
+    await ctx.send(file=disnake.File(users_metrics_dataframe_buffer, filename="user_metrics.csv"))
+    del users_metrics_dataframe_buffer
 
   @commands.command(brief=Strings.stats_user_activity_brief)
   @cooldowns.long_cooldown
