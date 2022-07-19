@@ -2,10 +2,11 @@ from typing import Optional, List
 import datetime
 import cachetools
 
+from config import config
 from database import session
 from database.tables.help_threads import HelpThread
 
-thread_cache = cachetools.LRUCache(100)
+thread_cache = cachetools.LRUCache(config.db.max_number_of_cached_help_requests)
 
 def get_thread(thread_id: int) -> Optional[HelpThread]:
   cached_item = thread_cache.get(thread_id)

@@ -1,8 +1,9 @@
 # Collect and show stats of main guild
 
+import datetime
 import disnake
 from disnake.ext import commands, tasks
-from typing import Optional, List
+from typing import Optional, List, Tuple
 import pandas as pd
 import numpy as np
 from collections import Counter
@@ -26,6 +27,9 @@ from config import config
 from features.base_cog import Base_Cog
 from database import user_metrics_repo, messages_repo, help_threads_repo
 from static_data.strings import Strings
+from util.logger import setup_custom_logger
+
+logger = setup_custom_logger(__name__)
 
 DISCORD_BG_COLOR = '#36393E'
 
@@ -43,6 +47,9 @@ class Stats(Base_Cog):
     self.main_guild: Optional[disnake.Guild] = None
     if self.bot.is_ready():
       self.late_init()
+
+    self.user_activity_image: Optional[Tuple[io.BytesIO, datetime.datetime]] = None
+    self.community_report_image: Optional[Tuple[io.BytesIO, datetime.datetime]] = None
 
   def late_init(self):
     self.main_guild = self.bot.get_guild(config.ids.main_guild)
@@ -107,12 +114,23 @@ class Stats(Base_Cog):
       messages_repo.session.commit()
 
   @commands.command(brief=Strings.stats_user_activity_brief)
-  @cooldowns.huge_cooldown_guild
+  @cooldowns.default_cooldown
   async def user_activity(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
 
     if self.main_guild is None:
       return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
+
+    if self.user_activity_image is not None and datetime.datetime.utcnow() - self.user_activity_image[1] < datetime.timedelta(minutes=config.stats.max_graph_minutes_age_for_regenerate):
+      logger.info("Taking user activity from cache")
+
+      self.user_activity_image[0].seek(0)
+      embed = disnake.Embed(title="User activity", color=disnake.Color.dark_blue())
+      general_util.add_author_footer(embed, ctx.author)
+      embed.set_image(file=disnake.File(self.user_activity_image[0], "user_activity.png"))
+      return await ctx.send(embed=embed)
+
+    logger.info("Generating new user activity")
 
     message_history = messages_repo.get_message_metrics(config.stats.days_back)
     dataframe = pd.DataFrame.from_records(message_history, columns=["message_id", "timestamp", "author_id", "channel_id"])
@@ -166,18 +184,33 @@ class Stats(Base_Cog):
     buf.seek(0)
     plt.clf()
 
+    self.user_activity_image = (buf, datetime.datetime.utcnow())
+
     embed = disnake.Embed(title="User activity", color=disnake.Color.dark_blue())
     general_util.add_author_footer(embed, ctx.author)
     embed.set_image(file=disnake.File(buf, "user_activity.png"))
     await ctx.send(embed=embed)
 
   @commands.command(brief=Strings.stats_community_report_brief)
-  @cooldowns.huge_cooldown_guild
+  @cooldowns.default_cooldown
   async def community_report(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
 
     if self.main_guild is None:
       return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
+
+    if self.community_report_image is not None and datetime.datetime.utcnow() - self.community_report_image[1] < datetime.timedelta(minutes=config.stats.max_graph_minutes_age_for_regenerate):
+      logger.info("Taking community report from cache")
+
+      self.community_report_image[0].seek(0)
+
+      online, idle, offline = self.get_user_stats()
+      embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
+      general_util.add_author_footer(embed, ctx.author)
+      embed.set_image(file=disnake.File(self.community_report_image[0], "community_report.png"))
+      return await ctx.send(embed=embed)
+
+    logger.info("Generating new community report")
 
     message_history = messages_repo.get_message_metrics(config.stats.days_back)
     message_df = pd.DataFrame.from_records(
@@ -245,6 +278,8 @@ class Stats(Base_Cog):
     plt.savefig(buf, facecolor=fig.get_facecolor(), format='png')
     buf.seek(0)
     plt.clf()
+
+    self.community_report_image = (buf, datetime.datetime.utcnow())
 
     online, idle, offline = self.get_user_stats()
     embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())

@@ -7,16 +7,20 @@ discord_api_key = "<env>"
 command_prefixes = ["!"]
 status_message = "Sentdebot V2"
 
-# Connection string to database with specified engine
-# This address is for usage with docker deployment
-database_connect_string = "postgresql://postgres:postgres@db:5432/postgres" # Example for testing: "sqlite://database.db" For docker workflow: "postgresql://postgres:postgres@db:5432/postgres"
-
 # If true warning and error logs will also be logged in file discord.log
 log_to_file = false
 
 # Duration of error and success messages
 error_duration = 30
 success_duration = 30
+
+
+[db]
+# Connection string to database with specified engine
+# This address is for usage with docker deployment
+connect_string = "postgresql://postgres:postgres@db:5432/postgres" # Example for testing: "sqlite://database.db" For docker workflow: "postgresql://postgres:postgres@db:5432/postgres"
+
+max_number_of_cached_help_requests = 500
 
 
 [ids]
@@ -29,20 +33,24 @@ mod_role = []
 # Channle id to which error messages will be send
 log_channel = 838455904571621427
 
+
 [cogs]
 # Cogs that will be loaded on startup and unable to be unloaded
 protected = ["system", "errors", "help", "listeners"]
 # Cogs automatically loaded after start
 defaul_loaded = ["common", "code_execute", "projects", "random_role_giver", "stats", "help_threader", "bookmarks"]
 
+
 [random_role_giver]
 # Ids of roles that will be randomly given to users
 role_ids = [988796853757812786, 988796949467627520, 988796952319758356, 988796951300571146]
 chance = 0.2 # Chance on message to receive role in percents
 
+
 [stats]
 days_back = 21
 name_length_limit = 18
+
 
 [essentials]
 max_cached_messages = 5000
