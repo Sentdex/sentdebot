@@ -19,11 +19,11 @@ class Projects(Base_Cog):
   @projects.sub_command(name="add", description=Strings.projects_add_project_brief)
   @commands.check(general_util.is_mod)
   async def add_project(self, inter: disnake.CommandInteraction):
-    await inter.response.send_modal(modal=disnake.ui.Modal(title="Add project", custom_id="add_project_modal",
+    await inter.response.send_modal(modal=disnake.ui.Modal(title="Add project", custom_id="add_project",
                                                            components=
                                                            [
-                                                             disnake.ui.TextInput(label="Name", custom_id="name", max_length=128, min_length=1),
-                                                             disnake.ui.TextInput(label="Description", custom_id="description", max_length=4000, min_length=1, style=disnake.TextInputStyle.multi_line)
+                                                             disnake.ui.TextInput(label="Name", custom_id="add_project:name", max_length=128, required=True),
+                                                             disnake.ui.TextInput(label="Description", custom_id="add_project:description", max_length=4000, required=True, style=disnake.TextInputStyle.multi_line)
                                                            ]))
 
   @staticmethod
@@ -55,12 +55,12 @@ class Projects(Base_Cog):
 
   @commands.Cog.listener()
   async def on_modal_submit(self, inter: disnake.ModalInteraction):
-    if inter.custom_id == "add_project_modal":
-      project = projects_repo.add_project(project_name=inter.text_values["name"], project_description=inter.text_values["description"])
+    if inter.custom_id == "add_project":
+      project = projects_repo.add_project(project_name=inter.text_values["add_project:name"], project_description=inter.text_values["add_project:description"])
       if project is None:
-        await general_util.generate_error_message(inter, Strings.projects_add_project_failed(name=inter.text_values["name"]))
+        await general_util.generate_error_message(inter, Strings.projects_add_project_failed(name=inter.text_values["add_project:name"]))
       else:
-        await general_util.generate_success_message(inter, Strings.projects_add_project_added(name=inter.text_values["name"]))
+        await general_util.generate_success_message(inter, Strings.projects_add_project_added(name=inter.text_values["add_project:name"]))
 
 def setup(bot):
   bot.add_cog(Projects(bot))

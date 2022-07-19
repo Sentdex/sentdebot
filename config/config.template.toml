@@ -31,9 +31,9 @@ log_channel = 838455904571621427
 
 [cogs]
 # Cogs that will be loaded on startup and unable to be unloaded
-protected = ["system", "errors", "help"]
+protected = ["system", "errors", "help", "reactions"]
 # Cogs automatically loaded after start
-defaul_loaded = ["common", "code_execute", "projects", "random_role_giver", "stats", "help_threader"]
+defaul_loaded = ["common", "code_execute", "projects", "random_role_giver", "stats", "help_threader", "bookmarks"]
 
 [random_role_giver]
 # Ids of roles that will be randomly given to users

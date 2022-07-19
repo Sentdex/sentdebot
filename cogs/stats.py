@@ -88,9 +88,9 @@ class Stats(Base_Cog):
   @commands.Cog.listener()
   async def on_message(self, message: disnake.Message):
     if self.main_guild is None: return
+    if message.guild is None: return
     if self.main_guild.id != message.guild.id: return
     if message.author.bot: return
-    if message.guild is None: return
 
     thread_exist = help_threads_repo.thread_exists(message.channel.id)
     channel_id = config.ids.help_channel if thread_exist else message.channel.id

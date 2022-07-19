@@ -118,7 +118,7 @@ class HelpThreader(Base_Cog):
 
 
   async def create_new_help_thread(self, interaction: disnake.ModalInteraction, data:dict):
-    title, tags, description = data["title"], data["tags"] if data["tags"] != "" else None, data["description"]
+    title, tags, description = data["help_request:title"], data["help_request:tags"] if data["help_request:tags"] != "" else None, data["help_request:description"]
     help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.ids.help_channel)
 
     if help_channel is None:
