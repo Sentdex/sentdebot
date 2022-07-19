@@ -38,7 +38,7 @@ def create_thread(thread_id: int, owner_id: int, tags: Optional[str]=None) -> He
   return item
 
 def get_all() -> List[HelpThread]:
-  return session.query(HelpThread).all()
+  return session.query(HelpThread).order_by(HelpThread.last_activity_time.desc()).all()
 
 def delete_thread(thread_id: int):
   session.query(HelpThread).filter(HelpThread.thread_id == str(thread_id)).delete()

@@ -6,6 +6,7 @@ import disnake
 from disnake.ext import commands, tasks
 import math
 from typing import Optional
+import humanize
 
 from features.base_cog import Base_Cog
 from config import config, cooldowns
@@ -196,6 +197,7 @@ class HelpThreader(Base_Cog):
 
     if not unanswered_threads:
       embed = disnake.Embed(title="Help needed", description=Strings.help_threader_list_requests_no_help_required, color=disnake.Color.dark_green())
+      general_util.add_author_footer(embed, inter.author)
       return await inter.send(embed=embed, ephemeral=True)
 
     num_of_unanswered_threads = len(unanswered_threads)
@@ -205,8 +207,11 @@ class HelpThreader(Base_Cog):
     pages = []
     for batch in batches:
       embed = disnake.Embed(title="Help needed", color=disnake.Color.dark_green())
+      general_util.add_author_footer(embed, inter.author)
       for thread, tags, message, owner, last_activity in batch:
-        embed.add_field(name=f"{thread.name}", value=f"Owner: {owner.name}\nTags: {tags}\Last activity at: {last_activity.strftime('%d.%m.%Y %H:%M:%S')} UTC\n[Link]({thread.jump_url})", inline=False)
+        tags = "".join([f"[{tag.strip()}]" for tag in tags.split(";") if tag != ""]) if tags is not None else None
+
+        embed.add_field(name=f"{thread.name}", value=f"Owner: {owner.name}\nTags: {tags}\nLast activity: {humanize.naturaltime(last_activity)}\n[Link]({thread.jump_url})", inline=False)
       pages.append(embed)
 
     await EmbedView(inter.author, pages).run(inter)
