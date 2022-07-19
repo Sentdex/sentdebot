@@ -35,13 +35,16 @@ class ReactionContext:
         if author.bot:
             return None
 
-        try:
-            message: disnake.Message = await channel.fetch_message(payload.message_id)
+        message = bot.get_message(payload.message_id)
 
-            if message is None:
+        if message is None:
+            try:
+                message = await channel.fetch_message(payload.message_id)
+
+                if message is None:
+                    return None
+            except disnake.errors.NotFound:
                 return None
-        except disnake.errors.NotFound:
-            return None
 
         reply_to = None
         if message.reference is not None and message.reference.message_id is not None:
