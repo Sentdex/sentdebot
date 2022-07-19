@@ -26,15 +26,35 @@ Static data folder is used to data that are not change in runtime, and it's desi
 Utils is place for any other extensions, helper functions, etc.
 
 ## Features
-1. Buildin robust error handling with option to log to file and log discord channel (in cases that are forgotten to handle or caused by bad manipulation of user)
+1. Buildin robust error handling with option to log to file and log discord channel (in cases that are forgotten to handle or caused by bad manipulation of user) \
+![1](media/error_sample1.jpg?raw=true)
 2. Managing system for loading, unloading and reloading extensions on the fly
-3. Guild statistics collector and displayer
+3. Guild statistics collector and displayer \
+![2](media/community_report.jpg?raw=true)
 4. Parametric random role giver
-5. Custom help command with automatically generated help for individual message commands
-6. System for managing help requests in help channel using threads and ticket system
-7. Extension for storing project and information about them
-8. Simple code evaluator for almost any language
-9. Bookmark feature so you don't lose some important messages
+5. Custom help command with automatically generated help for individual message commands \
+Help embed is send with button to list through help pages that outly author can control \
+![3](media/help.jpg?raw=true)
+6. System for managing help requests in help channel using threads and ticket system \
+Help channel is locked by default to not allow users to write here directly, instead help requests are created using command that will bring this help request form. \
+![7](media/help_req_create_form.jpg?raw=true) \
+Help request is then created in help channel as thread by the bot and author is invited to that thread, this request is added to database too to track time of last activity. \
+![8](media/help_req_created.jpg?raw=true) \
+If then problem is solved user or mod can call `/help_request solve` in this thread to mark it as solved and lock it from future messages. \
+![9](media/help_req_solved.jpg?raw=true)
+7. Extension for storing project and information about them \
+Mods can add projects using this form (ofcourse there is command to remove them too). \
+![4](media/project_add_form.jpg?raw=true) \
+User then can find project using command `/projects get <name>` and bot will show you all current projects as reference. \
+![5](media/project_get_info.jpg?raw=true) \
+And bot will then send information about the project in this form \
+![6](media/project_get_info_result.jpg?raw=true)
+8. Simple code evaluator for almost any language \
+![10](media/code_evaluation.jpg?raw=true)
+9. Bookmark feature, so you don't lose some important messages \
+User can create bookmark of any message reacting to it by `🔖` or using rightclick on message -> Apps -> Bookmark \
+Bot will then send to users bookmark like this \
+![11](media/bookmark.jpg?raw=true)
 10. Robust database using SQLAlchemy ORM
 11. Centralized handling of added reaction because there is needed some more processing for non cached messages
 
