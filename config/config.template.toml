@@ -50,6 +50,8 @@ chance = 0.2 # Chance on message to receive role in percents
 [stats]
 days_back = 21
 name_length_limit = 18
+max_graph_minutes_age_for_regenerate = 20
+graph_bg_color_code = "#2F3136"
 
 
 [essentials]

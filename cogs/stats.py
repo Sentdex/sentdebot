@@ -31,8 +31,6 @@ from util.logger import setup_custom_logger
 
 logger = setup_custom_logger(__name__)
 
-DISCORD_BG_COLOR = '#36393E'
-
 def df_match(c1, c2):
   if c1 == c2:
     return np.nan
@@ -98,6 +96,7 @@ class Stats(Base_Cog):
     if message.guild is None: return
     if self.main_guild.id != message.guild.id: return
     if message.author.bot: return
+    if message.content == "" or message.content[0] in config.base.command_prefixes: return
 
     thread_exist = help_threads_repo.thread_exists(message.channel.id)
     channel_id = config.ids.help_channel if thread_exist else message.channel.id
@@ -141,12 +140,12 @@ class Stats(Base_Cog):
     user_id_counts_overall = Counter(dataframe[dataframe["channel_id"].isin(self.all_channels)]["author_id"].values).most_common(10)
     uids_in_help = Counter(dataframe[dataframe["channel_id"].isin([config.ids.help_channel])]["author_id"].values).most_common(10)
 
-    fig = plt.figure(facecolor=DISCORD_BG_COLOR)
+    fig = plt.figure(facecolor=config.stats.graph_bg_color_code)
     ax1 = plt.subplot2grid((2, 1), (0, 0))
 
     plt.xlabel("Message Volume")
     plt.title(f"General User Activity (past {config.stats.days_back} days)")
-    ax1.set_facecolor(DISCORD_BG_COLOR)
+    ax1.set_facecolor(config.stats.graph_bg_color_code)
 
     users = []
     msgs = []
@@ -163,7 +162,7 @@ class Stats(Base_Cog):
     ax2 = plt.subplot2grid((2, 1), (1, 0))
     plt.title(f"Help Channel Activity (past {config.stats.days_back} days)")
     plt.xlabel("Help Channel\nMsg Volume")
-    ax2.set_facecolor(DISCORD_BG_COLOR)
+    ax2.set_facecolor(config.stats.graph_bg_color_code)
 
     users = []
     msgs = []
@@ -242,17 +241,17 @@ class Stats(Base_Cog):
       axis=1
     ).fillna(0)
 
-    fig = plt.figure(facecolor=DISCORD_BG_COLOR)
+    fig = plt.figure(facecolor=config.stats.graph_bg_color_code)
     ax1 = plt.subplot2grid((2, 1), (0, 0))
     plt.ylabel("Active Users")
     plt.title("Community Report")
-    ax1.set_facecolor(DISCORD_BG_COLOR)
+    ax1.set_facecolor(config.stats.graph_bg_color_code)
     ax1v = ax1.twinx()
     plt.ylabel("Message Volume")
 
     ax2 = plt.subplot2grid((2, 1), (1, 0))
     plt.ylabel("Total Users")
-    ax2.set_facecolor(DISCORD_BG_COLOR)
+    ax2.set_facecolor(config.stats.graph_bg_color_code)
 
     ax1.plot(users_metrics_dataframe.index, users_metrics_dataframe.online, label="Active Users\n(Not Idle)")
     # ax1v.bar(df.index, df["count"], width=0.01)
