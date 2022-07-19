@@ -92,8 +92,11 @@ class Stats(Base_Cog):
     if message.author.bot: return
     if message.guild is None: return
 
-    help_req = help_threads_repo.get_thread(message.channel.id)
-    channel_id = config.ids.help_channel if help_req is not None else message.channel.id
+    thread_exist = help_threads_repo.thread_exists(message.channel.id)
+    channel_id = config.ids.help_channel if thread_exist else message.channel.id
+    if thread_exist:
+      # Will get updated with the message data
+      help_threads_repo.update_thread_activity(message.channel.id, message.created_at, commit=False)
 
     messages_repo.add_message(message.id, channel_id, message.author.id, message.content, use_for_metrics=messages_repo.get_author_of_last_message_metric(channel_id) != message.author.id)
 

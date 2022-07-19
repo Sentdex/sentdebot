@@ -1,7 +1,9 @@
 # Manager for help threads
 
+import asyncio
+import datetime
 import disnake
-from disnake.ext import commands
+from disnake.ext import commands, tasks
 import math
 from typing import Optional
 
@@ -19,6 +21,100 @@ logger = setup_custom_logger(__name__)
 class HelpThreader(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(HelpThreader, self).__init__(bot, __file__)
+    if self.bot.is_ready():
+      self.close_unactive_threads_task.start()
+
+  def cog_unload(self) -> None:
+    if self.close_unactive_threads_task.is_running():
+      self.close_unactive_threads_task.cancel()
+
+  def __del__(self):
+    if self.close_unactive_threads_task.is_running():
+      self.close_unactive_threads_task.cancel()
+
+  @commands.Cog.listener()
+  async def on_ready(self):
+    if not self.close_unactive_threads_task.is_running():
+      self.close_unactive_threads_task.start()
+
+  @tasks.loop(hours=24)
+  async def close_unactive_threads_task(self):
+    logger.info("[Auto close task] Starting cleaning cycle")
+
+    unactive_help_requests = help_threads_repo.get_unactive(config.help_threader.close_request_after_days_of_inactivity)
+    help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.ids.help_channel)
+
+    if help_channel is None:
+      logger.warning("[Auto close task] Help channel not found, skipping cycle")
+      return
+
+    for help_req_item in unactive_help_requests:
+      message_id = int(help_req_item.thread_id)
+
+      try:
+        message = await help_channel.fetch_message(message_id)
+      except:
+        # Message that thread was connected to don't exist
+        logger.info(f"[Auto close task] Message {message_id} don't exist")
+        continue
+
+      thread = message.thread
+      if thread is None:
+        # Thread don't exist
+        logger.info(f"[Auto close task] Thread for message {message_id} don't exist")
+        continue
+
+      if thread.locked:
+        # Thread is already closed
+        logger.info(f"[Auto close task] Thread for message {message_id} is already closed")
+        continue
+
+      owner = message.guild.get_member(int(help_req_item.owner_id))
+      if owner is None:
+        # Owner of that thread is not on server anymore
+        logger.info(f"[Auto close task] Owner of thread {thread.id} is not on server anymore, locking it up")
+        try:
+          await thread.edit(locked=True)
+        except:
+          pass
+        continue
+
+      if thread.last_message_id is not None:
+        try:
+          last_message = await thread.fetch_message(thread.last_message_id)
+        except:
+          logger.info(f"[Auto close task] Last message of thread {thread.id} can't be retrieved so beliving data in database, locking it up")
+
+          try:
+            await thread.edit(locked=True)
+          except:
+            pass
+          continue
+
+        last_activity_before = datetime.datetime.utcnow() - last_message.created_at
+
+        if last_activity_before > datetime.timedelta(days=config.help_threader.close_request_after_days_of_inactivity):
+          logger.info(f"[Auto close task] Last message of thread {thread.id} is older than {config.help_threader.close_request_after_days_of_inactivity} days, locking it up")
+          try:
+            await thread.edit(locked=True)
+          except:
+            pass
+        else:
+          logger.info(f"[Auto close task] Last activity date for thread {thread.id} was outdated, updating it")
+
+          if last_message.created_at > help_req_item.last_activity_time:
+            help_req_item.last_activity_time = last_message.created_at
+
+      # Some delay to easy the strain on discord api
+      await asyncio.sleep(10)
+
+      # Commit potential updates of last activity
+    help_threads_repo.session.commit()
+
+    help_threads_repo.delete_unactive(config.help_threader.close_request_after_days_of_inactivity)
+
+    logger.info("[Auto close task] Cleaning cycle finished")
+
 
   async def create_new_help_thread(self, interaction: disnake.ModalInteraction, data:dict):
     title, tags, description = data["title"], data["tags"] if data["tags"] != "" else None, data["description"]
@@ -30,8 +126,7 @@ class HelpThreader(Base_Cog):
     try:
       completed_message = f"{description}" if tags is None else f"{tags}\n{description}"
       message = await help_channel.send(completed_message)
-      # Archive after 3 day
-      thread = await help_channel.create_thread(name=title, message=message, auto_archive_duration=4320, reason=f"Help request from {interaction.author}")
+      thread = await help_channel.create_thread(name=title, message=message, auto_archive_duration=1440, reason=f"Help request from {interaction.author}")
       await thread.add_user(interaction.author)
 
       help_threads_repo.create_thread(thread.id, interaction.author.id, tags)
@@ -79,8 +174,8 @@ class HelpThreader(Base_Cog):
         help_threads_repo.delete_thread(message_id)
         continue
 
-      if thread.locked or thread.archived:
-        # Thread is unactive or closed
+      if thread.locked:
+        # Thread is closed
         logger.info(f"Thread for message {message_id} is closed")
         help_threads_repo.delete_thread(message_id)
         continue
@@ -92,7 +187,12 @@ class HelpThreader(Base_Cog):
         help_threads_repo.delete_thread(message_id)
         continue
 
-      unanswered_threads.append((thread, record.tags, message, owner))
+      if thread.archived:
+        # Thread not active for extensive period of time but maybe still unsolved
+        logger.info(f"Thread for message {message_id} is archived but not closed, skipping")
+        continue
+
+      unanswered_threads.append((thread, record.tags, message, owner, record.last_activity_time))
 
     if not unanswered_threads:
       embed = disnake.Embed(title="Help needed", description=Strings.help_threader_list_requests_no_help_required, color=disnake.Color.dark_green())
@@ -105,8 +205,8 @@ class HelpThreader(Base_Cog):
     pages = []
     for batch in batches:
       embed = disnake.Embed(title="Help needed", color=disnake.Color.dark_green())
-      for thread, tags, message, owner in batch:
-        embed.add_field(name=f"{thread.name}", value=f"Owner: {owner.name}\nTags: {tags}\n[Link]({thread.jump_url})", inline=False)
+      for thread, tags, message, owner, last_activity in batch:
+        embed.add_field(name=f"{thread.name}", value=f"Owner: {owner.name}\nTags: {tags}\Last activity at: {last_activity.strftime('%d.%m.%Y %H:%M:%S')} UTC\n[Link]({thread.jump_url})", inline=False)
       pages.append(embed)
 
     await EmbedView(inter.author, pages).run(inter)
@@ -130,7 +230,8 @@ class HelpThreader(Base_Cog):
       help_channel: Optional[disnake.TextChannel] = self.bot.get_channel(config.ids.help_channel)
       message = await help_channel.fetch_message(thread_message_id)
       thread = message.thread
-      await thread.edit(archived=True)
+      if not thread.archived and not thread.locked:
+        await thread.edit(locked=True, reason="Help request solved")
     except:
       pass
 
