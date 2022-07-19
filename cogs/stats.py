@@ -100,8 +100,7 @@ class Stats(Base_Cog):
 
     messages_repo.add_message(message.id, channel_id, message.author.id, message.content, use_for_metrics=messages_repo.get_author_of_last_message_metric(channel_id) != message.author.id)
 
-  @commands.Cog.listener()
-  async def on_message_edit(self, _, after: disnake.Message):
+  async def handle_message_edited(self, _, after: disnake.Message):
     message_item = messages_repo.get_message(after.id)
     if message_item is not None:
       message_item.content = after.content

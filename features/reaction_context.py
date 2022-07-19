@@ -1,41 +1,38 @@
 import disnake
 from disnake.ext.commands import Bot
-from typing import Union
-from config import config
+from typing import Union, Optional
 
-
-class ReactionContext():
-    channel: disnake.TextChannel
-    guild: disnake.Guild
-    member: disnake.Member
-    message: disnake.Message
-    reply_to: disnake.Message
-    emoji: Union[disnake.Emoji, str]
-
-    def __init__(self, channel, guild, member, message, reply_to, emoji):
+class ReactionContext:
+    def __init__(self, channel: disnake.TextChannel, guild: Optional[disnake.Guild], author: Union[disnake.Member, disnake.User], message: disnake.Message, reply_to: Optional[disnake.Message], emoji: Union[disnake.Emoji, str]):
         self.channel = channel
         self.guild = guild
-        self.member = member
+        self.author = author
         self.message = message
         self.reply_to = reply_to
         self.emoji = emoji
 
-    @staticmethod
-    async def from_payload(bot: Bot, payload: disnake.RawReactionActionEvent):
+    @classmethod
+    async def from_payload(cls, bot: Bot, payload: disnake.RawReactionActionEvent):
         channel = bot.get_channel(payload.channel_id)
+        guild = None
+
         if channel is None:
             return None
 
-        if channel.type is disnake.ChannelType.text:
+        if hasattr(channel, "guild") is not None:
+            if not isinstance(channel, disnake.TextChannel):
+                return None
             guild = channel.guild
-        else:
-            guild = bot.get_guild(config.ids.main_guild)
 
-        if guild is None:
-            return
+        author = payload.member if payload.member is not None else None
 
-        member = payload.member if payload.member is not None else guild.get_member(payload.user_id)
-        if member is None or member.bot:
+        if author is None and guild is not None:
+            author = await guild.get_or_fetch_member(payload.user_id)
+
+        if author is None:
+            return None
+
+        if author.bot:
             return None
 
         try:
@@ -47,7 +44,7 @@ class ReactionContext():
             return None
 
         reply_to = None
-        if message is not None and message.reference is not None and message.reference.message_id is not None:
+        if message.reference is not None and message.reference.message_id is not None:
             try:
                 reply_to = await channel.fetch_message(message.reference.message_id)
             except disnake.errors.NotFound:
@@ -60,4 +57,4 @@ class ReactionContext():
         else:
             emoji = payload.emoji.name
 
-        return ReactionContext(channel, guild, member, message, reply_to, emoji)
+        return cls(channel, guild, author, message, reply_to, emoji)

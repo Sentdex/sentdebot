@@ -12,13 +12,16 @@ class Bookmarks(Base_Cog):
     super(Bookmarks, self).__init__(bot, __name__)
 
   async def handle_reaction_add(self, ctx: ReactionContext):
+    if ctx.author is None:
+      return
+
     if str(ctx.emoji) == "🔖":
       embed, images, files_attached = await bookmark.create_bookmark_embed(ctx.message, "Bookmark")
       try:
         if images:
           for image in images:
             embed.append(bookmark.create_image_embed(ctx.message, image, "Image"))
-        await ctx.member.send(embeds=embed, view=BookmarkView(), files=files_attached)
+        await ctx.author.send(embeds=embed, view=BookmarkView(), files=files_attached)
       except disnake.HTTPException:
         return
 
