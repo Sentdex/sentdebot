@@ -75,7 +75,7 @@ class HelpThreader(Base_Cog):
         # Owner of that thread is not on server anymore
         logger.info(f"[Auto close task] Owner of thread {thread.id} is not on server anymore, locking it up")
         try:
-          await thread.edit(locked=True)
+          await thread.edit(locked=True, archived=True, reason="Locking unactive thread")
         except:
           pass
         continue
@@ -87,7 +87,7 @@ class HelpThreader(Base_Cog):
           logger.info(f"[Auto close task] Last message of thread {thread.id} can't be retrieved so beliving data in database, locking it up")
 
           try:
-            await thread.edit(locked=True)
+            await thread.edit(locked=True, archived=True, reason="Locking unactive thread")
           except:
             pass
           continue
@@ -97,7 +97,7 @@ class HelpThreader(Base_Cog):
         if last_activity_before > datetime.timedelta(days=config.help_threader.close_request_after_days_of_inactivity):
           logger.info(f"[Auto close task] Last message of thread {thread.id} is older than {config.help_threader.close_request_after_days_of_inactivity} days, locking it up")
           try:
-            await thread.edit(locked=True)
+            await thread.edit(locked=True, archived=True, reason="Locking unactive thread")
           except:
             pass
         else:
@@ -236,7 +236,7 @@ class HelpThreader(Base_Cog):
       message = await help_channel.fetch_message(thread_message_id)
       thread = message.thread
       if not thread.archived and not thread.locked:
-        await thread.edit(locked=True, reason="Help request solved")
+        await thread.edit(locked=True, archived=True, reason="Help request solved")
     except:
       pass
 
