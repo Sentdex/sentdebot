@@ -85,10 +85,10 @@ docker-compose down --rmi local
 docker-compose down -v --rmi local
 
 # Dump of database
-docker exec -t sentdebot_db_1 pg_dumpall -c -U postgres > database_dump.sql
+docker exec -t sentdebot-db-1 pg_dumpall -c -U postgres > database_dump.sql
 
 # Restore database from dump
-cat database_dump.sql | docker exec -i sentdebot_db_1 psql -U postgres
+cat database_dump.sql | docker exec -i sentdebot-db-1 psql -U postgres
 ```
 
 Using Heroku hosting only push to heroku project repository or link it to your copy of this repository

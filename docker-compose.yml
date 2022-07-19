@@ -1,12 +1,6 @@
 version: '3.8'
 
 services:
-    adminer:
-        image: adminer
-        ports:
-            - "8080:8080"
-        depends_on:
-            - db
     db:
         image: postgres:latest
         ports:
@@ -19,6 +13,12 @@ services:
         build: .
         volumes:
             -   ./:/sentdebot/
+        depends_on:
+            - db
+    adminer:
+        image: adminer
+        ports:
+            - "8080:8080"
         depends_on:
             - db
 

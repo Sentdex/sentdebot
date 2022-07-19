@@ -54,5 +54,9 @@ max_graph_minutes_age_for_regenerate = 20
 graph_bg_color_code = "#2F3136"
 
 
+[help_threader]
+close_request_after_days_of_inactivity = 10
+
+
 [essentials]
 max_cached_messages = 5000
