@@ -88,6 +88,7 @@ class Help(Base_Cog):
     super(Help, self).__init__(bot, __file__)
 
   @commands.command(name="help", brief=Strings.help_dummy_help_brief)
+  @cooldowns.short_cooldown
   async def dummy_help(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
     embed = disnake.Embed(title="Help", description=Strings.help_dummy_help_text, colour=disnake.Color.dark_blue())

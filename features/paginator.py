@@ -2,7 +2,7 @@
 import asyncio
 
 import disnake
-from typing import List
+from typing import List, Optional
 
 from util import general_util
 
@@ -38,7 +38,7 @@ class EmbedView(disnake.ui.View):
       perma_lock: bool = False,
       roll_arroud: bool = True,
       end_arrow: bool = True,
-      timeout: int = 300
+      timeout: Optional[int] = 300
   ):
 
     self.message = None

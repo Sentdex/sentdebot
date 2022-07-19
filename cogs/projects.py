@@ -3,6 +3,7 @@
 import disnake
 from disnake.ext import commands
 
+from config import cooldowns
 from static_data.strings import Strings
 from features.base_cog import Base_Cog
 from util import general_util
@@ -43,6 +44,7 @@ class Projects(Base_Cog):
       await general_util.generate_error_message(inter, Strings.projects_remove_project_failed(name=project_name))
 
   @projects.sub_command(name="get", description=Strings.projects_project_get_brief)
+  @cooldowns.short_cooldown
   async def project_get(self, inter: disnake.CommandInteraction, project_name: str = commands.Param(autocomplete=projects_list_autocomplete, description="Name of project to show")):
     project = projects_repo.get_by_name(project_name)
     if project is None:
