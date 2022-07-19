@@ -43,3 +43,6 @@ chance = 0.2 # Chance on message to receive role in percents
 [stats]
 days_back = 21
 name_length_limit = 18
+
+[essentials]
+max_cached_messages = 5000

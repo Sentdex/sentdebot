@@ -31,7 +31,8 @@ bot = commands.Bot(
   case_insensitive=True,
   allowed_mentions=AllowedMentions(roles=False, everyone=False, users=True),
   intents=intents,
-  sync_commands=True
+  sync_commands=True,
+  max_messages=config.essentials.max_cached_messages
 )
 
 is_initialized = False
