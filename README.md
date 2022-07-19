@@ -34,7 +34,9 @@ Utils is place for any other extensions, helper functions, etc.
 6. System for managing help requests in help channel using threads and ticket system
 7. Extension for storing project and information about them
 8. Simple code evaluator for almost any language
-9. Robust database using SQLAlchemy ORM
+9. Bookmark feature so you don't lose some important messages
+10. Robust database using SQLAlchemy ORM
+11. Centralized handling of added reaction because there is needed some more processing for non cached messages
 
 And many other smaller things
 
