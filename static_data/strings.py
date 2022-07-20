@@ -63,6 +63,9 @@ class Strings(metaclass=formattable):
   common_search_brief = "Search on Sentdex webpage"
   common_search_nothing_found = "Nothing found for search term `{term}`"
 
+  common_pet_brief = "Pet a user"
+  common_pet_user_not_found = "Can't found target user"
+
   # Projects
   projects_project_get_brief = "Get project by name"
   projects_project_get_not_found = "Project `{name}` is not in database"
@@ -99,6 +102,8 @@ class Strings(metaclass=formattable):
 
   help_threader_help_channel_not_found = "Help channel not found"
 
+  help_threader_help_thread_closed_for_inactivity = "Closed for inactivity"
+
   # Code Execute
   code_execute_run_brief = "Evaluate code"
   code_execute_run_help = "Code to execute should always be in markdown with specified language\nCode block can be as a part of command (under the command) or the command can be called in reply message to that codeblock"
@@ -123,3 +128,5 @@ class Strings(metaclass=formattable):
   voice_channel_notifier_unsubscribe_role_not_found = "Role for channel {channel} not found"
   voice_channel_notifier_unsubscribe_remove_role_failed = "Unsubscription failed"
   voice_channel_notifier_unsubscribe_remove_role_success = "Unsubscribed from {channel}"
+
+  voice_channel_notifier_list_brief = "List all channels available for subscribtion"
