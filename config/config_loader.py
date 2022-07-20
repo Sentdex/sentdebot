@@ -4,13 +4,26 @@ import os
 import toml
 
 class Config:
+  def to_dict(self):
+    result = {}
+    for attr in self.__exportable__:
+      v = getattr(self, attr)
+      result[attr] = v.to_dict() if isinstance(v, Config) else v
+    return result
+
+  def write(self, path):
+    with open(path, "w+", encoding="utf-8") as fd:
+      toml.dump(self.to_dict(), fd)
+
   @classmethod
   def parse(cls, obj):
     if isinstance(obj, list):
       return [cls.parse(v) for v in obj]
     elif isinstance(obj, dict):
       result = cls()
-      for k,v in obj.items():
+      result.__exportable__ = []
+      for k, v in obj.items():
+        result.__exportable__.append(k)
         setattr(result, k, cls.parse(v))
       return result
     else:
