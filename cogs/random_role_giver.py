@@ -27,6 +27,7 @@ class RandomRoleGiver(Base_Cog):
   @commands.Cog.listener()
   async def on_message(self, message: disnake.Message):
     if not config.random_role_giver.role_ids: return
+    if message.guild is None: return
     if message.author.bot: return
     if have_random_role(message.author): return
     if self.chance == 0: return

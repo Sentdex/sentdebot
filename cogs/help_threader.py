@@ -75,6 +75,7 @@ class HelpThreader(Base_Cog):
         # Owner of that thread is not on server anymore
         logger.info(f"[Auto close task] Owner of thread {thread.id} is not on server anymore, locking it up")
         try:
+          await thread.send(embed=disnake.Embed(title=Strings.help_threader_help_thread_closed_for_inactivity, color=disnake.Color.orange()))
           await thread.edit(locked=True, archived=True, reason="Locking unactive thread")
         except:
           pass
@@ -87,6 +88,7 @@ class HelpThreader(Base_Cog):
           logger.info(f"[Auto close task] Last message of thread {thread.id} can't be retrieved so beliving data in database, locking it up")
 
           try:
+            await thread.send(embed=disnake.Embed(title=Strings.help_threader_help_thread_closed_for_inactivity, color=disnake.Color.orange()))
             await thread.edit(locked=True, archived=True, reason="Locking unactive thread")
           except:
             pass
@@ -97,6 +99,7 @@ class HelpThreader(Base_Cog):
         if last_activity_before > datetime.timedelta(days=config.help_threader.close_request_after_days_of_inactivity):
           logger.info(f"[Auto close task] Last message of thread {thread.id} is older than {config.help_threader.close_request_after_days_of_inactivity} days, locking it up")
           try:
+            await thread.send(embed=disnake.Embed(title=Strings.help_threader_help_thread_closed_for_inactivity, color=disnake.Color.orange()))
             await thread.edit(locked=True, archived=True, reason="Locking unactive thread")
           except:
             pass

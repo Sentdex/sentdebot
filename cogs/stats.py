@@ -100,14 +100,17 @@ class Stats(Base_Cog):
 
     thread_exist = help_threads_repo.thread_exists(message.channel.id)
     channel_id = config.ids.help_channel if thread_exist else message.channel.id
+
     if thread_exist:
-      # Will get updated with the message data
       help_threads_repo.update_thread_activity(message.channel.id, message.created_at, commit=False)
 
-    messages_repo.add_message(message.id, channel_id, message.author.id, message.content, use_for_metrics=messages_repo.get_author_of_last_message_metric(channel_id) != message.author.id)
+    if messages_repo.get_author_of_last_message_metric(channel_id) != message.author.id:
+      messages_repo.add_message_metric(message.id, channel_id, message.author.id, commit=False)
+
+    messages_repo.add_message_content(channel_id, message.content)
 
   async def handle_message_edited(self, _, after: disnake.Message):
-    message_item = messages_repo.get_message(after.id)
+    message_item = messages_repo.get_message_metric(after.id)
     if message_item is not None:
       message_item.content = after.content
       messages_repo.session.commit()
