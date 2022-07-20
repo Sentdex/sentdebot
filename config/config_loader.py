@@ -5,11 +5,15 @@ import toml
 
 class Config:
   def to_dict(self):
-    result = {}
-    for attr in self.__exportable__:
-      v = getattr(self, attr)
-      result[attr] = v.to_dict() if isinstance(v, Config) else v
-    return result
+    def convert(value):
+      if isinstance(value, Config):
+        return value.to_dict()
+      elif isinstance(value, list):
+        return [convert(item) for item in value]
+      else:
+        return value
+
+    return { attr: convert(getattr(self, attr)) for attr in self.__exportable__   }
 
   def __repr__(self):
     return f'{type(self).__name__}.parse({self.to_dict()!r})'
