@@ -72,7 +72,7 @@ Using docker compose
 docker-compose up --build
 
 # After code modification rebuild using
-docker-compose restart
+docker restart sentdebot-bot-1
 
 ## Special cleanup cases ##
 # Teardown and remove volumes

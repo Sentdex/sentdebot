@@ -162,6 +162,14 @@ class VoiceChannelNotifier(Base_Cog):
     current_time = datetime.datetime.utcnow()
 
     for channel_id in self.voice_channel_ids:
+      voice_channel = self.bot.get_channel(channel_id)
+      if voice_channel is None:
+        voice_channel = await self.bot.fetch_channel(channel_id)
+
+      if voice_channel is None:
+        logger.warning(f"Failed to find voice channel with id `{channel_id}` for announcement")
+        continue
+
       for threshold in self.threshold_to_announce_role.keys():
         if threshold <= 0:
           logger.warning("Invalid member threshold, threshold can't be lower than 1")
@@ -178,14 +186,6 @@ class VoiceChannelNotifier(Base_Cog):
 
           if announce_channel is None:
             logger.warning(f"Failed to find announce channel with id `{self.threshold_to_announce_channel[threshold]}`")
-            continue
-
-          voice_channel = self.bot.get_channel(channel_id)
-          if voice_channel is None:
-            voice_channel = await self.bot.fetch_channel(channel_id)
-
-          if voice_channel is None:
-            logger.warning(f"Failed to find voice channel with id `{channel_id}` for announcement")
             continue
 
           oldest_members = await self.get_n_oldest_members(voice_channel, threshold)
