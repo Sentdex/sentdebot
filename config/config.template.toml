@@ -65,14 +65,14 @@ update_every_minutes = 0.5
 stay_threshold_minutes = 2
 delay_between_announcements_minutes = 15
 
-# This is array of voice channels to look for and announcement channels for them
-[[voice_channel_notifier.channels]]
-id = 838389392002252845
-user_threshold = 1
-announce_channel_id = 999105598614425690
+vc_channel_ids = [991016207777943622, 999134772565643425]
 
-[[voice_channel_notifier.channels]]
-id = 999090811239153754
+[[voice_channel_notifier.notification_settings]]
 user_threshold = 1
-announce_channel_id = 999130200463921302
-################################################################################
+announce_role_id = 999132413206724668
+announce_channel_id = 999125170260283444
+
+[[voice_channel_notifier.notification_settings]]
+user_threshold = 2
+announce_role_id = 999135017341030410
+announce_channel_id = 999134821458645062

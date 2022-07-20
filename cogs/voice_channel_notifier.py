@@ -23,10 +23,9 @@ class VoiceChannelNotifier(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(VoiceChannelNotifier, self).__init__(bot, __file__)
 
-    self.voice_channel_ids = [channel.id for channel in config.voice_channel_notifier.channels]
-    self.annouce_thresholds = {channel.id: channel.user_threshold for channel in config.voice_channel_notifier.channels}
-    self.annouce_channel_ids = {channel.id: channel.announce_channel_id for channel in config.voice_channel_notifier.channels}
-    self.annouce_role_ids = {channel.id: channel.announce_role_id for channel in config.voice_channel_notifier.channels}
+    self.voice_channel_ids = [channel for channel in config.voice_channel_notifier.vc_channel_ids]
+    self.threshold_to_announce_role = {settings.user_threshold:settings.announce_role_id for settings in config.voice_channel_notifier.notification_settings}
+    self.threshold_to_announce_channel = {settings.user_threshold: settings.announce_channel_id for settings in config.voice_channel_notifier.notification_settings}
 
     self.initialised = False
     self.voice_channel_members: Dict[int, Dict[int, datetime.datetime]] = {}
@@ -49,88 +48,58 @@ class VoiceChannelNotifier(Base_Cog):
     if self.announcement_task.is_running():
       self.announcement_task.cancel()
 
-  @commands.command(brief=Strings.voice_channel_notifier_list_brief)
-  @cooldowns.default_cooldown
-  async def vc_list(self, ctx: commands.Context):
-    await general_util.delete_message(self.bot, ctx)
-
-    voice_channel_names = []
-    for channel_id in self.voice_channel_ids:
-      channel = self.bot.get_channel(channel_id)
-
-      if channel is None:
-        channel = await self.bot.fetch_channel(channel_id)
-
-      if channel is None or not isinstance(channel, disnake.VoiceChannel):
-        continue
-
-      voice_channel_names.append(channel.mention)
-
-    descriptions = []
-    while voice_channel_names:
-      output, voice_channel_names = general_util.add_string_until_length(voice_channel_names, 4000, "\n")
-      descriptions.append(output)
-
-    pages = []
-    for description in descriptions:
-      embed = disnake.Embed(title="Voice channels for subscribtion", description=description, color=disnake.Color.dark_blue())
-      general_util.add_author_footer(embed, ctx.author)
-      pages.append(embed)
-
-    await EmbedView(ctx.author, pages, perma_lock=False).run(ctx)
-
   @commands.command(brief=Strings.voice_channel_notifier_subscribe_brief)
   @cooldowns.default_cooldown
-  async def vc_subscribe(self, ctx: commands.Context, vc_channel: disnake.VoiceChannel):
+  async def vc_subscribe(self, ctx: commands.Context, treshhold: int):
     await general_util.delete_message(self.bot, ctx)
 
-    if vc_channel.id not in self.voice_channel_ids:
-      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_subscribe_invalid_channel(channel=vc_channel.mention))
+    if treshhold not in self.threshold_to_announce_role.keys():
+      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_subscribe_invalid_threshold(treshhold=treshhold))
 
-    role_id = self.annouce_role_ids[vc_channel.id]
+    role_id = self.threshold_to_announce_role[treshhold]
     role = ctx.guild.get_role(role_id)
     if role is None:
       roles = await ctx.guild.fetch_roles()
       role = disnake.utils.get(roles, id=role_id)
 
     if role is None:
-      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_subscribe_role_not_found(channel=vc_channel.mention))
+      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_subscribe_role_not_found(treshhold=treshhold))
 
     try:
-      await ctx.author.add_roles(role, reason=f"Subscribed to {vc_channel.name} VC")
-      await general_util.generate_success_message(ctx, Strings.voice_channel_notifier_subscribe_add_role_success(channel=vc_channel.mention))
+      await ctx.author.add_roles(role, reason=f"Subscribed to VC announcements")
+      await general_util.generate_success_message(ctx, Strings.voice_channel_notifier_subscribe_success)
     except Exception as e:
       logger.warning(f"Failed to give user `{ctx.author.name}` `{role.name}` role\n{e}")
-      await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_subscribe_add_role_failed)
+      await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_subscribe_failed)
 
   @commands.command(brief=Strings.voice_channel_notifier_unsubscribe_brief)
   @cooldowns.default_cooldown
-  async def vc_unsubscribe(self, ctx: commands.Context, vc_channel: disnake.VoiceChannel):
+  async def vc_unsubscribe(self, ctx: commands.Context, threshold: int):
     await general_util.delete_message(self.bot, ctx)
 
-    if vc_channel.id not in self.voice_channel_ids:
-      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_unsubscribe_invalid_channel(channel=vc_channel.mention))
+    if threshold not in self.threshold_to_announce_role.keys():
+      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_unsubscribe_invalid_threshold(treshhold=threshold))
 
-    role_id = self.annouce_role_ids[vc_channel.id]
+    role_id = self.threshold_to_announce_role[threshold]
     role = ctx.guild.get_role(role_id)
     if role is None:
       roles = await ctx.guild.fetch_roles()
       role = disnake.utils.get(roles, id=role_id)
 
     if role is None:
-      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_unsubscribe_role_not_found(channel=vc_channel.mention))
+      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_unsubscribe_role_not_found(treshhold=threshold))
 
     try:
-      await ctx.author.remove_roles(role, reason=f"Unsubscribed from {vc_channel.name} VC")
-      await general_util.generate_success_message(ctx, Strings.voice_channel_notifier_unsubscribe_remove_role_success(channel=vc_channel.mention))
+      await ctx.author.remove_roles(role, reason=f"Unsubscribed from VC")
+      await general_util.generate_success_message(ctx, Strings.voice_channel_notifier_unsubscribe_success)
     except Exception as e:
       logger.warning(f"Failed to give user `{ctx.author.name}` `{role.name}` role\n{e}")
-      await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_unsubscribe_remove_role_failed)
+      await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_unsubscribe_failed)
 
   async def async_init(self):
     self.voice_channel_members = {channel_id:{} for channel_id in self.voice_channel_ids}
     self.member_counts = {channel_id:0 for channel_id in self.voice_channel_ids}
-    self.last_announcements = {channel_id:None for channel_id in self.voice_channel_ids}
+    self.last_announcements = {threshold:None for threshold in self.threshold_to_announce_role.keys()}
 
     update_time = datetime.datetime.utcnow()
 
@@ -192,45 +161,45 @@ class VoiceChannelNotifier(Base_Cog):
     current_time = datetime.datetime.utcnow()
 
     for channel_id in self.voice_channel_ids:
-      member_threshold = self.annouce_thresholds[channel_id]
-      if member_threshold <= 0:
-        logger.warning(f"Invalid member threshold for channel id `{channel_id}`, threshold can't be lower than 1")
-        continue
-
-      time_since_announcement = (current_time - self.last_announcements[channel_id]) if self.last_announcements[channel_id] is not None else None
-
-      if new_member_counts[channel_id] >= member_threshold > self.member_counts[channel_id] and \
-         (time_since_announcement is None or time_since_announcement >= datetime.timedelta(minutes=config.voice_channel_notifier.delay_between_announcements_minutes)):
-        announce_channel = self.bot.get_channel(self.annouce_channel_ids[channel_id])
-
-        if announce_channel is None:
-          announce_channel = await self.bot.fetch_channel(self.annouce_channel_ids[channel_id])
-
-        if announce_channel is None:
-          logger.warning(f"Failed to find announce channel with id `{self.annouce_channel_ids[channel_id]}` for voice channel with id `{channel_id}`")
+      for threshold in self.threshold_to_announce_role.keys():
+        if threshold <= 0:
+          logger.warning("Invalid member threshold, threshold can't be lower than 1")
           continue
 
-        voice_channel = self.bot.get_channel(channel_id)
-        if voice_channel is None:
-          voice_channel = await self.bot.fetch_channel(channel_id)
+        time_since_announcement = (current_time - self.last_announcements[threshold]) if self.last_announcements[threshold] is not None else None
 
-        if voice_channel is None:
-          logger.warning(f"Failed to find voice channel with id `{channel_id}` for announcement")
-          continue
+        if new_member_counts[channel_id] >= threshold > self.member_counts[channel_id] and \
+           (time_since_announcement is None or time_since_announcement >= datetime.timedelta(minutes=config.voice_channel_notifier.delay_between_announcements_minutes)):
+          announce_channel = self.bot.get_channel(self.threshold_to_announce_channel[threshold])
 
-        oldest_members = await self.get_n_oldest_members(voice_channel, member_threshold)
-        if not oldest_members:
-          continue
+          if announce_channel is None:
+            announce_channel = await self.bot.fetch_channel(self.threshold_to_announce_channel[threshold])
 
-        nicks = generate_nick_string(oldest_members)
+          if announce_channel is None:
+            logger.warning(f"Failed to find announce channel with id `{self.threshold_to_announce_channel[threshold]}`")
+            continue
 
-        if len(oldest_members) == 1:
-          await announce_channel.send(Strings.voice_channel_notifier_single_user(nick=nicks, channel=voice_channel.mention))
-        else:
-          await announce_channel.send(Strings.voice_channel_notifier_multiple_users(nicks=nicks, channel=voice_channel.mention))
+          voice_channel = self.bot.get_channel(channel_id)
+          if voice_channel is None:
+            voice_channel = await self.bot.fetch_channel(channel_id)
 
-        logger.info(f"Event in `{voice_channel.name}`")
-        self.last_announcements[channel_id] = current_time
+          if voice_channel is None:
+            logger.warning(f"Failed to find voice channel with id `{channel_id}` for announcement")
+            continue
+
+          oldest_members = await self.get_n_oldest_members(voice_channel, threshold)
+          if not oldest_members:
+            continue
+
+          nicks = generate_nick_string(oldest_members)
+
+          if len(oldest_members) == 1:
+            await announce_channel.send(Strings.voice_channel_notifier_single_user(nick=nicks, channel=voice_channel.mention))
+          else:
+            await announce_channel.send(Strings.voice_channel_notifier_multiple_users(nicks=nicks, channel=voice_channel.mention))
+
+          logger.info(f"Event in `{voice_channel.name}` for threshold `{threshold}`")
+          self.last_announcements[threshold] = current_time
     self.member_counts = new_member_counts
 
   @commands.Cog.listener()
