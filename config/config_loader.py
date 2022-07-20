@@ -11,8 +11,11 @@ class Config:
       result[attr] = v.to_dict() if isinstance(v, Config) else v
     return result
 
+  def __repr__(self):
+    return f'{type(self).__name__}.parse({self.to_dict()!r})'
+
   def write(self, path):
-    with open(path, "w+", encoding="utf-8") as fd:
+    with open(path, "w", encoding="utf-8") as fd:
       toml.dump(self.to_dict(), fd)
 
   @classmethod
