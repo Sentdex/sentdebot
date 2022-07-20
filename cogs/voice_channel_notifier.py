@@ -9,6 +9,7 @@ from static_data.strings import Strings
 from features.base_cog import Base_Cog
 from util.logger import setup_custom_logger
 from util import general_util
+from features.paginator import EmbedView
 
 logger = setup_custom_logger(__name__)
 
@@ -47,6 +48,36 @@ class VoiceChannelNotifier(Base_Cog):
   def __del__(self):
     if self.announcement_task.is_running():
       self.announcement_task.cancel()
+
+  @commands.command(brief=Strings.voice_channel_notifier_list_brief)
+  @cooldowns.default_cooldown
+  async def vc_list(self, ctx: commands.Context):
+    await general_util.delete_message(self.bot, ctx)
+
+    voice_channel_names = []
+    for channel_id in self.voice_channel_ids:
+      channel = self.bot.get_channel(channel_id)
+
+      if channel is None:
+        channel = await self.bot.fetch_channel(channel_id)
+
+      if channel is None or not isinstance(channel, disnake.VoiceChannel):
+        continue
+
+      voice_channel_names.append(channel.mention)
+
+    descriptions = []
+    while voice_channel_names:
+      output, voice_channel_names = general_util.add_string_until_length(voice_channel_names, 4000, "\n")
+      descriptions.append(output)
+
+    pages = []
+    for description in descriptions:
+      embed = disnake.Embed(title="Voice channels for subscribtion", description=description, color=disnake.Color.dark_blue())
+      general_util.add_author_footer(embed, ctx.author)
+      pages.append(embed)
+
+    await EmbedView(ctx.author, pages, perma_lock=False).run(ctx)
 
   @commands.command(brief=Strings.voice_channel_notifier_subscribe_brief)
   @cooldowns.default_cooldown
