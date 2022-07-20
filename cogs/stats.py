@@ -115,6 +115,12 @@ class Stats(Base_Cog):
       message_item.content = after.content
       messages_repo.session.commit()
 
+  @commands.command(brief=Strings.stats_stats_brief)
+  @cooldowns.default_cooldown
+  async def stats(self, ctx: commands.Context):
+    await self.user_activity(ctx)
+    await self.community_report(ctx)
+
   @commands.command(brief=Strings.stats_user_activity_brief)
   @cooldowns.default_cooldown
   async def user_activity(self, ctx: commands.Context):

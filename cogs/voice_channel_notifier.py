@@ -9,7 +9,6 @@ from static_data.strings import Strings
 from features.base_cog import Base_Cog
 from util.logger import setup_custom_logger
 from util import general_util
-from features.paginator import EmbedView
 
 logger = setup_custom_logger(__name__)
 
@@ -50,6 +49,7 @@ class VoiceChannelNotifier(Base_Cog):
 
   @commands.command(brief=Strings.voice_channel_notifier_subscribe_brief)
   @cooldowns.default_cooldown
+  @commands.guild_only()
   async def vc_subscribe(self, ctx: commands.Context, treshhold: int):
     await general_util.delete_message(self.bot, ctx)
 
@@ -74,6 +74,7 @@ class VoiceChannelNotifier(Base_Cog):
 
   @commands.command(brief=Strings.voice_channel_notifier_unsubscribe_brief)
   @cooldowns.default_cooldown
+  @commands.guild_only()
   async def vc_unsubscribe(self, ctx: commands.Context, threshold: int):
     await general_util.delete_message(self.bot, ctx)
 

@@ -71,12 +71,15 @@ async def delete_message(bot: commands.Bot, cnt: Union[commands.Context, disnake
   if isinstance(cnt, disnake.CommandInteraction):
     return
 
-  if isinstance(cnt, commands.Context):
-    if cnt.guild is not None or cnt.message.author.id == bot.user.id:
-      await cnt.message.delete()
-  else:
-    if cnt.guild is not None or cnt.message.author.id == bot.user.id:
-      await cnt.delete()
+  try:
+    if isinstance(cnt, commands.Context):
+      if cnt.guild is not None or cnt.message.author.id == bot.user.id:
+        await cnt.message.delete()
+    else:
+      if cnt.guild is not None or cnt.message.author.id == bot.user.id:
+        await cnt.delete()
+  except:
+    pass
 
 # https://github.com/Toaster192/rubbergod/blob/master/utils.py
 def get_command_group_signature(ctx: commands.Context):

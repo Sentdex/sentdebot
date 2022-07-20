@@ -79,6 +79,8 @@ class Strings(metaclass=formattable):
   projects_remove_project_failed = "Project `{name}` not found for removal"
 
   # Stats
+  stats_stats_brief = "Send both user activity and community report"
+
   stats_user_activity_brief = "Show recent user activity in channels"
 
   stats_community_report_brief = "Show recent numbers of users on server"
