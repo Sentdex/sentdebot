@@ -14,7 +14,6 @@ from typing import Union, List, Optional
 
 logger = setup_custom_logger(__name__)
 
-
 def command_check(com, ctx):
   if not com.checks:
     return True
@@ -30,6 +29,15 @@ def command_check(com, ctx):
 
 def get_all_commands(bot: commands.Bot, ctx):
   return [com for cog in bot.cogs.values() for com in cog.walk_commands() if isinstance(com, commands.Command) and not com.hidden and command_check(com, ctx)]
+
+
+async def help_name_autocomplete(inter, string):
+  everything = [str(cog.qualified_name).replace("_", " ") for cog in inter.bot.cogs.values()]
+  everything.extend([com.name for com in get_all_commands(inter.bot, inter)])
+
+  if string is None or string == "":
+    return everything
+  return [d for d in everything if string.lower() in d.lower()]
 
 def add_command_help(embed, com):
   help_string = f"**Help**: " + com.help if com.help is not None else ""
@@ -97,7 +105,7 @@ class Help(Base_Cog):
 
   @commands.slash_command(name="help", description=Strings.help_description)
   @cooldowns.short_cooldown
-  async def help(self, inter: disnake.CommandInteraction, name: Optional[str]=commands.Param(default=None, description="Name of command or extension you want to search help for")):
+  async def help(self, inter: disnake.CommandInteraction, name: Optional[str]=commands.Param(default=None, description="Name of command or extension you want to search help for", autocomplete=help_name_autocomplete)):
     pages = []
     if name is not None:
       all_commands = get_all_commands(self.bot, inter)
