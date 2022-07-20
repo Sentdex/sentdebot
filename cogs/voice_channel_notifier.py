@@ -4,10 +4,11 @@ import disnake
 from disnake.ext import commands, tasks
 from typing import Dict, Optional, List
 
-from config import config
+from config import config, cooldowns
 from static_data.strings import Strings
 from features.base_cog import Base_Cog
 from util.logger import setup_custom_logger
+from util import general_util
 
 logger = setup_custom_logger(__name__)
 
@@ -24,6 +25,7 @@ class VoiceChannelNotifier(Base_Cog):
     self.voice_channel_ids = [channel.id for channel in config.voice_channel_notifier.channels]
     self.annouce_thresholds = {channel.id: channel.user_threshold for channel in config.voice_channel_notifier.channels}
     self.annouce_channel_ids = {channel.id: channel.announce_channel_id for channel in config.voice_channel_notifier.channels}
+    self.annouce_role_ids = {channel.id: channel.announce_role_id for channel in config.voice_channel_notifier.channels}
 
     self.initialised = False
     self.voice_channel_members: Dict[int, Dict[int, datetime.datetime]] = {}
@@ -45,6 +47,54 @@ class VoiceChannelNotifier(Base_Cog):
   def __del__(self):
     if self.announcement_task.is_running():
       self.announcement_task.cancel()
+
+  @commands.command(brief=Strings.voice_channel_notifier_subscribe_brief)
+  @cooldowns.default_cooldown
+  async def vc_subscribe(self, ctx: commands.Context, vc_channel: disnake.VoiceChannel):
+    await general_util.delete_message(self.bot, ctx)
+
+    if vc_channel.id not in self.voice_channel_ids:
+      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_subscribe_invalid_channel(channel=vc_channel.mention))
+
+    role_id = self.annouce_role_ids[vc_channel.id]
+    role = ctx.guild.get_role(role_id)
+    if role is None:
+      roles = await ctx.guild.fetch_roles()
+      role = disnake.utils.get(roles, id=role_id)
+
+    if role is None:
+      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_subscribe_role_not_found(channel=vc_channel.mention))
+
+    try:
+      await ctx.author.add_roles(role, reason=f"Subscribed to {vc_channel.name} VC")
+      await general_util.generate_success_message(ctx, Strings.voice_channel_notifier_subscribe_add_role_success(channel=vc_channel.mention))
+    except Exception as e:
+      logger.warning(f"Failed to give user `{ctx.author.name}` `{role.name}` role\n{e}")
+      await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_subscribe_add_role_failed)
+
+  @commands.command(brief=Strings.voice_channel_notifier_unsubscribe_brief)
+  @cooldowns.default_cooldown
+  async def vc_unsubscribe(self, ctx: commands.Context, vc_channel: disnake.VoiceChannel):
+    await general_util.delete_message(self.bot, ctx)
+
+    if vc_channel.id not in self.voice_channel_ids:
+      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_unsubscribe_invalid_channel(channel=vc_channel.mention))
+
+    role_id = self.annouce_role_ids[vc_channel.id]
+    role = ctx.guild.get_role(role_id)
+    if role is None:
+      roles = await ctx.guild.fetch_roles()
+      role = disnake.utils.get(roles, id=role_id)
+
+    if role is None:
+      return await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_unsubscribe_role_not_found(channel=vc_channel.mention))
+
+    try:
+      await ctx.author.remove_roles(role, reason=f"Unsubscribed from {vc_channel.name} VC")
+      await general_util.generate_success_message(ctx, Strings.voice_channel_notifier_unsubscribe_remove_role_success(channel=vc_channel.mention))
+    except Exception as e:
+      logger.warning(f"Failed to give user `{ctx.author.name}` `{role.name}` role\n{e}")
+      await general_util.generate_error_message(ctx, Strings.voice_channel_notifier_unsubscribe_remove_role_failed)
 
   async def async_init(self):
     self.voice_channel_members = {channel_id:{} for channel_id in self.voice_channel_ids}

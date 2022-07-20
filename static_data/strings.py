@@ -111,3 +111,15 @@ class Strings(metaclass=formattable):
   # Voice channel notifier
   voice_channel_notifier_single_user = "{nick} started something big in {channel}"
   voice_channel_notifier_multiple_users = "{nicks} started something big in {channel}"
+
+  voice_channel_notifier_subscribe_brief = "Subscribe to receive voice chat notifications"
+  voice_channel_notifier_subscribe_invalid_channel = "Channel {channel} is not available for subscription"
+  voice_channel_notifier_subscribe_role_not_found = "Role for channel {channel} not found"
+  voice_channel_notifier_subscribe_add_role_failed = "Subscription failed"
+  voice_channel_notifier_subscribe_add_role_success = "Subscribed to {channel}"
+
+  voice_channel_notifier_unsubscribe_brief = "Unsubscribe from receiving voice chat notifications"
+  voice_channel_notifier_unsubscribe_invalid_channel = "Channel {channel} is not available for unsubscription"
+  voice_channel_notifier_unsubscribe_role_not_found = "Role for channel {channel} not found"
+  voice_channel_notifier_unsubscribe_remove_role_failed = "Unsubscription failed"
+  voice_channel_notifier_unsubscribe_remove_role_success = "Unsubscribed from {channel}"
