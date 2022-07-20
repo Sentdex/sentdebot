@@ -1,5 +1,3 @@
-# <env> means this will be loaded from os environment variable with name <section>_<key>
-# for example: "base_discord_api_key" for discord api key
 # Ids should be unset by setting them to -1 but some may be required
 
 [base]
@@ -60,3 +58,21 @@ close_request_after_days_of_inactivity = 10
 
 [essentials]
 max_cached_messages = 5000
+
+
+[voice_channel_notifier]
+update_every_minutes = 0.5
+stay_threshold_minutes = 2
+delay_between_announcements_minutes = 15
+
+# This is array of voice channels to look for and announcement channels for them
+[[voice_channel_notifier.channels]]
+id = 838389392002252845
+user_threshold = 1
+announce_channel_id = 999105598614425690
+
+[[voice_channel_notifier.channels]]
+id = 999090811239153754
+user_threshold = 1
+announce_channel_id = 999130200463921302
+################################################################################

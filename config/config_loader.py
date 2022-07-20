@@ -3,19 +3,18 @@
 import os
 import toml
 
-
 class Config:
   @classmethod
-  def parse(cls, dct, crumbs=None):
-    crumbs = crumbs or []
-    result = cls()
-    for k,v in dct.items():
-      if isinstance(v, dict):
-        v = cls.parse(v, [*crumbs, k])
-      if v == '<env>':
-        v = os.getenv('_'.join((*crumbs, k)))
-      setattr(result, k, v)
-    return result
+  def parse(cls, obj):
+    if isinstance(obj, list):
+      return [cls.parse(v) for v in obj]
+    elif isinstance(obj, dict):
+      result = cls()
+      for k,v in obj.items():
+        setattr(result, k, cls.parse(v))
+      return result
+    else:
+      return obj
 
   @classmethod
   def from_toml(cls, *paths, **kwargs):

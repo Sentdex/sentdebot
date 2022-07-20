@@ -107,3 +107,7 @@ class Strings(metaclass=formattable):
   code_execute_run_cant_find_code_block = "Can't find codeblock in message"
   code_execute_run_cant_find_language_in_code_block = "Can't find language in codeblock"
   code_execute_run_failed_to_get_api_response = "Failed to get response from API"
+
+  # Voice channel notifier
+  voice_channel_notifier_single_user = "{nick} started something big in {channel}"
+  voice_channel_notifier_multiple_users = "{nicks} started something big in {channel}"
