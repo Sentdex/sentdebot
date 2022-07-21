@@ -60,7 +60,7 @@ async def on_message(message: disnake.Message):
     if message.content.startswith(config.base.command_prefix + "."):
       orig_content = message.content
 
-      logger.info(f"Command content: {orig_content}")
+      # logger.info(f"Command content: {orig_content}")
 
       try:
         arg_start = message.content.find("(")
@@ -92,10 +92,10 @@ async def on_message(message: disnake.Message):
         if arg != "":
           args.append(f"\"{arg.strip()}\"")
 
-        logger.info(f"Command name: `{command_name}`, Args: {args}, Number of args: {len(args)}")
+        # logger.info(f"Command name: `{command_name}`, Args: {args}, Number of args: {len(args)}")
         message.content = f"{config.base.command_prefix}.{command_name} {' '.join(args)}"
 
-        logger.info(f"New content: `{message.content}`")
+        # logger.info(f"New content: `{message.content}`")
 
         await bot.process_commands(message)
       except SyntaxError:
