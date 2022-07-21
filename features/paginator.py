@@ -1,8 +1,7 @@
 # Basic scroller for embeds
-import asyncio
 
 import disnake
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from util import general_util
 
@@ -38,10 +37,10 @@ class EmbedView(disnake.ui.View):
       perma_lock: bool = False,
       roll_arroud: bool = True,
       end_arrow: bool = True,
-      timeout: Optional[int] = 300
+      timeout: Optional[float] = 300
   ):
 
-    self.message = None
+    self.message: Optional[Union[disnake.Message, disnake.ApplicationCommandInteraction, disnake.ModalInteraction, disnake.MessageCommandInteraction]] = None
     self.page = 1
     self.author = author
     self.locked = False
@@ -96,8 +95,11 @@ class EmbedView(disnake.ui.View):
     return page
 
   async def run(self, ctx):
-    self.message = await ctx.send(embed=self.embed(), view=self)
-    return self.message
+    message = await ctx.send(embed=self.embed(), view=self)
+    if isinstance(ctx, (disnake.ApplicationCommandInteraction, disnake.ModalInteraction, disnake.MessageCommandInteraction)):
+      self.message = ctx
+    else:
+      self.message = message
 
   async def interaction_check(self, interaction: disnake.MessageInteraction) -> None:
     if interaction.data.custom_id == "embed:lock":
@@ -131,13 +133,9 @@ class EmbedView(disnake.ui.View):
   async def on_timeout(self):
     try:
       self.clear_items()
-      await self.message.edit(view=self)
-    except:
-      pass
-
-  def __del__(self):
-    try:
-      loop = asyncio.get_running_loop()
-      asyncio.ensure_future(self.on_timeout(), loop=loop)
+      if isinstance(self.message, disnake.Message):
+        await self.message.edit(view=self)
+      else:
+        await self.message.edit_original_message(view=self)
     except:
       pass

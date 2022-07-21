@@ -66,6 +66,8 @@ class Strings(metaclass=formattable):
   common_pet_brief = "Pet a user"
   common_pet_user_not_found = "Can't found target user"
 
+  common_vote_brief = "Create vote pool"
+
   # Projects
   projects_project_get_brief = "Get project by name"
   projects_project_get_not_found = "Project `{name}` is not in database"

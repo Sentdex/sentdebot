@@ -60,6 +60,10 @@ close_request_after_days_of_inactivity = 10
 max_cached_messages = 5000
 
 
+[common]
+vote_duration_seconds = 180
+
+
 [voice_channel_notifier]
 update_every_minutes = 0.5
 stay_threshold_minutes = 2

@@ -9,10 +9,11 @@ import requests
 from PIL import Image, ImageDraw
 import cachetools
 
-from config import cooldowns
+from config import cooldowns, config
 from static_data.strings import Strings
 from features.base_cog import Base_Cog
 from util import general_util
+from modals.vote_modal import VoteSetupModal
 
 class Common(Base_Cog):
   def __init__(self, bot: commands.Bot):
@@ -121,6 +122,11 @@ class Common(Base_Cog):
     if isinstance(error, commands.MemberNotFound):
       await inter.response.send_message(Strings.common_pet_user_not_found)
       return True
+
+  @commands.slash_command(name="vote", description=Strings.common_vote_brief)
+  @cooldowns.long_cooldown
+  async def pet(self, inter: disnake.ApplicationCommandInteraction):
+    await inter.response.send_modal(VoteSetupModal())
 
 def setup(bot):
   bot.add_cog(Common(bot))
