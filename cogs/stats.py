@@ -96,7 +96,7 @@ class Stats(Base_Cog):
     if message.guild is None: return
     if self.main_guild.id != message.guild.id: return
     if message.author.bot: return
-    if message.content == "" or message.content[0] in config.base.command_prefixes: return
+    if message.content == "" or message.content.startswith(config.base.command_prefix + "."): return
 
     thread_exist = help_threads_repo.thread_exists(message.channel.id)
     channel_id = config.ids.help_channel if thread_exist else message.channel.id

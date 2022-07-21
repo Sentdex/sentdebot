@@ -50,7 +50,7 @@ def add_command_help(embed, com):
   if len(output) > 4096:
     logger.warning(f"Description for command {com.name} is too long")
   else:
-    embed.add_field(name=f"{config.base.command_prefixes[0]}{general_util.get_command_signature(com)}", value=output, inline=False)
+    embed.add_field(name=f"{config.base.command_prefix}.{general_util.get_command_signature(com)}", value=output, inline=False)
 
 
 def generate_help_for_cog(cog: Base_Cog, ctx) -> Union[None, List[disnake.Embed]]:
@@ -137,7 +137,7 @@ class Help(Base_Cog):
   @cooldowns.short_cooldown
   async def command_list(self, inter: disnake.CommandInteraction):
     all_commands = get_all_commands(self.bot, inter)
-    command_strings = [f"{config.base.command_prefixes[0]}{general_util.get_command_signature(com)}" for com in all_commands]
+    command_strings = [f"{config.base.command_prefix}{general_util.get_command_signature(com)}" for com in all_commands]
 
     pages = []
     while command_strings:
