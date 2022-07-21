@@ -74,7 +74,7 @@ class VoteView(disnake.ui.View):
       pass
 
     if max(self.results) == 0:
-      embed = disnake.Embed(title="Vote results", description=f"There is no winner")
+      embed = disnake.Embed(title="Vote results", description=f"There is no winner", color=disnake.Color.orange())
     else:
       max_cnt = self.results[0]
       res_index = 0
