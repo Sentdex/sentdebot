@@ -29,7 +29,7 @@ class VoteView(disnake.ui.View):
 
     embed = disnake.Embed(title="Vote", description=general_util.truncate_string(self.description, 4000), color=self.color)
     for idx, (reaction_id, choice) in enumerate(zip(reaction_ids, self.choices)):
-      embed.add_field(name=f"{reactions[idx]}", value=general_util.truncate_string(choice, 1000), inline=False)
+      embed.add_field(name=f"{reactions[idx]}", value=general_util.truncate_string(choice, 1000))
     general_util.add_author_footer(embed, ctx.author)
 
     message = await ctx.send(embed=embed, view=self)
