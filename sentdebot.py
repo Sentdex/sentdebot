@@ -3,6 +3,7 @@ import disnake
 from disnake import AllowedMentions, Intents, Game, Status
 from disnake.ext import commands
 import ast
+import re
 
 from config import config
 from util.logger import setup_custom_logger
@@ -53,42 +54,49 @@ async def on_ready():
   await bot.change_presence(activity=Game(name=config.base.status_message, type=0), status=Status.online)
   logger.info('Ready!')
 
-def parse(message):
-  root = ast.parse(message)
-  match root:
-    case ast.Module(
-      body=[
-        ast.Expr(
-          value=ast.Call(
-            func=ast.Attribute(
-              value=ast.Name(id=config.base.command_prefix),
-              attr=method
-            ),
-            args=positional
-          )
-        )
-      ]
-    ):
-      for i, pos in enumerate(positional):
-        if isinstance(pos, ast.Constant):
-          positional[i] = pos.value
-        elif isinstance(pos, ast.Name):
-          positional[i] = pos.id
-        else:
-          raise SyntaxError
-
-      return method, positional
-
 @bot.event
 async def on_message(message: disnake.Message):
   if not message.author.bot:
     if message.content.startswith(config.base.command_prefix + "."):
       orig_content = message.content
-      try:
-        method, args = parse(message.content)
-        # logger.info(f"Command {method}, Args: {args}")
 
-        message.content = f"{config.base.command_prefix}.{method} {' '.join(args)}"
+      logger.info(f"Command content: {orig_content}")
+
+      try:
+        arg_start = message.content.find("(")
+        if not message.content.endswith(")"):
+          raise SyntaxError
+
+        command_name = message.content[message.content.find(".") + 1:arg_start]
+        args_string = message.content[arg_start+1:-1]
+
+        args = []
+        arg = ""
+        in_parentheses = None
+        for ch in args_string:
+          if ch in ("\"", "\'"):
+            if in_parentheses is None:
+              if arg != "":
+                raise SyntaxError
+
+              in_parentheses = ch
+              continue
+            elif ch == in_parentheses:
+              in_parentheses = None
+              continue
+          elif ch == "," and in_parentheses is None:
+            args.append(f"\"{arg.strip()}\"")
+            arg = ""
+            continue
+          arg += ch
+        if arg != "":
+          args.append(f"\"{arg.strip()}\"")
+
+        logger.info(f"Command name: `{command_name}`, Args: {args}, Number of args: {len(args)}")
+        message.content = f"{config.base.command_prefix}.{command_name} {' '.join(args)}"
+
+        logger.info(f"New content: `{message.content}`")
+
         await bot.process_commands(message)
       except SyntaxError:
         await general_util.generate_error_message(message, Strings.error_command_syntax_error)

@@ -128,5 +128,9 @@ class Common(Base_Cog):
   async def pet(self, inter: disnake.ApplicationCommandInteraction):
     await inter.response.send_modal(VoteSetupModal())
 
+  @commands.command()
+  async def send_message(self, ctx: commands.Context, message: str, channel: disnake.TextChannel):
+    await channel.send(message)
+
 def setup(bot):
   bot.add_cog(Common(bot))

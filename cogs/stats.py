@@ -150,6 +150,8 @@ class Stats(Base_Cog):
     uids_in_help = Counter(dataframe[dataframe["channel_id"].isin([config.ids.help_channel])]["author_id"].values).most_common(10)
 
     fig = plt.figure(facecolor=config.stats.graph_bg_color_code)
+    fig.set_dpi(200)
+
     ax1 = plt.subplot2grid((2, 1), (0, 0))
 
     plt.xlabel("Message Volume")
@@ -251,16 +253,22 @@ class Stats(Base_Cog):
     ).fillna(0)
 
     fig = plt.figure(facecolor=config.stats.graph_bg_color_code)
-    ax1 = plt.subplot2grid((2, 1), (0, 0))
+    fig.set_dpi(200)
+
+    ax1 = plt.subplot2grid((3, 1), (0, 0))
     plt.ylabel("Active Users")
     plt.title("Community Report")
     ax1.set_facecolor(config.stats.graph_bg_color_code)
     ax1v = ax1.twinx()
     plt.ylabel("Message Volume")
 
-    ax2 = plt.subplot2grid((2, 1), (1, 0))
-    plt.ylabel("Total Users")
+    ax2 = plt.subplot2grid((3, 1), (1, 0))
+    plt.ylabel("Users")
     ax2.set_facecolor(config.stats.graph_bg_color_code)
+
+    ax3 = plt.subplot2grid((3, 1), (2, 0))
+    plt.ylabel("Total Users")
+    ax3.set_facecolor(config.stats.graph_bg_color_code)
 
     ax1.plot(users_metrics_dataframe.index, users_metrics_dataframe.online, label="Active Users\n(Not Idle)")
     # ax1v.bar(df.index, df["count"], width=0.01)
@@ -269,13 +277,19 @@ class Stats(Base_Cog):
     ax1.legend(loc=2)
     ax1v.legend(loc=9)
 
-    ax2.plot(users_metrics_dataframe.index, users_metrics_dataframe.total, label="Total Users")
-    ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d\n%H:%M'))
+    ax2.plot(users_metrics_dataframe.index, users_metrics_dataframe.online.rolling(3).mean(), label="Online Users")
+    ax2.plot(users_metrics_dataframe.index, users_metrics_dataframe.idle.rolling(3).mean(), label="Idle Users")
+    ax2.plot(users_metrics_dataframe.index, users_metrics_dataframe.offline.rolling(3).mean(), label="Offline Users")
+    ax2.legend(loc=2)
+    ax2.get_xaxis().set_visible(False)
+
+    ax3.plot(users_metrics_dataframe.index, users_metrics_dataframe.total, label="Total Users")
+    ax3.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d\n%H:%M'))
 
     # for label in ax2.xaxis.get_ticklabels():
     #        label.set_rotation(45)
-    ax2.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='lower'))
-    ax2.legend()
+    ax3.xaxis.set_major_locator(mticker.MaxNLocator(nbins=5, prune='lower'))
+    ax3.legend()
 
     plt.subplots_adjust(left=0.11, bottom=0.10, right=0.89, top=0.95, wspace=0.2, hspace=0)
     ax1.get_xaxis().set_visible(False)

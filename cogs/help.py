@@ -137,7 +137,7 @@ class Help(Base_Cog):
   @cooldowns.short_cooldown
   async def command_list(self, inter: disnake.CommandInteraction):
     all_commands = get_all_commands(self.bot, inter)
-    command_strings = [f"{config.base.command_prefix}{general_util.get_command_signature(com)}" for com in all_commands]
+    command_strings = [f"{config.base.command_prefix}.{general_util.get_command_signature(com)}" for com in all_commands]
 
     pages = []
     while command_strings:
