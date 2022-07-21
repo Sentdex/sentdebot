@@ -73,17 +73,19 @@ class VoteView(disnake.ui.View):
     except:
       pass
 
-    if max(self.results) == 0:
+    max_res = max(self.results)
+
+    if max_res == 0:
       embed = disnake.Embed(title="Vote results", description=f"There is no winner", color=disnake.Color.orange())
     else:
-      max_cnt = self.results[0]
-      res_index = 0
+      res_indexes = []
       for idx, result in enumerate(self.results):
-        if result > max_cnt:
-          max_cnt = result
-          res_index = idx
+        if result == max_res:
+          res_indexes.append(idx)
 
-      embed = disnake.Embed(title="Vote results", description=f"{reactions[res_index]} choice won:\n`{self.choices[res_index]}`\n[Link]({message.jump_url})", color=self.color)
+      res_reactions = [reaction for idx, reaction in enumerate(reactions) if idx in res_indexes]
+      res_choices, _ = general_util.add_string_until_length([choice for idx, choice in enumerate(self.choices) if idx in res_indexes], 3000, "\n")
+      embed = disnake.Embed(title="Vote results", description=f"{', '.join(res_reactions)} {'choice' if len(res_indexes) == 1 else 'choices'} won:\n`{res_choices}`\n[Link]({message.jump_url})", color=self.color)
 
     try:
       await message.reply(embed=embed)
