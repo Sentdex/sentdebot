@@ -56,18 +56,18 @@ class Errors(Base_Cog):
       log_channel = self.bot.get_channel(config.ids.log_channel)
       if log_channel is None: return
 
-      if isinstance(ctx, disnake.ApplicationCommandInteraction):
+      if isinstance(ctx, (disnake.ApplicationCommandInteraction, disnake.ModalInteraction, disnake.MessageCommandInteraction)):
         embed = disnake.Embed(title=f"Ignoring exception in application interaction {ctx.application_command}", color=0xFF0000)
-        embed.add_field(name="Autor", value=str(ctx.author))
-        embed.add_field(name="Type", value=str(type(error)))
       else:
         embed = disnake.Embed(title=f"Ignoring exception in command {ctx.command}", color=0xFF0000)
         embed.add_field(name="Message", value=ctx.message.content[:1000])
-        embed.add_field(name="Autor", value=str(ctx.author))
-        embed.add_field(name="Type", value=str(type(error)))
-        if ctx.guild:
-          embed.add_field(name="Guild", value=ctx.guild.name)
         embed.add_field(name="Link", value=ctx.message.jump_url, inline=False)
+
+      embed.add_field(name="Autor", value=str(ctx.author))
+      embed.add_field(name="Type", value=str(type(error)))
+
+      if ctx.guild:
+        embed.add_field(name="Guild", value=ctx.guild.name)
 
       await log_channel.send(embed=embed)
 
