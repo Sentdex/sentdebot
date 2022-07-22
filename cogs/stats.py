@@ -98,16 +98,21 @@ class Stats(Base_Cog):
     if message.author.bot: return
     if message.content == "" or message.content.startswith(config.base.command_prefix + "."): return
 
-    thread_exist = help_threads_repo.thread_exists(message.channel.id)
-    channel_id = config.ids.help_channel if thread_exist else message.channel.id
+    thread = None
+    channel = message.channel
+    if isinstance(channel, disnake.Thread):
+      thread = channel
+      channel = channel.parent
 
-    if thread_exist:
-      help_threads_repo.update_thread_activity(message.channel.id, message.created_at, commit=False)
+    thread_id = thread.id if thread is not None else None
+    if thread is not None:
+      if help_threads_repo.thread_exists(thread_id):
+        help_threads_repo.update_thread_activity(thread_id, message.created_at, commit=False)
 
-    if messages_repo.get_author_of_last_message_metric(channel_id) != message.author.id:
-      messages_repo.add_message_metric(message.id, channel_id, message.author.id, commit=False)
+    if messages_repo.get_author_of_last_message_metric(channel.id, thread_id) != message.author.id:
+      messages_repo.add_message_metric(message.id, channel.id, thread_id, message.author.id, commit=False)
 
-    messages_repo.add_message_content(channel_id, message.content)
+    messages_repo.add_message_content(channel.id, thread_id, message.content)
 
   async def handle_message_edited(self, _, after: disnake.Message):
     message_item = messages_repo.get_message_metric(after.id)

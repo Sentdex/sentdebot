@@ -158,6 +158,8 @@ class VoiceChannelNotifier(Base_Cog):
   @tasks.loop(minutes=config.voice_channel_notifier.update_every_minutes)
   async def announcement_task(self):
     new_member_counts = self.get_number_of_users()
+    if new_member_counts == self.member_counts:
+      return
 
     current_time = datetime.datetime.utcnow()
 

@@ -8,7 +8,8 @@ class MessageMetric(database.base):
   message_id = Column(String, primary_key=True, unique=True)
   timestamp = Column(DateTime, index=True)
   author_id = Column(String)
-  channel_id = Column(String)
+  channel_id = Column(String, index=True)
+  thread_id = Column(String)
 
 class MessageContent(database.base):
   __tablename__ = "message_contents"
@@ -16,4 +17,5 @@ class MessageContent(database.base):
   id = Column(BigIntegerType, primary_key=True, unique=True, autoincrement=True)
 
   channel_id = Column(String, index=True)
+  thread_id = Column(String)
   content = Column(String)
