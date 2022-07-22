@@ -90,7 +90,7 @@ async def delete_message(bot: commands.Bot, cnt: Union[commands.Context, disnake
 def get_command_signature(cmd_src: Union[commands.Context, commands.Command]):
   cmd = cmd_src.command if isinstance(cmd_src, commands.Context) else cmd_src
   cmd_string = f"{cmd}({','.join(cmd.signature.split(' '))})".rstrip(" ")
-  return f"`{cmd_string}`"
+  return f"{cmd_string}"
 
 def add_author_footer(embed: disnake.Embed, author: Union[disnake.User, disnake.Member],
                       set_timestamp=True, additional_text: Union[Iterable[str], None] = None):
