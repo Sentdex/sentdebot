@@ -112,12 +112,6 @@ class Stats(Base_Cog):
 
     messages_repo.add_message_content(channel.id, thread_id, message.content)
 
-  async def handle_message_edited(self, _, after: disnake.Message):
-    message_item = messages_repo.get_message_metric(after.id)
-    if message_item is not None:
-      message_item.content = after.content
-      messages_repo.session.commit()
-
   @commands.command(brief=Strings.stats_stats_brief)
   @cooldowns.default_cooldown
   async def stats(self, ctx: commands.Context):
