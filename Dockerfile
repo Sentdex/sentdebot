@@ -13,4 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt --user
 RUN apt-get --purge remove build-essential -y
 RUN apt-get upgrade -y
 
+COPY . .
+
 ENTRYPOINT [ "python3", "sentdebot.py" ]

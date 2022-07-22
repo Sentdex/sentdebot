@@ -3,6 +3,7 @@ version: '3.8'
 services:
     db:
         image: postgres:latest
+        container_name: sentdebot-db
         ports:
             - "5432:5432"
         environment:
@@ -11,12 +12,14 @@ services:
             - postgres_data:/var/lib/postgresql/data/
     bot:
         build: .
+        container_name: sentdebot
         volumes:
-            -   ./:/sentdebot/
+            -   .:/sentdebot/
         depends_on:
             - db
     adminer:
         image: adminer
+        container_name: sentdebot-adminer
         ports:
             - "8080:8080"
         depends_on:
