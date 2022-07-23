@@ -26,7 +26,7 @@ def getApproximateAnswer(q):
       max_score = score
       answer_id = ans_id
 
-  if max_score > 0.3:
+  if max_score > config.questions_and_answers.score_limit:
     return questions_and_answers_repo.get_answer_by_id(answer_id)
   return None
 

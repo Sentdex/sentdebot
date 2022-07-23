@@ -85,3 +85,7 @@ announce_channel_id = 999125170260283444
 user_threshold = 2
 announce_role_id = 999135017341030410
 announce_channel_id = 999134821458645062
+
+
+[questions_and_answers]
+score_limit = 0.4
