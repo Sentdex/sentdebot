@@ -138,7 +138,10 @@ class Strings(metaclass=formattable):
   questions_and_answers_repond_format = "Maybe this is what you are looking for\n`{result}`"
 
   questions_and_answers_add_description = "Add new question and answer"
+  questions_and_answers_add_added = "New Q&A datapoint created"
+  questions_and_answers_add_failed = "Failed to create new Q&A datapoint, maybe it already exists"
 
   questions_and_answers_remove_description = "Remove question and answer from database"
+  questions_and_answers_remove_removed = "Question removed from database"
 
   questions_and_answers_list_description = "List all questions and answers"

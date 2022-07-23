@@ -67,7 +67,7 @@ class QuestionsAndAnswers(Base_Cog):
   @commands.check(general_util.is_mod)
   async def add_question_and_answer(self, inter: disnake.CommandInteraction, question: str):
     questions_and_answers_repo.remove_question(question)
-    await general_util.generate_success_message(inter, "Question removed from database")
+    await general_util.generate_success_message(inter, Strings.questions_and_answers_remove_removed)
 
   @question_and_answer.sub_command(name="list", description=Strings.questions_and_answers_list_description)
   @cooldowns.default_cooldown

@@ -2,6 +2,7 @@ import disnake
 
 from util import general_util
 from database import questions_and_answers_repo
+from static_data.strings import Strings
 
 class CreateQuestionAndAnswer(disnake.ui.Modal):
   def __init__(self):
@@ -13,5 +14,5 @@ class CreateQuestionAndAnswer(disnake.ui.Modal):
 
   async def callback(self, interaction: disnake.ModalInteraction) -> None:
     if questions_and_answers_repo.create_question_and_answer(interaction.text_values["q_and_a:question"], interaction.text_values["q_and_a:answer"]) is None:
-      return await general_util.generate_error_message(interaction, "Failed to create new Q&A datapoint")
-    await general_util.generate_success_message(interaction, "New Q&A datapoint created")
+      return await general_util.generate_error_message(interaction, Strings.questions_and_answers_add_failed)
+    await general_util.generate_success_message(interaction, Strings.questions_and_answers_add_added)
