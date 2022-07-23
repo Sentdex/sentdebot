@@ -15,20 +15,22 @@ logger = setup_custom_logger(__name__)
 def getApproximateAnswer(q):
   max_score = 0
   answer_id = -1
+  ref_question = None
 
   questions = questions_and_answers_repo.get_all_questions()
 
   for ans_id, question in questions:
     score = ratio(question, q)
     if score >= 0.9:
-      return questions_and_answers_repo.get_answer_by_id(ans_id)
+      return question, questions_and_answers_repo.get_answer_by_id(ans_id), score
     elif score > max_score:
       max_score = score
       answer_id = ans_id
+      ref_question = question
 
-  if max_score > config.questions_and_answers.score_limit:
-    return questions_and_answers_repo.get_answer_by_id(answer_id)
-  return None
+  if (max_score * 100) > config.questions_and_answers.score_limit:
+    return ref_question, questions_and_answers_repo.get_answer_by_id(answer_id), max_score
+  return None, None, None
 
 class QuestionsAndAnswers(Base_Cog):
   def __init__(self, bot: commands.Bot):
@@ -44,8 +46,10 @@ class QuestionsAndAnswers(Base_Cog):
     channel = message.channel.parent if isinstance(message.channel, disnake.Thread) else message.channel
     if channel.id != config.ids.help_channel: return
 
-    answer = getApproximateAnswer(message.content)
+    ref_question, answer, score = getApproximateAnswer(message.content)
     if answer is None: return
+
+    logger.info(f"Found answer for users question: `{message.content}`\nReference question: `{ref_question}`\nAnswer: `{answer}`")
 
     await message.reply(f"Maybe this is answer to you problem\n`{answer}`")
 

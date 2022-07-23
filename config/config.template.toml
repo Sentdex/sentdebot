@@ -88,4 +88,5 @@ announce_channel_id = 999134821458645062
 
 
 [questions_and_answers]
-score_limit = 0.4
+# In percent
+score_limit = 40
