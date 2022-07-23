@@ -50,11 +50,8 @@ class Auditlog(Base_Cog):
 
   @commands.Cog.listener()
   async def on_message(self, message: disnake.Message):
-    main_guild = self.bot.get_guild(config.ids.main_guild)
-
-    if main_guild is None: return
     if message.guild is None: return
-    if main_guild.id != message.guild.id: return
+    if config.ids.main_guild != message.guild.id: return
     if message.author.bot: return
     if message.content == "" or message.content.startswith(config.base.command_prefix + "."): return
 

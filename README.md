@@ -71,10 +71,13 @@ python sentdebot.py
 
 Using docker compose
 ```py
-docker-compose up --build
+docker-compose up --build -d
 
 # After code modification rebuild using
 docker restart sentdebot
+# Or when you need some new packages installed
+docker-compose down
+docker-compose up --build -d
 
 ## Special cleanup cases ##
 # Teardown and remove volumes

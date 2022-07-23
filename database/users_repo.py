@@ -8,7 +8,7 @@ from database.tables.users import User
 
 def get_user(user_id: int) -> Optional[User]:
   user = session.query(User).filter(User.id == str(user_id)).one_or_none()
-  if user.left_at is not None:
+  if user is not None and user.left_at is not None:
     user.left_at = None
     session.commit()
   return user
