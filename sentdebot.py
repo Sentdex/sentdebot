@@ -73,8 +73,15 @@ async def on_message(message: disnake.Message):
         args = []
         arg = ""
         in_parentheses = None
+        in_codeblock = False
         for ch in args_string:
-          if ch in ("\"", "\'"):
+          if ch == "`" and in_parentheses is None:
+            in_codeblock = not in_codeblock
+            if not in_codeblock and arg != "":
+              args.append(f"```{arg.strip()}```")
+              arg = ""
+            continue
+          elif ch in ("\"", "\'") and not in_codeblock:
             if in_parentheses is None:
               if arg != "":
                 raise SyntaxError

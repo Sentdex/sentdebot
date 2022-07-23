@@ -115,8 +115,13 @@ def add_string_until_length(strings:List[str], max_length:int, sep:str) -> Tuple
     output = tmp_output
   return output, strings
 
-def truncate_string(string: str, limit: int=12, ellipsis :str="…") -> str:
-  return string[:limit - len(ellipsis)] + ellipsis if len(string) > limit else string
+def truncate_string(string: str, limit: int, ellipsis :str="…", from_beginning: bool=False) -> str:
+  if len(string) <= limit: return string
+
+  if from_beginning:
+    return ellipsis + string[len(string) - limit + len(ellipsis):]
+  else:
+    return string[:limit - len(ellipsis)] + ellipsis
 
 def get_user_stats(guild):
   members = guild.members

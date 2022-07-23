@@ -136,8 +136,9 @@ class Auditlog(Base_Cog):
       return
 
     user_it = users_repo.get_user(member.id)
-    user_it.left_at = datetime.datetime.utcnow()
-    users_repo.session.commit()
+    if user_it is not None:
+      user_it.left_at = datetime.datetime.utcnow()
+      users_repo.session.commit()
 
   @tasks.loop(hours=24)
   async def cleanup_taks(self):
