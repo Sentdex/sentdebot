@@ -7,6 +7,7 @@ import traceback
 from features.base_cog import Base_Cog
 from features.reaction_context import ReactionContext
 from util.logger import setup_custom_logger
+from database import messages_repo
 
 logger = setup_custom_logger(__name__)
 
@@ -50,7 +51,7 @@ class Listeners(Base_Cog):
       cogs_listening_futures = [cog.handle_message_edited(before, after) for cog in cogs]
       await asyncio.gather(*cogs_listening_futures)
     except:
-      logger.warning(f"Failed to execute add message edit handler\n{traceback.format_exc()}")
+      logger.warning(f"Failed to execute message edit handler\n{traceback.format_exc()}")
 
 def setup(bot):
   bot.add_cog(Listeners(bot))

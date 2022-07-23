@@ -12,7 +12,7 @@ from features.base_cog import Base_Cog
 from config import config, cooldowns
 from static_data.strings import Strings
 from features.paginator import EmbedView
-from database import help_threads_repo
+from database import help_threads_repo, users_repo
 from util.logger import setup_custom_logger
 from util import general_util
 from modals.create_help_request import HelpRequestModal
@@ -70,7 +70,7 @@ class HelpThreader(Base_Cog):
         logger.info(f"[Auto close task] Thread for message {message_id} is already closed")
         continue
 
-      owner = message.guild.get_member(int(help_req_item.owner_id))
+      owner = message.guild.get_member(int(help_req_item.owner_id)) if help_req_item.owner_id is not None else None
       if owner is None:
         # Owner of that thread is not on server anymore
         logger.info(f"[Auto close task] Owner of thread {thread.id} is not on server anymore, locking it up")
@@ -148,6 +148,7 @@ class HelpThreader(Base_Cog):
   @help_requests.sub_command(name="create", description=Strings.help_threader_request_create_brief)
   @cooldowns.huge_cooldown
   async def help_requests_create(self, inter: disnake.CommandInteraction):
+    users_repo.create_user_if_not_exist(inter.author)
     await inter.response.send_modal(HelpRequestModal(self.create_new_help_thread))
 
   @help_requests.sub_command(name="list", description=Strings.help_threader_list_requests_brief)
@@ -184,7 +185,7 @@ class HelpThreader(Base_Cog):
         help_threads_repo.delete_thread(message_id)
         continue
 
-      owner = message.guild.get_member(int(record.owner_id))
+      owner = message.guild.get_member(int(record.owner_id)) if record.owner_id is not None else None
       if owner is None:
         # Owner of that thread is not on server anymore
         logger.info(f"Owner of thread {thread.id} is not on server anymore")
@@ -214,7 +215,7 @@ class HelpThreader(Base_Cog):
       for thread, tags, message, owner, last_activity in batch:
         tags = "".join([f"[{tag.strip()}]" for tag in tags.split(";") if tag != ""]) if tags is not None else None
 
-        embed.add_field(name=f"{thread.name}", value=f"Owner: {owner.name}\nTags: {tags}\nLast activity: {humanize.naturaltime(last_activity)}\n[Link]({thread.jump_url})", inline=False)
+        embed.add_field(name=f"{thread.name}", value=f"Owner: {owner.display_name}\nTags: {tags}\nLast activity: {humanize.naturaltime(last_activity)}\n[Link]({thread.jump_url})", inline=False)
       pages.append(embed)
 
     await EmbedView(inter.author, pages).run(inter)

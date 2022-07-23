@@ -36,7 +36,7 @@ log_channel = 838455904571621427
 # Cogs that will be loaded on startup and unable to be unloaded
 protected = ["system", "errors", "help", "listeners"]
 # Cogs automatically loaded after start
-defaul_loaded = ["common", "code_execute", "projects", "random_role_giver", "stats", "help_threader", "bookmarks", "voice_channel_notifier"]
+defaul_loaded = ["common", "code_execute", "projects", "random_role_giver", "stats", "auditlog", "help_threader", "bookmarks", "voice_channel_notifier"]
 
 
 [random_role_giver]

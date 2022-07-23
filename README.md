@@ -15,15 +15,17 @@ This project is no replacement for original Sentdebot. It was created only as pr
 Because original bot was ment to be used only for one specific server and some features are tightly related to it then this bot to share similar behaviour and simply some functions will be unavailable if invited to different guild for which was the bot configured.
 
 ## Bot structure
-Main difference between this bot and the original one is the that this bot is split to modules with different subfunctions to be as modular as possible. \
-This bot is divided to few main parts: main bot file, cogs, config, database, features, modals, static data and utils. \
-Main bot file (sentdebot.py in root directory) is used as entrypoint of whole bot. \
-Cogs is folder to store individual extensions of functionality. \
+```
+Main difference between this bot and the original one is the that this bot is split to modules with different subfunctions to be as modular as possible.
+This bot is divided to few main parts: main bot file, cogs, config, database, features, modals, static data and utils. 
+Main bot file (sentdebot.py in root directory) is used as entrypoint of whole bot. 
+Cogs is folder to store individual extensions of functionality. 
 Config stores parser for configuration files and definitions for cooldowns, there is also template for configuration file that you want to copy, modify and rename to ``config.toml`` to be able to run this bot. \
-Features is used to store extension of disnake functionality by wrappers, custom functional components and other things. \
-Modals stores discord UI definitions for InApp forms. \
-Static data folder is used to data that are not change in runtime, and it's desired to have them on one place to better access for editing. \
+Features is used to store extension of disnake functionality by wrappers, custom functional components and other things. 
+Modals stores discord UI definitions for InApp forms. 
+Static data folder is used to data that are not change in runtime, and it's desired to have them on one place to better access for editing. 
 Utils is place for any other extensions, helper functions, etc.
+```
 
 ## Features
 1. Buildin robust error handling with option to log to file and log discord channel (in cases that are forgotten to handle or caused by bad manipulation of user) \

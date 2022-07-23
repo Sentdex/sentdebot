@@ -1,21 +1,19 @@
-from sqlalchemy import Column, DateTime, String
+from sqlalchemy import Column, DateTime, String, ForeignKey, Boolean
 
-from database import database, BigIntegerType
+from database import database
 
-class MessageMetric(database.base):
-  __tablename__ = "message_metrics"
+class Message(database.base):
+  __tablename__ = "messages"
 
   message_id = Column(String, primary_key=True, unique=True)
-  timestamp = Column(DateTime, index=True)
-  author_id = Column(String)
-  channel_id = Column(String, index=True)
-  thread_id = Column(String)
+  author_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"))
 
-class MessageContent(database.base):
-  __tablename__ = "message_contents"
+  created_at = Column(DateTime, index=True, nullable=False)
+  edited_at = Column(DateTime)
 
-  id = Column(BigIntegerType, primary_key=True, unique=True, autoincrement=True)
-
-  channel_id = Column(String, index=True)
+  channel_id = Column(String, index=True, nullable=False)
   thread_id = Column(String)
   content = Column(String)
+  attachments = Column(String)
+
+  use_for_metrics = Column(Boolean, nullable=False)

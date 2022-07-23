@@ -90,6 +90,8 @@ class Help(Base_Cog):
   @commands.command(name="help", brief=Strings.help_brief, help=Strings.help_help)
   @cooldowns.short_cooldown
   async def help(self, ctx: commands.Context, name: Optional[str]=None):
+    await general_util.delete_message(self.bot, ctx)
+
     pages = []
     if name is not None:
       all_commands = get_all_commands(self.bot, ctx)
@@ -120,6 +122,8 @@ class Help(Base_Cog):
   @commands.command(name="command_list", brief=Strings.help_commands_list_brief)
   @cooldowns.short_cooldown
   async def command_list(self, ctx: commands.Context):
+    await general_util.delete_message(self.bot, ctx)
+
     all_commands = get_all_commands(self.bot, ctx)
     command_strings = [f"{config.base.command_prefix}.{general_util.get_command_signature(com)}" for com in all_commands]
 
