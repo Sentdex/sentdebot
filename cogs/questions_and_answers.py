@@ -9,6 +9,7 @@ from util.logger import setup_custom_logger
 from features.base_cog import Base_Cog
 from modals.question_and_answer import CreateQuestionAndAnswer
 from features.paginator import EmbedView
+from static_data.strings import Strings
 
 logger = setup_custom_logger(__name__)
 
@@ -51,24 +52,24 @@ class QuestionsAndAnswers(Base_Cog):
 
     logger.info(f"Found answer for users question: `{message.content}`\nReference question: `{ref_question}`\nAnswer: `{answer}`")
 
-    await message.reply(f"Maybe this is answer to you problem\n`{answer}`")
+    await message.reply(Strings.questions_and_answers_repond_format(result=answer))
 
   @commands.slash_command(name="question_and_answer")
   async def question_and_answer(self, inter: disnake.CommandInteraction):
     pass
 
-  @question_and_answer.sub_command(name="add", description="Add new question and answer")
+  @question_and_answer.sub_command(name="add", description=Strings.questions_and_answers_add_description)
   @commands.check(general_util.is_mod)
   async def add_question_and_answer(self, inter: disnake.CommandInteraction):
     await inter.response.send_modal(modal=CreateQuestionAndAnswer())
 
-  @question_and_answer.sub_command(name="remove", description="Remove question and answer from database")
+  @question_and_answer.sub_command(name="remove", description=Strings.questions_and_answers_remove_description)
   @commands.check(general_util.is_mod)
   async def add_question_and_answer(self, inter: disnake.CommandInteraction, question: str):
     questions_and_answers_repo.remove_question(question)
     await general_util.generate_success_message(inter, "Question removed from database")
 
-  @question_and_answer.sub_command(name="list", description="List all questions and answers")
+  @question_and_answer.sub_command(name="list", description=Strings.questions_and_answers_list_description)
   @cooldowns.default_cooldown
   async def question_and_answer_list(self, inter: disnake.CommandInteraction):
     data = questions_and_answers_repo.get_all()

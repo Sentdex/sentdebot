@@ -133,3 +133,12 @@ class Strings(metaclass=formattable):
   voice_channel_notifier_unsubscribe_role_not_found = "Can't found role for notification threshold `{threshold}`"
   voice_channel_notifier_unsubscribe_success = "Unsubscribed for notifications"
   voice_channel_notifier_unsubscribe_failed = "Unsubscribtion failed"
+
+  # Questions and answers
+  questions_and_answers_repond_format = "Maybe this is what you are looking for\n`{result}`"
+
+  questions_and_answers_add_description = "Add new question and answer"
+
+  questions_and_answers_remove_description = "Remove question and answer from database"
+
+  questions_and_answers_list_description = "List all questions and answers"
