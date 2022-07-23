@@ -7,7 +7,11 @@ from database import session
 from database.tables.users import User
 
 def get_user(user_id: int) -> Optional[User]:
-  return session.query(User).filter(User.id == str(user_id)).one_or_none()
+  user = session.query(User).filter(User.id == str(user_id)).one_or_none()
+  if user.left_at is not None:
+    user.left_at = None
+    session.commit()
+  return user
 
 def create_user_if_not_exist(user: disnake.Member) -> User:
   user_it = get_user(user.id)

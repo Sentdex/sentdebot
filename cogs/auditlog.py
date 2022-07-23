@@ -116,6 +116,13 @@ class Auditlog(Base_Cog):
     users_repo.session.commit()
 
   @commands.Cog.listener()
+  async def on_member_join(self, member: disnake.Member):
+    if member.guild.id != config.ids.main_guild:
+      return
+
+    users_repo.create_user_if_not_exist(member)
+
+  @commands.Cog.listener()
   async def on_member_remove(self, member: disnake.Member):
     if member.guild.id != config.ids.main_guild:
       return
