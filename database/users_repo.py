@@ -1,3 +1,5 @@
+import datetime
+
 import disnake
 from typing import Optional
 
@@ -14,3 +16,8 @@ def create_user_if_not_exist(user: disnake.Member) -> User:
     session.add(user_it)
     session.commit()
   return user_it
+
+def delete_left_users(days_after_left: int):
+  threshold = datetime.datetime.utcnow() - datetime.timedelta(days=days_after_left)
+  session.query(User).filter(User.left_at != None, User.left_at <= threshold).delete()
+  session.commit()

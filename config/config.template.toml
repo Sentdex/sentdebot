@@ -59,6 +59,11 @@ close_request_after_days_of_inactivity = 10
 [essentials]
 max_cached_messages = 5000
 
+# Disable by setting to -1
+delete_left_users_after_days = 20
+delete_messages_after_days = 60
+delete_audit_logs_after_days = 60
+
 
 [common]
 vote_duration_seconds = 180

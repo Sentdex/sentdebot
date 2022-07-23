@@ -21,3 +21,8 @@ def get_message_metrics(days_back: int) -> List[Tuple[int, datetime.datetime, in
 def get_author_of_last_message_metric(channel_id: int, thread_id: Optional[int]) -> Optional[int]:
   user_id = session.query(Message.author_id).filter(Message.channel_id == str(channel_id), Message.thread_id == (str(thread_id) if thread_id is not None else None), Message.use_for_metrics == True).order_by(Message.created_at.desc()).first()
   return int(user_id[0]) if user_id is not None else None
+
+def delete_old_messages(days: int):
+  threshold = datetime.datetime.utcnow() - datetime.timedelta(days=days)
+  session.query(Message).filter(Message.created_at <= threshold).delete()
+  session.commit()

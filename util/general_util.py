@@ -117,3 +117,17 @@ def add_string_until_length(strings:List[str], max_length:int, sep:str) -> Tuple
 
 def truncate_string(string: str, limit: int=12, ellipsis :str="…") -> str:
   return string[:limit - len(ellipsis)] + ellipsis if len(string) > limit else string
+
+def get_user_stats(guild):
+  members = guild.members
+
+  online, idle, offline = 0, 0, 0
+  for member in members:
+    if member.status == disnake.Status.online:
+      online += 1
+    elif member.status == disnake.Status.offline:
+      offline += 1
+    else:
+      idle += 1
+
+  return online, idle, offline

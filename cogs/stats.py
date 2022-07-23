@@ -2,8 +2,8 @@
 
 import datetime
 import disnake
-from disnake.ext import commands, tasks
-from typing import Optional, List, Tuple
+from disnake.ext import commands
+from typing import Optional, Tuple
 import pandas as pd
 import numpy as np
 from collections import Counter
@@ -25,7 +25,7 @@ from config import cooldowns
 from util import general_util
 from config import config
 from features.base_cog import Base_Cog
-from database import user_metrics_repo, messages_repo, help_threads_repo, users_repo
+from database import user_metrics_repo, messages_repo
 from static_data.strings import Strings
 from util.logger import setup_custom_logger
 
@@ -37,81 +37,12 @@ def df_match(c1, c2):
   else:
     return c1
 
-
-def get_user_stats(guild):
-  members = guild.members
-
-  online, idle, offline = 0, 0, 0
-  for member in members:
-    if member.status == disnake.Status.online:
-      online += 1
-    elif member.status == disnake.Status.offline:
-      offline += 1
-    else:
-      idle += 1
-
-  return online, idle, offline
-
-
 class Stats(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(Stats, self).__init__(bot, __file__)
 
-    if self.bot.is_ready():
-      self.late_init()
-
     self.user_activity_image: Optional[Tuple[io.BytesIO, datetime.datetime]] = None
     self.community_report_image: Optional[Tuple[io.BytesIO, datetime.datetime]] = None
-
-  def late_init(self):
-    if not self.user_stats_task.is_running():
-      self.user_stats_task.start()
-
-  def cog_unload(self) -> None:
-    if self.user_stats_task.is_running():
-      self.user_stats_task.cancel()
-
-  def __del__(self):
-    if self.user_stats_task.is_running():
-      self.user_stats_task.cancel()
-
-  @commands.Cog.listener()
-  async def on_ready(self):
-    self.late_init()
-
-  @tasks.loop(minutes=5)
-  async def user_stats_task(self):
-    main_guild = self.bot.get_guild(config.ids.main_guild)
-    if main_guild is not None:
-      online, idle, offline = get_user_stats(main_guild)
-      user_metrics_repo.add_user_metrics(online, idle, offline)
-    else:
-      self.late_init()
-
-  @commands.Cog.listener()
-  async def on_message(self, message: disnake.Message):
-    main_guild = self.bot.get_guild(config.ids.main_guild)
-
-    if main_guild is None: return
-    if message.guild is None: return
-    if main_guild.id != message.guild.id: return
-    if message.author.bot: return
-    if message.content == "" or message.content.startswith(config.base.command_prefix + "."): return
-
-    thread = None
-    channel = message.channel
-    if isinstance(channel, disnake.Thread):
-      thread = channel
-      channel = channel.parent
-
-    thread_id = thread.id if thread is not None else None
-    if thread is not None:
-      if help_threads_repo.thread_exists(thread_id):
-        help_threads_repo.update_thread_activity(thread_id, message.created_at, commit=False)
-
-    users_repo.create_user_if_not_exist(message.author)
-    use_for_metrics = messages_repo.get_author_of_last_message_metric(channel.id, thread_id) != message.author.id
-    messages_repo.add_message(message.id, message.author.id, message.created_at, channel.id, thread.id if thread is not None else None, message.content, ";".join([att.url for att in message.attachments]), use_for_metrics, commit=True)
 
   @commands.command(brief=Strings.stats_stats_brief)
   @cooldowns.default_cooldown
@@ -215,7 +146,7 @@ class Stats(Base_Cog):
 
       self.community_report_image[0].seek(0)
 
-      online, idle, offline = get_user_stats(main_guild)
+      online, idle, offline = general_util.get_user_stats(main_guild)
       embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
       general_util.add_author_footer(embed, ctx.author)
       embed.set_image(file=disnake.File(self.community_report_image[0], "community_report.png"))
@@ -304,7 +235,7 @@ class Stats(Base_Cog):
 
     self.community_report_image = (buf, datetime.datetime.utcnow())
 
-    online, idle, offline = get_user_stats(main_guild)
+    online, idle, offline = general_util.get_user_stats(main_guild)
     embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
     general_util.add_author_footer(embed, ctx.author)
     embed.set_image(file=disnake.File(buf, "community_report.png"))

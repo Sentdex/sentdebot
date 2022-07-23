@@ -65,9 +65,9 @@ def create_message_deleted_log(message: disnake.Message) -> AuditLog:
 
 def create_member_changed_log(before: disnake.Member, after: disnake.Member, commit: bool=False) -> Optional[AuditLog]:
   data = {}
-  if before.nick != after.nick:
-    data["nick_before"] = before.nick
-    data["nick_after"] = after.nick
+  if before.display_name != after.display_name:
+    data["nick_before"] = before.display_name
+    data["nick_after"] = after.display_name
 
   if before.display_avatar.url != after.display_avatar.url:
     data["avatar_url_before"] = before.display_avatar.url
@@ -81,3 +81,8 @@ def create_member_changed_log(before: disnake.Member, after: disnake.Member, com
       session.commit()
     return item
   return None
+
+def delete_old_logs(days: int):
+  threshold = datetime.datetime.utcnow() - datetime.timedelta(days=days)
+  session.query(AuditLog).filter(AuditLog.timestamp <= threshold).delete()
+  session.commit()
