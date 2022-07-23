@@ -2,8 +2,6 @@ import traceback
 import disnake
 from disnake import AllowedMentions, Intents, Game, Status
 from disnake.ext import commands
-import ast
-import re
 
 from config import config
 from util.logger import setup_custom_logger

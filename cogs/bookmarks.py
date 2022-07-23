@@ -26,7 +26,7 @@ class Bookmarks(Base_Cog):
         return
 
   @commands.message_command(name="Bookmark")
-  async def bookmark(self, inter: disnake.ApplicationCommandInteraction, message: disnake.Message):
+  async def bookmark(self, inter: disnake.MessageCommandInteraction, message: disnake.Message):
     await inter.response.send_modal(modal=BookmarkModal(message))
 
 def setup(bot):

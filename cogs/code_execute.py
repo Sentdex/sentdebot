@@ -42,7 +42,7 @@ class Code_Execute(Base_Cog):
     await self.run_the_code(ctx, codeblock)
 
   @commands.message_command(name="Run Code")
-  async def run_code_message_command(self, inter: disnake.ApplicationCommandInteraction, message: disnake.Message):
+  async def run_code_message_command(self, inter: disnake.MessageCommandInteraction, message: disnake.Message):
     await self.run_the_code(inter, message.content)
 
   async def run_the_code(self, ctx, sourcecode: str, codeblock_args: Optional[list]=None):
