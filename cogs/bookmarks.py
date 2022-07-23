@@ -1,6 +1,7 @@
 import disnake
 from disnake.ext import commands
 
+from config import cooldowns
 from features.base_cog import Base_Cog
 from views.bookmark import BookmarkView
 from features import bookmark
@@ -26,6 +27,7 @@ class Bookmarks(Base_Cog):
         return
 
   @commands.message_command(name="Bookmark")
+  @cooldowns.default_cooldown
   async def bookmark(self, inter: disnake.MessageCommandInteraction, message: disnake.Message):
     await inter.response.send_modal(modal=BookmarkModal(message))
 
