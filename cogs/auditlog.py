@@ -84,11 +84,22 @@ class Auditlog(Base_Cog):
     if before is None:
       before = message_item
 
+    after_attachments = ";".join([att.url for att in after.attachments])
+
+    if before is not None:
+      if isinstance(before, disnake.Message):
+        if before.content == after.content and \
+          ";".join([att.url for att in before.attachments]) == after_attachments:
+          return
+      else:
+        if before.content == after.content and before.attachments == after.attachments:
+          return
+
     audit_log_repo.create_message_edited_log(before, after)
 
     message_item.edited_at = after.edited_at
     message_item.content = after.content
-    message_item.attachments = ";".join([att.url for att in after.attachments])
+    message_item.attachments = after_attachments
 
     messages_repo.session.commit()
 
