@@ -53,7 +53,7 @@ class Auditlog(Base_Cog):
     if message.guild is None: return
     if config.ids.main_guild != message.guild.id: return
     if message.author.bot: return
-    if message.content == "" or message.content.startswith(config.base.command_prefix + "."): return
+    if message.content == "" or message.content.startswith(config.base.command_prefix): return
 
     thread = None
     channel = message.channel

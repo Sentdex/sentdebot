@@ -42,7 +42,7 @@ class QuestionsAndAnswers(Base_Cog):
     if message.guild is None: return
     if config.ids.main_guild != message.guild.id: return
     if message.author.bot: return
-    if message.content == "" or message.content.startswith(config.base.command_prefix + "."): return
+    if message.content == "" or message.content.startswith(config.base.command_prefix): return
 
     channel = message.channel.parent if isinstance(message.channel, disnake.Thread) else message.channel
     if channel.id != config.ids.help_channel: return

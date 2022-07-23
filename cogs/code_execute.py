@@ -10,7 +10,7 @@ from config import cooldowns
 from static_data.strings import Strings
 from features.base_cog import Base_Cog
 
-language_regex = re.compile(r"(\w*)\s*```(\w*)?([\s\S]*)```$")
+language_regex = re.compile(r"([\w\s\d]+)*```(\w*)([\s\S]*)```$")
 
 class Code_Execute(Base_Cog):
   def __init__(self, bot:commands.Bot):
@@ -45,17 +45,18 @@ class Code_Execute(Base_Cog):
   async def run_code_message_command(self, inter: disnake.MessageCommandInteraction, message: disnake.Message):
     await self.run_the_code(inter, message.content)
 
-  async def run_the_code(self, ctx, sourcecode: str, codeblock_args: Optional[list]=None):
+  async def run_the_code(self, ctx, sourcecode: str):
     matches = language_regex.findall(sourcecode)
 
     if not matches:
       return await general_util.generate_error_message(ctx, Strings.code_execute_run_cant_find_code_block)
 
-    lang = matches[0][0] or matches[0][1]
+    lang = matches[0][-2]
+    codeblock_args = [arg for arg in matches[0][:-2][0].split("\n") if arg != ""]
     if not lang:
       return await general_util.generate_error_message(ctx, Strings.code_execute_run_cant_find_language_in_code_block)
 
-    code: str = matches[0][2]
+    code: str = matches[0][-1]
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(None, self._run_code, lang, code, codeblock_args)
     if result is None:

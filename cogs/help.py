@@ -30,6 +30,13 @@ def command_check(com, ctx):
 def get_all_commands(bot: commands.Bot, ctx):
   return [com for cog in bot.cogs.values() for com in cog.walk_commands() if isinstance(com, commands.Command) and not com.hidden and command_check(com, ctx)]
 
+async def help_name_autocomplete(inter, string):
+  everything = [str(cog.qualified_name).replace("_", " ") for cog in inter.bot.cogs.values()]
+  everything.extend([com.name for com in get_all_commands(inter.bot, inter)])
+
+  if string is None or string == "":
+    return everything
+  return [d for d in everything if string.lower() in d.lower()]
 
 def add_command_help(embed, com):
   help_string = f"**Help**: " + com.help if com.help is not None else ""
@@ -42,7 +49,7 @@ def add_command_help(embed, com):
   if len(output) > 4096:
     logger.warning(f"Description for command {com.name} is too long")
   else:
-    embed.add_field(name=f"{config.base.command_prefix}.{general_util.get_command_signature(com)}", value=output, inline=False)
+    embed.add_field(name=f"{config.base.command_prefix}{general_util.get_command_signature(com)}", value=output, inline=False)
 
 
 def generate_help_for_cog(cog: Base_Cog, ctx) -> Union[None, List[disnake.Embed]]:
@@ -87,9 +94,9 @@ class Help(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(Help, self).__init__(bot, __file__)
 
-  @commands.command(name="help", brief=Strings.help_brief, help=Strings.help_help)
+  @commands.slash_command(name="help", description=Strings.help_brief)
   @cooldowns.short_cooldown
-  async def help(self, ctx: commands.Context, name: Optional[str]=None):
+  async def help(self, ctx: disnake.CommandInteraction, name: Optional[str]=commands.Param(default=None, description=Strings.help_name_param_description, autocomplete=help_name_autocomplete)):
     await general_util.delete_message(self.bot, ctx)
 
     pages = []
@@ -119,13 +126,13 @@ class Help(Base_Cog):
       emb = disnake.Embed(title="Help", description="*No help available*", colour=disnake.Color.orange())
       await ctx.send(embed=emb)
 
-  @commands.command(name="command_list", brief=Strings.help_commands_list_brief)
+  @commands.slash_command(name="command_list", description=Strings.help_commands_list_brief)
   @cooldowns.short_cooldown
-  async def command_list(self, ctx: commands.Context):
-    await general_util.delete_message(self.bot, ctx)
+  async def command_list(self, inter: disnake.CommandInteraction):
+    await general_util.delete_message(self.bot, inter)
 
-    all_commands = get_all_commands(self.bot, ctx)
-    command_strings = [f"{config.base.command_prefix}.{general_util.get_command_signature(com)}" for com in all_commands]
+    all_commands = get_all_commands(self.bot, inter)
+    command_strings = [f"{config.base.command_prefix}{general_util.get_command_signature(com)}" for com in all_commands]
 
     pages = []
     while command_strings:
@@ -133,15 +140,15 @@ class Help(Base_Cog):
       output = "{" + f"\n\t{output}\n" + "}"
       output = f"```py\n{output}\n```"
       embed = disnake.Embed(title="Commands list", description=output, colour=disnake.Color.dark_blue())
-      general_util.add_author_footer(embed, ctx.author)
+      general_util.add_author_footer(embed, inter.author)
       pages.append(embed)
 
     if pages:
-      await EmbedView(ctx.author, embeds=pages, perma_lock=True).run(ctx)
+      await EmbedView(inter.author, embeds=pages, perma_lock=True).run(inter)
     else:
       emb = disnake.Embed(title="Commands list", description="*No commands available*", colour=disnake.Color.orange())
-      general_util.add_author_footer(emb, ctx.author)
-      await ctx.send(embed=emb)
+      general_util.add_author_footer(emb, inter.author)
+      await inter.send(embed=emb, ephemeral=True)
 
 def setup(bot):
   bot.add_cog(Help(bot))

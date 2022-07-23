@@ -1,9 +1,9 @@
 # Ids should be unset by setting them to -1 but some may be required
 
 [base]
-discord_api_key = "<env>"
-command_prefixes = ["!"]
-status_message = "Sentdebot V2"
+discord_api_key = ""
+command_prefix = "!"
+status_message = "Some status message"
 
 # If true warning and error logs will also be logged in file discord.log
 log_to_file = false

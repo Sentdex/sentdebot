@@ -39,18 +39,18 @@ class Strings(metaclass=formattable):
 
   # Help
   help_brief = "Show all message commands and help for them"
-  help_help = "You can specify name of command or name of extension as parameter to search help only for thing you want"
+  help_name_param_description = "Specify name of command or name of extension as parameter to search help only for thing you want"
 
   help_commands_list_brief = "Show list of all available message commands"
 
   # Errors
   error_command_syntax_error = "Unknown syntax of command"
-  error_unknown_command = f"Unknown command - use {config.base.command_prefix}.help() for help"
+  error_unknown_command = f"Unknown command - use {config.base.command_prefix}help for help"
   error_command_on_cooldown = "This command is on cooldown. Please wait {remaining}s"
   error_missing_permission = "You do not have the permissions to use this command."
   error_missing_role = "You do not have {role} role to use this command"
   error_missing_argument = "Missing {argument} argument of command\n{signature}"
-  error_bad_argument = f"Some arguments of command missing or wrong, use {config.base.command_prefix}.help() to get more info"
+  error_bad_argument = f"Some arguments of command missing or wrong, use {config.base.command_prefix}help to get more info"
   error_max_concurrency_reached = "Bot is busy, try it later"
   error_no_private_message = "This command can't be used in private channel"
   error_interaction_timeout = "Interaction took more than 3 seconds to be responded to. Try again later."
@@ -111,7 +111,7 @@ class Strings(metaclass=formattable):
 
   # Code Execute
   code_execute_run_brief = "Evaluate code"
-  code_execute_run_help = "Code to execute should always be in markdown with specified language\nCode block can be as a part of command (under the command) or the command can be called in reply message to that codeblock"
+  code_execute_run_help = "Code to execute should always be in markdown with specified language\nCode block can be as a part of command (under the command) or the command can be called in reply message to that codeblock\Arguments can be part of markdown and can be placed above each on separated line"
   code_execute_run_cant_find_reference_channel = "Can't find reference channel of reply"
   code_execute_run_cant_find_reference_message = "Can't find reference message of reply"
   code_execute_run_cant_find_code_block = "Can't find codeblock in message"
