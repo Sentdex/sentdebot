@@ -21,7 +21,11 @@ class Errors(Base_Cog):
     await self.command_error_handling(ctx, error)
 
   @commands.Cog.listener()
-  async def ont_message_command_error(self, inter, error):
+  async def on_message_command_error(self, inter, error):
+    await self.command_error_handling(inter, error)
+
+  @commands.Cog.listener()
+  async def on_user_command_error(self, inter, error):
     await self.command_error_handling(inter, error)
 
   @commands.Cog.listener()

@@ -92,7 +92,7 @@ class Warden(Base_Cog):
       channel_id = message.channel.parent.id
       thread_id = message.channel.id
 
-    item = WardenMessageData(message.author.id, message.id, channel_id, thread_id, message.created_at, message.content, att_hashes)
+    item = WardenMessageData(message.author.id, message.id, channel_id, thread_id, datetime.datetime.utcnow(), message.content, att_hashes)
     message_cache[message.id] = item
     return item
 

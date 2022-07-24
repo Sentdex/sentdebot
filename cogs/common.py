@@ -21,11 +21,20 @@ class Common(Base_Cog):
 
     self.pet_cache = cachetools.LRUCache(maxsize=20)
 
+  @commands.command(name="invite")
+  @cooldowns.long_cooldown
+  async def invite_link(self, ctx: commands.Context):
+    await general_util.delete_message(self.bot, ctx)
+    await ctx.send("https://discord.com/oauth2/authorize?client_id=998191988312657960&permissions=1634705341648&scope=bot")
+
   @commands.message_command(name="Pin message")
   @commands.check(general_util.is_mod)
   async def pin_message(self, inter: disnake.MessageCommandInteraction, message: disnake.Message):
     try:
-      await message.pin(reason=f"{inter.author} pinned message")
+      if message.pinned:
+        await message.unpin(reason=f"{inter.author} unpinned message")
+      else:
+        await message.pin(reason=f"{inter.author} pinned message")
     except disnake.Forbidden:
       await general_util.generate_error_message(inter, "Bot don't have permissions to pin this message")
 

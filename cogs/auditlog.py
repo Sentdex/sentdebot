@@ -64,11 +64,11 @@ class Auditlog(Base_Cog):
     thread_id = thread.id if thread is not None else None
     if thread is not None:
       if help_threads_repo.thread_exists(thread_id):
-        help_threads_repo.update_thread_activity(thread_id, message.created_at, commit=False)
+        help_threads_repo.update_thread_activity(thread_id, datetime.datetime.utcnow(), commit=False)
 
     users_repo.create_user_if_not_exist(message.author)
     use_for_metrics = messages_repo.get_author_of_last_message_metric(channel.id, thread_id) != message.author.id
-    messages_repo.add_message(message.id, message.author.id, message.created_at, channel.id, thread.id if thread is not None else None, message.content, ";".join([att.url for att in message.attachments]), use_for_metrics, commit=True)
+    messages_repo.add_message(message.id, message.author.id, datetime.datetime.utcnow(), channel.id, thread.id if thread is not None else None, message.content, ";".join([att.url for att in message.attachments]), use_for_metrics, commit=True)
 
   async def handle_message_edited(self, before: Optional[disnake.Message], after: disnake.Message):
     if after.guild is None:
