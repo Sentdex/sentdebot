@@ -1,7 +1,7 @@
 import datetime
 import disnake
-from disnake.ext import commands
-from typing import Optional, List
+from disnake.ext import commands, tasks
+from typing import Optional, List, Dict
 import io
 from Levenshtein import ratio
 import hashlib
@@ -44,6 +44,25 @@ class WardenMessageData:
 class Warden(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(Warden, self).__init__(bot, __file__)
+
+    self.strikes: Dict[int, int] = {}
+    self.decrement_strikes_task.start()
+
+  def cog_unload(self) -> None:
+    if self.decrement_strikes_task.is_running():
+      self.decrement_strikes_task.cancel()
+
+  def __del__(self):
+    if self.decrement_strikes_task.is_running():
+      self.decrement_strikes_task.cancel()
+
+  @tasks.loop(minutes=config.warden.decrement_strikes_every_minutes)
+  async def decrement_strikes_task(self):
+    keys = self.strikes.keys()
+    for key in keys:
+      self.strikes[key] -= 1
+      if self.strikes[key] <= 0:
+        del self.strikes[key]
 
   @commands.Cog.listener()
   async def on_message(self, message: disnake.Message):
@@ -100,6 +119,7 @@ class Warden(Base_Cog):
     def hamming_distance(chaine1, chaine2):
       return sum(c1 != c2 for c1, c2 in zip(chaine1, chaine2))
 
+    logger.info("Starting message duplicate check")
     current_message = await self.generate_message_hash(message)
     current_have_attachments = len(current_message.attachment_hashes) != 0
     all_messages: List[WardenMessageData] = list(message_cache.values())
@@ -143,8 +163,12 @@ class Warden(Base_Cog):
                 if probability > attachment_max_probability:
                   attachment_max_probability = probability
 
+    logger.info("Duplicate check finished")
+
     if content_max_similarity >= CONTENT_MEDIUM_SIMILARITY and ((not attachments_present and not current_have_attachments) or attachment_max_probability >= ATT_MEDIUM_SIMILARITY_PROBABILITY):
-      await self.announce_duplicate(message, similar_object, content_max_similarity, attachment_max_probability)
+      self.strikes[message.author.id] += 1
+      if self.strikes[message.author.id] >= config.warden.strikes_to_notify:
+        await self.announce_duplicate(message, similar_object, content_max_similarity, attachment_max_probability)
 
   async def announce_duplicate(self, message: disnake.Message, similar_object: WardenMessageData, content_similarity: float, attachment_probability: float):
     report_channel = await general_util.get_or_fetch_channel(self.bot, config.ids.warden_report_channel)

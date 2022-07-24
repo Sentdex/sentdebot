@@ -96,3 +96,6 @@ score_limit = 40
 
 [warden]
 message_cache_size = 2000
+expire_time_minutes = 5
+strikes_to_notify = 2
+decrement_strikes_every_minutes = 10
