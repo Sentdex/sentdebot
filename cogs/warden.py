@@ -25,6 +25,7 @@ message_cache = cachetools.FIFOCache(config.warden.message_cache_size)
 
 @dataclasses.dataclass
 class WardenMessageData:
+  author_id: int
   message_id: int
   channel_id: int
   thread_id: Optional[int]
@@ -91,7 +92,7 @@ class Warden(Base_Cog):
       channel_id = message.channel.parent.id
       thread_id = message.channel.id
 
-    item = WardenMessageData(message.id, channel_id, thread_id, message.created_at, message.content, att_hashes)
+    item = WardenMessageData(message.author.id, message.id, channel_id, thread_id, message.created_at, message.content, att_hashes)
     message_cache[message.id] = item
     return item
 
@@ -111,6 +112,9 @@ class Warden(Base_Cog):
 
     for message_item in all_messages:
       if message_item == current_message:
+        continue
+
+      if message_item.author_id != current_message.author_id:
         continue
 
       if current_message.content is not None and message_item.content is not None:
