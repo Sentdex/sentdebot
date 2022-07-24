@@ -15,10 +15,10 @@ from util import general_util
 
 logger = setup_custom_logger(__name__)
 
-CONTENT_MEDIUM_SIMILARITY = 85
+CONTENT_MEDIUM_SIMILARITY = 90
 CONTENT_HIGH_SIMILARITY = 95
 
-ATT_MEDIUM_SIMILARITY_PROBABILITY = 85
+ATT_MEDIUM_SIMILARITY_PROBABILITY = 90
 ATT_HIGH_SIMILARITY_PROBABILITY = 95
 
 message_cache = cachetools.FIFOCache(config.warden.message_cache_size)
@@ -114,6 +114,10 @@ class Warden(Base_Cog):
       if message_item == current_message:
         continue
 
+      if datetime.datetime.utcnow() - message_item.created_at > datetime.timedelta(minutes=config.warden.expire_time_minutes):
+        message_cache.pop(message_item.message_id)
+        continue
+
       if message_item.author_id != current_message.author_id:
         continue
 
@@ -163,8 +167,8 @@ class Warden(Base_Cog):
 
     color = disnake.Color.orange() if content_similarity < CONTENT_HIGH_SIMILARITY and attachment_probability < ATT_HIGH_SIMILARITY_PROBABILITY else disnake.Color.red()
     embed = disnake.Embed(title="Message duplicate found", color=color, description=description)
-    embed.add_field(name="Original message", value=f"[Link]({original_message.jump_url})" if original_message is not None else "_??? (404)_")
-    embed.add_field(name="Duplicate message", value=f"[Link]({message.jump_url})")
+    embed.add_field(name="Original message", value=f"Author: {original_message.author}\nChannel: {original_message.channel.name}\n[Link]({original_message.jump_url})" if original_message is not None else "_??? (404)_")
+    embed.add_field(name="Duplicate message", value=f"Author: {message.author}\nChannel: {message.channel.name}\n[Link]({message.jump_url})")
 
     await report_channel.send(embed=embed)
 

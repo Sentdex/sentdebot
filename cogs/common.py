@@ -9,7 +9,7 @@ import requests
 from PIL import Image, ImageDraw
 import cachetools
 
-from config import cooldowns, config
+from config import cooldowns
 from static_data.strings import Strings
 from features.base_cog import Base_Cog
 from util import general_util
@@ -20,6 +20,14 @@ class Common(Base_Cog):
     super(Common, self).__init__(bot, __file__)
 
     self.pet_cache = cachetools.LRUCache(maxsize=20)
+
+  @commands.message_command(name="Pin message")
+  @commands.check(general_util.is_mod)
+  async def pin_message(self, inter: disnake.MessageCommandInteraction, message: disnake.Message):
+    try:
+      await message.pin(reason=f"{inter.author} pinned message")
+    except disnake.Forbidden:
+      await general_util.generate_error_message(inter, "Bot don't have permissions to pin this message")
 
   @commands.command(brief=Strings.common_ping_brief)
   @cooldowns.default_cooldown
