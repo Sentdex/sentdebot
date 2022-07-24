@@ -26,7 +26,7 @@ intents.presences = True
 intents.typing = True
 intents.voice_states = True
 
-bot = commands.Bot(
+bot = commands.AutoShardedBot(
   command_prefix=commands.when_mentioned_or(config.base.command_prefix),
   help_command=None,
   case_insensitive=True,
@@ -45,9 +45,9 @@ async def on_ready():
     return
   is_initialized = True
 
-  logger.info('Logged in as: {0} (ID: {0.id})'.format(bot.user))
+  logger.info(f"Logged in as: {bot.user} (ID: {bot.user.id}) on {bot.shard_count} shards")
   await bot.change_presence(activity=Game(name=config.base.status_message, type=0), status=Status.online)
-  logger.info('Ready!')
+  logger.info("Ready!")
 
 for cog in config.cogs.protected:
   try:

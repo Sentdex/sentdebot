@@ -7,13 +7,12 @@ import traceback
 from features.base_cog import Base_Cog
 from features.reaction_context import ReactionContext
 from util.logger import setup_custom_logger
-from database import messages_repo
 
 logger = setup_custom_logger(__name__)
 
 class Listeners(Base_Cog):
   def __init__(self, bot: commands.Bot):
-    super(Listeners, self).__init__(bot, __name__)
+    super(Listeners, self).__init__(bot, __file__)
 
   @commands.Cog.listener()
   async def on_raw_reaction_add(self, payload):
@@ -37,10 +36,10 @@ class Listeners(Base_Cog):
       channel = self.bot.get_channel(payload.channel_id)
 
       if channel is None:
-        channel = await self.bot.fetch_channel(payload.channel_id)
-
-      if channel is None:
-        return
+        try:
+          channel = await self.bot.fetch_channel(payload.channel_id)
+        except:
+          return
 
       after = await channel.fetch_message(payload.message_id)
       if after is None:

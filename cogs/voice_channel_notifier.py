@@ -59,7 +59,10 @@ class VoiceChannelNotifier(Base_Cog):
     role_id = self.threshold_to_announce_role[treshhold]
     role = ctx.guild.get_role(role_id)
     if role is None:
-      roles = await ctx.guild.fetch_roles()
+      try:
+        roles = await ctx.guild.fetch_roles()
+      except:
+        return general_util.generate_error_message(ctx, Strings.voice_channel_notifier_subscribe_failed_to_retrieve_roles)
       role = disnake.utils.get(roles, id=role_id)
 
     if role is None:
@@ -84,7 +87,10 @@ class VoiceChannelNotifier(Base_Cog):
     role_id = self.threshold_to_announce_role[threshold]
     role = ctx.guild.get_role(role_id)
     if role is None:
-      roles = await ctx.guild.fetch_roles()
+      try:
+        roles = await ctx.guild.fetch_roles()
+      except:
+        return general_util.generate_error_message(ctx, Strings.voice_channel_notifier_unsubscribe_failed_to_retrieve_roles)
       role = disnake.utils.get(roles, id=role_id)
 
     if role is None:
@@ -108,7 +114,10 @@ class VoiceChannelNotifier(Base_Cog):
       channel = self.bot.get_channel(channel_id)
 
       if channel is None:
-        channel = await self.bot.fetch_channel(channel_id)
+        try:
+          channel = await self.bot.fetch_channel(channel_id)
+        except:
+          continue
 
       if channel is None or not isinstance(channel, disnake.VoiceChannel):
         continue
@@ -143,7 +152,10 @@ class VoiceChannelNotifier(Base_Cog):
     for member_id in oldest_members_ids:
       member = channel.guild.get_member(member_id)
       if member is None:
-        member = await channel.guild.fetch_member(member_id)
+        try:
+          member = await channel.guild.fetch_member(member_id)
+        except:
+          continue
 
       if member is not None:
         members.append(member)
@@ -166,11 +178,11 @@ class VoiceChannelNotifier(Base_Cog):
     for channel_id in self.voice_channel_ids:
       voice_channel = self.bot.get_channel(channel_id)
       if voice_channel is None:
-        voice_channel = await self.bot.fetch_channel(channel_id)
-
-      if voice_channel is None:
-        logger.warning(f"Failed to find voice channel with id `{channel_id}` for announcement")
-        continue
+        try:
+          voice_channel = await self.bot.fetch_channel(channel_id)
+        except:
+          logger.warning(f"Failed to find voice channel with id `{channel_id}` for announcement")
+          continue
 
       for threshold in self.threshold_to_announce_role.keys():
         if threshold <= 0:
@@ -184,11 +196,11 @@ class VoiceChannelNotifier(Base_Cog):
           announce_channel = self.bot.get_channel(self.threshold_to_announce_channel[threshold])
 
           if announce_channel is None:
-            announce_channel = await self.bot.fetch_channel(self.threshold_to_announce_channel[threshold])
-
-          if announce_channel is None:
-            logger.warning(f"Failed to find announce channel with id `{self.threshold_to_announce_channel[threshold]}`")
-            continue
+            try:
+              announce_channel = await self.bot.fetch_channel(self.threshold_to_announce_channel[threshold])
+            except:
+              logger.warning(f"Failed to find announce channel with id `{self.threshold_to_announce_channel[threshold]}`")
+              continue
 
           oldest_members = await self.get_n_oldest_members(voice_channel, threshold)
           if not oldest_members:

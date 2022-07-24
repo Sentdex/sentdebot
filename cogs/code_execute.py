@@ -33,8 +33,9 @@ class Code_Execute(Base_Cog):
       if channel is None:
         return await general_util.generate_error_message(ctx, Strings.code_execute_run_cant_find_reference_channel)
 
-      message = await channel.fetch_message(message.reference.message_id)
-      if message is None:
+      try:
+        message = await channel.fetch_message(message.reference.message_id)
+      except:
         return await general_util.generate_error_message(ctx, Strings.code_execute_run_cant_find_reference_message)
 
       codeblock = message.content

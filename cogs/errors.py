@@ -90,8 +90,11 @@ class Errors(Base_Cog):
         guild = self.bot.get_guild(arg.guild_id)
         event_guild = guild.name
         channel = guild.get_channel(arg.channel_id)
-        message = await channel.fetch_message(arg.message_id)
-        message = message.content[:1000]
+        try:
+          message = await channel.fetch_message(arg.message_id)
+          message = message.content[:1000]
+        except:
+          message = arg.message_id
       else:
         event_guild = "DM"
         message = arg.message_id
@@ -102,17 +105,20 @@ class Errors(Base_Cog):
       else:
         channel = self.bot.get_channel(arg.channel_id)
         if channel:
-          message = await channel.fetch_message(arg.message_id)
-          if message.content:
-            message = message.content[:1000]
-          elif message.embeds:
-            embeds.extend(message.embeds)
-            message = "Embed in previous message"
-          elif message.attachments:
-            message_out = ""
-            for attachment in message.attachments:
-              message_out += f"{attachment.url}\n"
-            message = message_out
+          try:
+            message = await channel.fetch_message(arg.message_id)
+            if message.content:
+              message = message.content[:1000]
+            elif message.embeds:
+              embeds.extend(message.embeds)
+              message = "Embed in previous message"
+            elif message.attachments:
+              message_out = ""
+              for attachment in message.attachments:
+                message_out += f"{attachment.url}\n"
+              message = message_out
+          except:
+            message = arg.message_id
         else:
           message = arg.message_id
         user = str(user)

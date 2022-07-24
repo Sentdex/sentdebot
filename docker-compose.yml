@@ -13,6 +13,14 @@ services:
     bot:
         build: .
         container_name: sentdebot
+        deploy:
+            resources:
+                limits:
+                    cpus: "1.0"
+                    memory: 500M
+                reservations:
+                    cpus: "0.05"
+                    memory: 200M
         volumes:
             -   .:/sentdebot/
         depends_on:

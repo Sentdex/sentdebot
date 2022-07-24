@@ -125,12 +125,14 @@ class Strings(metaclass=formattable):
   voice_channel_notifier_subscribe_brief = "Subscribe to receive voice chat notifications"
   voice_channel_notifier_subscribe_invalid_threshold = "Threshold `{threshold}` is not associated with any subscription role"
   voice_channel_notifier_subscribe_role_not_found = "Can't found role for notification threshold `{threshold}`"
+  voice_channel_notifier_subscribe_failed_to_retrieve_roles = "Failed to retrieve roles of server"
   voice_channel_notifier_subscribe_success = "Subscribed for notifications"
   voice_channel_notifier_subscribe_failed = "Subscribtion failed"
 
   voice_channel_notifier_unsubscribe_brief = "Unsubscribe from receiving voice chat notifications"
   voice_channel_notifier_unsubscribe_invalid_threshold = "Threshold `{threshold}` is not associated with any subscription role"
   voice_channel_notifier_unsubscribe_role_not_found = "Can't found role for notification threshold `{threshold}`"
+  voice_channel_notifier_unsubscribe_failed_to_retrieve_roles = "Failed to retrieve roles of server"
   voice_channel_notifier_unsubscribe_success = "Unsubscribed for notifications"
   voice_channel_notifier_unsubscribe_failed = "Unsubscribtion failed"
 

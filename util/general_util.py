@@ -136,3 +136,22 @@ def get_user_stats(guild):
       idle += 1
 
   return online, idle, offline
+
+async def get_or_fetch_channel(source: Union[disnake.Guild, commands.Bot], channel_id: int):
+  channel = source.get_channel(channel_id)
+  if channel is None:
+    try:
+      channel = await source.fetch_channel(channel_id)
+    except:
+      return None
+
+  return channel
+
+async def get_or_fetch_message(bot: commands.Bot, source: Union[disnake.TextChannel, disnake.Thread], message_id: int):
+  message = bot.get_message(message_id)
+  if message is None:
+    try:
+      message = source.fetch_message(message_id)
+    except:
+      return None
+  return message

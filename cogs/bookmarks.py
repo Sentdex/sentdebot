@@ -10,7 +10,7 @@ from features.reaction_context import ReactionContext
 
 class Bookmarks(Base_Cog):
   def __init__(self, bot: commands.Bot):
-    super(Bookmarks, self).__init__(bot, __name__)
+    super(Bookmarks, self).__init__(bot, __file__)
 
   async def handle_reaction_add(self, ctx: ReactionContext):
     if ctx.author is None:

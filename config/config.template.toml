@@ -30,6 +30,8 @@ admin_role = []
 mod_role = []
 # Channle id to which error messages will be send
 log_channel = 838455904571621427
+warden_channels_to_look_for = []
+warden_report_channel = -1
 
 
 [cogs]
@@ -90,3 +92,7 @@ announce_channel_id = 999134821458645062
 [questions_and_answers]
 # In percent
 score_limit = 40
+
+
+[warden]
+message_cache_size = 2000
