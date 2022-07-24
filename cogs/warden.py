@@ -18,9 +18,6 @@ logger = setup_custom_logger(__name__)
 CONTENT_MEDIUM_SIMILARITY = 90
 CONTENT_HIGH_SIMILARITY = 95
 
-ATT_MEDIUM_SIMILARITY_PROBABILITY = 90
-ATT_HIGH_SIMILARITY_PROBABILITY = 95
-
 message_cache = cachetools.FIFOCache(config.warden.message_cache_size)
 
 @dataclasses.dataclass
@@ -31,7 +28,7 @@ class WardenMessageData:
   thread_id: Optional[int]
   created_at: datetime.datetime
 
-  content: Optional[str]
+  content: str
 
   attachment_hashes: List[str]
 
@@ -103,32 +100,26 @@ class Warden(Base_Cog):
     return att_hashes
 
   async def generate_message_hash(self, message: disnake.Message) -> WardenMessageData:
-    att_hashes = await self.calculate_hashes_of_attachments(message)
-
     channel_id = message.channel.id
     thread_id = None
     if isinstance(message.channel, disnake.Thread):
       channel_id = message.channel.parent.id
       thread_id = message.channel.id
 
+    att_hashes = await self.calculate_hashes_of_attachments(message)
+
     item = WardenMessageData(message.author.id, message.id, channel_id, thread_id, datetime.datetime.utcnow(), message.content, att_hashes)
     message_cache[message.id] = item
     return item
 
   async def check_for_duplicates(self, message: disnake.Message):
-    def hamming_distance(chaine1, chaine2):
-      return sum(c1 != c2 for c1, c2 in zip(chaine1, chaine2))
-
     logger.info("Starting message duplicate check")
     current_message = await self.generate_message_hash(message)
-    current_have_attachments = len(current_message.attachment_hashes) != 0
     all_messages: List[WardenMessageData] = list(message_cache.values())
 
     content_max_similarity = 0
     similar_object = None
-
-    attachments_present = False
-    attachment_max_probability = 0
+    att_similar_object = None
 
     for message_item in all_messages:
       if message_item == current_message:
@@ -141,36 +132,33 @@ class Warden(Base_Cog):
       if message_item.author_id != current_message.author_id:
         continue
 
-      if current_message.content is not None and message_item.content is not None:
-        content_similarity = ratio(current_message.content, message_item.content) * 100
-        logger.info(f"Content similarity: {content_similarity}")
+      content_similarity = ratio(current_message.content, message_item.content) * 100
+      logger.info(f"Content similarity: {content_similarity}")
 
-        if content_similarity > content_max_similarity:
-          content_max_similarity = content_similarity
-          similar_object = message_item
+      if content_similarity > content_max_similarity:
+        content_max_similarity = content_similarity
+        similar_object = message_item
 
-          attachment_max_probability = 0
-          attachments_present = len(message_item.attachment_hashes) != 0
-
-          if attachments_present:
-            for message_attachment_hash in message_item.attachment_hashes:
-              for cur_message_attachment_hash in current_message.attachment_hashes:
-                att_hammin = hamming_distance(int(message_attachment_hash), int(cur_message_attachment_hash))
-
-                probability = (1 - att_hammin / 128) * 100
-                logger.info(f"Attachment duplicate probability: {probability}")
-
-                if probability > attachment_max_probability:
-                  attachment_max_probability = probability
+      for message_attachment_hash in message_item.attachment_hashes:
+        for cur_message_attachment_hash in current_message.attachment_hashes:
+          if cur_message_attachment_hash == message_attachment_hash:
+            att_similar_object = message_item
 
     logger.info("Duplicate check finished")
 
-    if content_max_similarity >= CONTENT_MEDIUM_SIMILARITY and ((not attachments_present and not current_have_attachments) or attachment_max_probability >= ATT_MEDIUM_SIMILARITY_PROBABILITY):
-      self.strikes[message.author.id] += 1
-      if self.strikes[message.author.id] >= config.warden.strikes_to_notify:
-        await self.announce_duplicate(message, similar_object, content_max_similarity, attachment_max_probability)
+    if content_max_similarity >= CONTENT_MEDIUM_SIMILARITY or att_similar_object is not None:
+      if message.author.id in self.strikes.keys():
+        self.strikes[message.author.id] += 1
+      else:
+        self.strikes[message.author.id] = 1
 
-  async def announce_duplicate(self, message: disnake.Message, similar_object: WardenMessageData, content_similarity: float, attachment_probability: float):
+      if self.strikes[message.author.id] >= config.warden.strikes_to_notify:
+        if content_max_similarity >= CONTENT_MEDIUM_SIMILARITY:
+          await self.announce_content_duplicate(message, similar_object, content_max_similarity)
+        if att_similar_object is not None and att_similar_object != similar_object:
+          await self.announce_attachment_duplicate(message, att_similar_object)
+
+  async def announce_content_duplicate(self, message: disnake.Message, similar_object: WardenMessageData, content_similarity: float):
     report_channel = await general_util.get_or_fetch_channel(self.bot, config.ids.warden_report_channel)
     if report_channel is None:
       logger.warning("Failed to get announce channel")
@@ -184,15 +172,32 @@ class Warden(Base_Cog):
 
     original_message = await general_util.get_or_fetch_message(self.bot, original_message_channel, similar_object.message_id)
 
-    description = f"Content similarity: {content_similarity}%"
-    if attachment_probability > 0:
-      description += f"\nAttachment duplicate probability: {attachment_probability}%"
-    description = description.strip()
+    color = disnake.Color.orange() if content_similarity < CONTENT_HIGH_SIMILARITY else disnake.Color.red()
+    embed = disnake.Embed(title="Message duplicate found", color=color, description=f"Content similarity: {content_similarity}%")
+    embed.add_field(name="Author", value=f"Author: {original_message.author}", inline=False)
+    embed.add_field(name="Original message", value=f"Channel: {original_message.channel.name}\n[Link]({original_message.jump_url})" if original_message is not None else "_??? (404)_")
+    embed.add_field(name="Duplicate message", value=f"Channel: {message.channel.name}\n[Link]({message.jump_url})")
 
-    color = disnake.Color.orange() if content_similarity < CONTENT_HIGH_SIMILARITY and attachment_probability < ATT_HIGH_SIMILARITY_PROBABILITY else disnake.Color.red()
-    embed = disnake.Embed(title="Message duplicate found", color=color, description=description)
-    embed.add_field(name="Original message", value=f"Author: {original_message.author}\nChannel: {original_message.channel.name}\n[Link]({original_message.jump_url})" if original_message is not None else "_??? (404)_")
-    embed.add_field(name="Duplicate message", value=f"Author: {message.author}\nChannel: {message.channel.name}\n[Link]({message.jump_url})")
+    await report_channel.send(embed=embed)
+
+  async def announce_attachment_duplicate(self, message: disnake.Message, similar_object: WardenMessageData):
+    report_channel = await general_util.get_or_fetch_channel(self.bot, config.ids.warden_report_channel)
+    if report_channel is None:
+      logger.warning("Failed to get announce channel")
+      return
+
+    original_message_channel = await general_util.get_or_fetch_channel(message.guild, similar_object.channel_id if similar_object.thread_id is None else similar_object.thread_id)
+    if original_message_channel is None:
+      logger.warning("Failed to find original message channel")
+      message_cache.pop(similar_object.message_id)
+      return
+
+    original_message = await general_util.get_or_fetch_message(self.bot, original_message_channel, similar_object.message_id)
+
+    embed = disnake.Embed(title="Message duplicate found", color=disnake.Color.red(), description="Attachment is the same")
+    embed.add_field(name="Author", value=f"Author: {original_message.author}", inline=False)
+    embed.add_field(name="Original message", value=f"Channel: {original_message.channel.name}\n[Link]({original_message.jump_url})" if original_message is not None else "_??? (404)_")
+    embed.add_field(name="Duplicate message", value=f"Channel: {message.channel.name}\n[Link]({message.jump_url})")
 
     await report_channel.send(embed=embed)
 
