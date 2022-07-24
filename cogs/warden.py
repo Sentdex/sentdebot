@@ -38,6 +38,32 @@ class WardenMessageData:
       return True
     return False
 
+
+async def calculate_hashes_of_attachments(message: disnake.Message) -> List[str]:
+  att_hashes = []
+  for f in message.attachments:
+    fp = io.BytesIO()
+    await f.save(fp)
+
+    att_hash = hashlib.md5(fp.read()).hexdigest()
+    att_hashes.append(str(att_hash))
+  return att_hashes
+
+
+async def generate_message_hash(message: disnake.Message) -> WardenMessageData:
+  channel_id = message.channel.id
+  thread_id = None
+  if isinstance(message.channel, disnake.Thread):
+    channel_id = message.channel.parent.id
+    thread_id = message.channel.id
+
+  att_hashes = await calculate_hashes_of_attachments(message)
+
+  item = WardenMessageData(message.author.id, message.id, channel_id, thread_id, datetime.datetime.utcnow(), message.content, att_hashes)
+  message_cache[message.id] = item
+  return item
+
+
 class Warden(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(Warden, self).__init__(bot, __file__)
@@ -89,32 +115,9 @@ class Warden(Base_Cog):
     if payload.message_id in message_cache.keys():
       message_cache.pop(payload.message_id)
 
-  async def calculate_hashes_of_attachments(self, message: disnake.Message) -> List[str]:
-    att_hashes = []
-    for f in message.attachments:
-      fp = io.BytesIO()
-      await f.save(fp)
-
-      att_hash = hashlib.md5(fp.read()).hexdigest()
-      att_hashes.append(str(att_hash))
-    return att_hashes
-
-  async def generate_message_hash(self, message: disnake.Message) -> WardenMessageData:
-    channel_id = message.channel.id
-    thread_id = None
-    if isinstance(message.channel, disnake.Thread):
-      channel_id = message.channel.parent.id
-      thread_id = message.channel.id
-
-    att_hashes = await self.calculate_hashes_of_attachments(message)
-
-    item = WardenMessageData(message.author.id, message.id, channel_id, thread_id, datetime.datetime.utcnow(), message.content, att_hashes)
-    message_cache[message.id] = item
-    return item
-
   async def check_for_duplicates(self, message: disnake.Message):
     logger.info("Starting message duplicate check")
-    current_message = await self.generate_message_hash(message)
+    current_message = await generate_message_hash(message)
     all_messages: List[WardenMessageData] = list(message_cache.values())
 
     content_max_similarity = 0
