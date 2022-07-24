@@ -59,8 +59,9 @@ Bot will then send to users bookmark like this \
 ![11](media/bookmark.jpg?raw=true)
 10. Basic Q&A system to answer users repeating questions based on Levenshtein distance
 11. Audit log to log inportant actions of users for admin purpose with automatic clearing of old entries
-12. Robust database using SQLAlchemy ORM
-13. Centralized handling of added reaction because there is needed some more processing for non cached messages
+12. Warden extension to monitor spam in channels and report duplicate messages
+13. Robust database using SQLAlchemy ORM
+14. Centralized handling of added reaction because there is needed some more processing for non cached messages
 
 And many other smaller things
 
