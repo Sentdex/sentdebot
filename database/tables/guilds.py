@@ -12,6 +12,7 @@ class Guild(database.base):
   id = Column(String, primary_key=True, unique=True, index=True)
 
   members = relationship("Member", back_populates="guild")
+  audit_logs = relationship("AuditLog")
 
   @classmethod
   def from_guild(cls, guild: disnake.Guild):

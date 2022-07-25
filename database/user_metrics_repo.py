@@ -21,5 +21,5 @@ def get_user_metrics(guild_id: int, days_back: int) -> List[Tuple[datetime.datet
 
   output = []
   for d in data:
-    output.append((d.timestamp, d.online, d.offline - d.online, d.offline))
+    output.append((d.timestamp, d.online, d.idle, d.offline))
   return output

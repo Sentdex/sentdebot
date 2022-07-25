@@ -54,10 +54,6 @@ class Stats(Base_Cog):
   @cooldowns.default_cooldown
   async def user_activity(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
-    main_guild = self.bot.get_guild(config.ids.main_guild)
-
-    if main_guild is None:
-      return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
 
     if ctx.guild.id in self.user_activity_image.keys() and datetime.datetime.utcnow() - self.user_activity_image[ctx.guild.id][1] < datetime.timedelta(minutes=config.stats.max_graph_minutes_age_for_regenerate):
       logger.info("Taking user activity from cache")
@@ -69,7 +65,7 @@ class Stats(Base_Cog):
       return await ctx.send(embed=embed)
 
     logger.info("Generating new user activity")
-    all_channels = [channel.id for channel in main_guild.channels]
+    all_channels = [channel.id for channel in ctx.guild.channels]
 
     message_history = messages_repo.get_message_metrics(ctx.guild.id, config.stats.days_back)
     dataframe = pd.DataFrame.from_records(message_history, columns=["message_id", "timestamp", "author_id", "channel_id"])
@@ -92,7 +88,7 @@ class Stats(Base_Cog):
     users = []
     msgs = []
     for pair in user_id_counts_overall[::-1]:
-      member = main_guild.get_member(pair[0])
+      member = await general_util.get_or_fetch_member(ctx.guild, pair[0])
       if member is not None:
         users.append(general_util.truncate_string(member.name, limit=config.stats.name_length_limit))
         msgs.append(pair[1])
@@ -109,7 +105,7 @@ class Stats(Base_Cog):
     users = []
     msgs = []
     for pair in uids_in_help[::-1]:
-      member = main_guild.get_member(pair[0])
+      member = await general_util.get_or_fetch_member(ctx.guild, pair[0])
       if member is not None:
         users.append(general_util.truncate_string(member.name, limit=config.stats.name_length_limit))
         msgs.append(pair[1])
@@ -136,18 +132,13 @@ class Stats(Base_Cog):
   @cooldowns.default_cooldown
   async def community_report(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
-    main_guild = self.bot.get_guild(config.ids.main_guild)
-
-    if main_guild is None:
-      return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
 
     if ctx.guild.id in self.community_report_image.keys() and datetime.datetime.utcnow() - self.community_report_image[ctx.guild.id][1] < datetime.timedelta(minutes=config.stats.max_graph_minutes_age_for_regenerate):
       logger.info("Taking community report from cache")
 
       self.community_report_image[ctx.guild.id][0].seek(0)
 
-      online, offline = general_util.get_user_stats(main_guild)
-      idle = offline - online
+      online, idle, offline = general_util.get_user_stats(ctx.guild)
       embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
       general_util.add_author_footer(embed, ctx.author)
       embed.set_image(file=disnake.File(self.community_report_image[ctx.guild.id][0], "community_report.png"))
@@ -236,8 +227,7 @@ class Stats(Base_Cog):
 
     self.community_report_image[ctx.guild.id] = (buf, datetime.datetime.utcnow())
 
-    online, offline = general_util.get_user_stats(main_guild)
-    idle = offline - online
+    online, idle, offline = general_util.get_user_stats(ctx.guild)
     embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
     general_util.add_author_footer(embed, ctx.author)
     embed.set_image(file=disnake.File(buf, "community_report.png"))
