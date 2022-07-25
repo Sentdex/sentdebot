@@ -29,7 +29,7 @@ async def create_message_edited_log(bot: commands.Bot, before: Optional[Union[di
     "attachments_after": [att.url for att in after.attachments]
   }
 
-  item = AuditLog(timestamp=after.edited_at, user_id=str(after.author.id), log_type=AuditLogItemType.MESSAGE_EDITED, data=data)
+  item = AuditLog(timestamp=after.edited_at, user_id=str(after.author.id), guild_id=str(after.guild.id) if after.guild is not None else None, log_type=AuditLogItemType.MESSAGE_EDITED, data=data)
   session.add(item)
   session.commit()
 
@@ -56,7 +56,7 @@ def create_message_deleted_log(message: disnake.Message) -> AuditLog:
     "attachments": attachments
   }
 
-  item = AuditLog(user_id=author_id, log_type=AuditLogItemType.MESSAGE_DELETED, data=data)
+  item = AuditLog(user_id=author_id, guild_id=str(message.guild.id) if message.guild is not None else None, log_type=AuditLogItemType.MESSAGE_DELETED, data=data)
   session.add(item)
   session.commit()
 
@@ -74,7 +74,7 @@ def create_member_changed_log(before: disnake.Member, after: disnake.Member, com
 
   if data.keys():
     get_or_create_member_if_not_exist(after)
-    item = AuditLog(user_id=str(after.id), log_type=AuditLogItemType.MEMBER_UPDATED, data=data)
+    item = AuditLog(user_id=str(after.id), guild_id=str(after.guild.id), log_type=AuditLogItemType.MEMBER_UPDATED, data=data)
     session.add(item)
     if commit:
       session.commit()
