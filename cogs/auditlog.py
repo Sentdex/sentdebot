@@ -92,7 +92,7 @@ class Auditlog(Base_Cog):
         if before.content == after.content and before.attachments == after.attachments:
           return
 
-    audit_log_repo.create_message_edited_log(before, after)
+    await audit_log_repo.create_message_edited_log(self.bot, before, after)
 
     message_item.edited_at = after.edited_at
     message_item.content = after.content
@@ -108,6 +108,7 @@ class Auditlog(Base_Cog):
     if message.guild.id != config.ids.main_guild:
       return
 
+    messages_repo.delete_message(message.id, commit=False)
     audit_log_repo.create_message_deleted_log(message)
 
   @commands.Cog.listener()

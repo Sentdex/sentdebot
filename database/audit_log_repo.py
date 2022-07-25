@@ -1,5 +1,6 @@
 import datetime
 import disnake
+from disnake.ext import commands
 from typing import Optional, Union
 
 from database import session
@@ -7,7 +8,7 @@ from database.tables.audit_log import AuditLogItemType, AuditLog
 from database.users_repo import create_user_if_not_exist
 from database.messages_repo import Message
 
-def create_message_edited_log(before: Optional[Union[disnake.Message, Message]], after: disnake.Message) -> AuditLog:
+async def create_message_edited_log(bot: commands.Bot, before: Optional[Union[disnake.Message, Message]], after: disnake.Message) -> AuditLog:
   thread = None
   channel = after.channel
   if isinstance(channel, disnake.Thread):
@@ -15,19 +16,17 @@ def create_message_edited_log(before: Optional[Union[disnake.Message, Message]],
     channel = channel.parent
 
   create_user_if_not_exist(after.author)
-
-  before_attachments = None
-  if before is not None:
-    before_attachments = (";".join([att.url for att in before.attachments])) if isinstance(before, disnake.Message) else before.attachments
+  if before is not None and isinstance(before, Message):
+    before = await before.to_object(bot)
 
   data = {
     "message_id": after.id,
     "channel_id": channel.id,
     "thread_id": thread.id if thread is not None else None,
     "content_before": before.content if  before is not None else None,
-    "attachments_before":  before_attachments,
+    "attachments_before": [att.url for att in before.attachments] if before is not None else None,
     "content_after": after.content,
-    "attachments_after": ";".join([att.url for att in before.attachments])
+    "attachments_after": [att.url for att in after.attachments]
   }
 
   item = AuditLog(timestamp=after.edited_at, user_id=str(after.author.id), log_type=AuditLogItemType.MESSAGE_EDITED, data=data)
@@ -45,7 +44,7 @@ def create_message_deleted_log(message: disnake.Message) -> AuditLog:
     thread_id = message.channel.id
     channel_id = message.channel.parent.id
   content = message.content
-  attachments = ";".join([att.url for att in message.attachments])
+  attachments = [att.url for att in message.attachments]
 
   create_user_if_not_exist(message.author)
 

@@ -163,4 +163,7 @@ class Strings(metaclass=formattable):
   admin_tools_clean_raid_help = "Select id of first and last join message and every user that joined in that join block will get banned\nHours back specifies how old messages will get deleted"
   admin_tools_clean_raid_messages_not_found = "Failed to get first or last message"
 
+  admin_tools_purge_brief = "Delete messages from channel"
+  admin_tools_purge_help = "Hours back specifies how old messages will get deleted"
+
   admin_tools_invalid_hours_back = "Invalid value of hours back"

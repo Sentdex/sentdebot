@@ -32,6 +32,15 @@ class WardenMessageData:
 
   attachment_hashes: List[str]
 
+  async def to_object(self, bot: commands.Bot) -> Optional[disnake.Message]:
+    message = await general_util.get_or_fetch_message(bot, None, self.message_id)
+    if message is None:
+      channel = await general_util.get_or_fetch_channel(bot, self.channel_id if self.thread_id is None else self.thread_id)
+      if channel is None: return None
+
+      message = await general_util.get_or_fetch_message(bot, channel, self.message_id)
+    return message
+
   def __eq__(self, other):
     if other is None: return False
     if other.message_id == self.message_id:
@@ -194,13 +203,7 @@ class Warden(Base_Cog):
       logger.warning("Failed to get announce channel")
       return
 
-    original_message_channel = await general_util.get_or_fetch_channel(message.guild, similar_object.channel_id if similar_object.thread_id is None else similar_object.thread_id)
-    if original_message_channel is None:
-      logger.warning("Failed to find original message channel")
-      message_cache.pop(similar_object.message_id)
-      return
-
-    original_message = await general_util.get_or_fetch_message(self.bot, original_message_channel, similar_object.message_id)
+    original_message = await similar_object.to_object(self.bot)
 
     embed = disnake.Embed(title="Message duplicate found", color=disnake.Color.red(), description="Attachment is the same")
     embed.add_field(name="Author", value=f"Author: {original_message.author}", inline=False)

@@ -1,6 +1,10 @@
+import disnake
+from disnake.ext import commands
+from typing import Optional
 from sqlalchemy import Column, DateTime, String, ForeignKey, Boolean
 
 from database import database
+from util import general_util
 
 class Message(database.base):
   __tablename__ = "messages"
@@ -17,3 +21,13 @@ class Message(database.base):
   attachments = Column(String)
 
   use_for_metrics = Column(Boolean, nullable=False)
+
+  async def to_object(self, bot: commands.Bot) -> Optional[disnake.Message]:
+    message = await general_util.get_or_fetch_message(bot, None, int(self.message_id))
+    if message is None:
+      channel = await general_util.get_or_fetch_channel(bot, int(self.channel_id) if self.thread_id is None else int(self.thread_id))
+      if channel is None: return None
+
+      message = await general_util.get_or_fetch_message(bot, channel, int(self.message_id))
+
+    return message

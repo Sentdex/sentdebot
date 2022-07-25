@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import disnake
 from disnake.ext import commands
 from typing import Union
@@ -17,9 +18,7 @@ class AdminTools(Base_Cog):
 
     messages = messages_repo.get_messages_of_user(user_id, hours_back)
     for message_it in messages:
-      channel = await general_util.get_or_fetch_channel(self.bot, int(message_it.channel_id) if message_it.thread_id is None else int(message_it.thread_id))
-      if channel is None: continue
-      message = await general_util.get_or_fetch_message(self.bot, channel, int(message_it.message_id))
+      message = await message_it.to_object(self.bot)
       if message is None: continue
 
       try:
@@ -114,6 +113,13 @@ class AdminTools(Base_Cog):
 
     await user.ban()
     await general_util.generate_success_message(ctx, "User destroyed" + (f"\nDeleted `{delete_message_count}` messages" if delete_message_count is not None else ""))
+
+  @commands.command(brief=Strings.admin_tools_purge_brief, help=Strings.admin_tools_purge_help)
+  @commands.check(general_util.is_mod)
+  async def purge(self, ctx: commands.Context, hours_back: float=1.0):
+    threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=hours_back)
+    deleted_messages = await ctx.channel.purge(after=threshold)
+    await general_util.generate_success_message(ctx, f"Deleted {len(deleted_messages)} message(s)")
 
 def setup(bot):
   bot.add_cog(AdminTools(bot))
