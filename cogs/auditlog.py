@@ -43,17 +43,16 @@ class Auditlog(Base_Cog):
 
   @tasks.loop(minutes=5)
   async def user_stats_task(self):
-    main_guild = self.bot.get_guild(config.ids.main_guild)
-    if main_guild is not None:
-      online, idle, offline = general_util.get_user_stats(main_guild)
-      user_metrics_repo.add_user_metrics(online, idle, offline)
+    guilds = self.bot.guilds
+    for guild in guilds:
+      user_metrics_repo.add_user_metrics(guild)
+    user_metrics_repo.session.commit()
 
   @commands.Cog.listener()
   async def on_message(self, message: disnake.Message):
     if message.guild is None: return
-    if config.ids.main_guild != message.guild.id: return
     if message.author.bot: return
-    if message.content == "" or message.content.startswith(config.base.command_prefix): return
+    if message.content.startswith(config.base.command_prefix): return
 
     thread = None
     channel = message.channel
@@ -66,30 +65,27 @@ class Auditlog(Base_Cog):
       if help_threads_repo.thread_exists(thread_id):
         help_threads_repo.update_thread_activity(thread_id, datetime.datetime.utcnow(), commit=False)
 
-    users_repo.create_user_if_not_exist(message.author)
     use_for_metrics = messages_repo.get_author_of_last_message_metric(channel.id, thread_id) != message.author.id
-    messages_repo.add_message(message.id, message.author.id, datetime.datetime.utcnow(), channel.id, thread.id if thread is not None else None, message.content, ";".join([att.url for att in message.attachments]), use_for_metrics, commit=True)
+    messages_repo.add_message(message, use_for_metrics, commit=True)
 
   async def handle_message_edited(self, before: Optional[disnake.Message], after: disnake.Message):
-    if after.guild is None:
-      return
-
-    if after.guild.id != config.ids.main_guild:
-      return
+    if after.guild is None: return
+    if after.author.bot: return
+    if after.content.startswith(config.base.command_prefix): return
 
     message_item = messages_repo.get_message(after.id)
     if before is None:
       before = message_item
 
-    after_attachments = ";".join([att.url for att in after.attachments])
+    after_attachments = [att.url for att in after.attachments]
 
     if before is not None:
       if isinstance(before, disnake.Message):
         if before.content == after.content and \
-          ";".join([att.url for att in before.attachments]) == after_attachments:
+          [att.url for att in before.attachments] == after_attachments:
           return
       else:
-        if before.content == after.content and before.attachments == after.attachments:
+        if before.content == after.content and before.attachments == after_attachments:
           return
 
     await audit_log_repo.create_message_edited_log(self.bot, before, after)
@@ -102,19 +98,16 @@ class Auditlog(Base_Cog):
 
   @commands.Cog.listener()
   async def on_message_delete(self, message: disnake.Message):
-    if message.guild is None:
-      return
-
-    if message.guild.id != config.ids.main_guild:
-      return
+    if message.guild is None: return
+    if message.author.bot: return
+    if message.content.startswith(config.base.command_prefix): return
 
     messages_repo.delete_message(message.id, commit=False)
     audit_log_repo.create_message_deleted_log(message)
 
   @commands.Cog.listener()
   async def on_member_update(self, before: disnake.Member, after: disnake.Member):
-    if after.guild.id != config.ids.main_guild:
-      return
+    if after.bot: return
 
     user_it = users_repo.get_user(after.id)
     if user_it is not None:
@@ -126,26 +119,23 @@ class Auditlog(Base_Cog):
 
   @commands.Cog.listener()
   async def on_member_join(self, member: disnake.Member):
-    if member.guild.id != config.ids.main_guild:
-      return
-
-    users_repo.create_user_if_not_exist(member)
+    if member.bot: return
+    users_repo.get_or_create_member_if_not_exist(member)
 
   @commands.Cog.listener()
   async def on_member_remove(self, member: disnake.Member):
-    if member.guild.id != config.ids.main_guild:
-      return
+    if member.bot: return
 
-    user_it = users_repo.get_user(member.id)
-    if user_it is not None:
-      user_it.left_at = datetime.datetime.utcnow()
+    member_it = users_repo.get_member(member.id, member.guild.id)
+    if member_it is not None:
+      member_it.left_at = datetime.datetime.utcnow()
       users_repo.session.commit()
 
   @tasks.loop(hours=24)
   async def cleanup_taks(self):
     logger.info("Starting cleanup")
     if config.essentials.delete_left_users_after_days > 0:
-      users_repo.delete_left_users(config.essentials.delete_left_users_after_days)
+      users_repo.delete_left_members(config.essentials.delete_left_users_after_days)
     if config.essentials.delete_audit_logs_after_days > 0:
       audit_log_repo.delete_old_logs(config.essentials.delete_audit_logs_after_days)
     if config.essentials.delete_messages_after_days > 0:

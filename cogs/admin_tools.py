@@ -13,10 +13,10 @@ class AdminTools(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(AdminTools, self).__init__(bot, __file__)
 
-  async def delete_users_messages(self, user_id: int, hours_back: float):
+  async def delete_users_messages(self, user_id: int, guild_id: int, hours_back: float):
     delete_message_count = 0
 
-    messages = messages_repo.get_messages_of_user(user_id, hours_back)
+    messages = messages_repo.get_messages_of_member(user_id, guild_id, hours_back)
     for message_it in messages:
       message = await message_it.to_object(self.bot)
       if message is None: continue
@@ -32,6 +32,7 @@ class AdminTools(Base_Cog):
 
   @commands.command(brief=Strings.admin_tools_clean_raid_brief, help=Strings.admin_tools_clean_raid_help)
   @commands.check(general_util.is_mod)
+  @commands.guild_only()
   async def clean_raid(self, ctx: commands.Context, first_message: Union[disnake.Message, int], last_message: Union[disnake.Message, int], hours_back: float = 1.0):
     if hours_back <= 0:
       return await general_util.generate_error_message(ctx, Strings.admin_tools_invalid_hours_back)
@@ -44,12 +45,12 @@ class AdminTools(Base_Cog):
     if first_message is None or last_message is None:
       return await general_util.generate_error_message(ctx, Strings.admin_tools_clean_raid_messages_not_found)
 
-    joined_users_items = users_repo.joined_in_timeframe(first_message.author.joined_at, last_message.author.joined_at)
+    joined_users_items = users_repo.members_joined_in_timeframe(first_message.author.joined_at, last_message.author.joined_at, ctx.guild.id)
 
     statuses = []
     some_failed = False
     for user_it in joined_users_items:
-      delete_message_count = await self.delete_users_messages(int(user_it.id), hours_back)
+      delete_message_count = await self.delete_users_messages(int(user_it.id), ctx.guild.id, hours_back)
       statuses.append(f"{user_it.nick} - Deleted {delete_message_count} messages")
 
     embed = disnake.Embed(title="Clean raid report", description=general_util.truncate_string("\n".join(statuses), 4000), color=disnake.Color.orange() if some_failed else disnake.Color.green())
@@ -59,6 +60,7 @@ class AdminTools(Base_Cog):
 
   @commands.command(brief=Strings.admin_tools_destroy_raid_brief, help=Strings.admin_tools_destroy_raid_help)
   @commands.check(general_util.is_mod)
+  @commands.guild_only()
   async def destroy_raid(self, ctx: commands.Context, first_message: Union[disnake.Message, int], last_message: Union[disnake.Message, int], hours_back: float=1.0):
     if isinstance(first_message, int):
       first_message = await general_util.get_or_fetch_message(self.bot, ctx.channel, first_message)
@@ -68,14 +70,14 @@ class AdminTools(Base_Cog):
     if first_message is None or last_message is None:
       return await general_util.generate_error_message(ctx, Strings.admin_tools_destroy_raid_messages_not_found)
 
-    joined_users_items = users_repo.joined_in_timeframe(first_message.author.joined_at, last_message.author.joined_at)
+    joined_users_items = users_repo.members_joined_in_timeframe(first_message.author.joined_at, last_message.author.joined_at, ctx.guild.id)
 
     statuses = []
     some_failed = False
     for user_it in joined_users_items:
       delete_message_count = None
       if hours_back > 0:
-        delete_message_count = await self.delete_users_messages(int(user_it.id), hours_back)
+        delete_message_count = await self.delete_users_messages(int(user_it.id), ctx.guild.id, hours_back)
 
       member = await general_util.get_or_fetch_member(ctx.guild, int(user_it.id))
       if member is None:
@@ -98,24 +100,27 @@ class AdminTools(Base_Cog):
 
   @commands.command(brief=Strings.admin_tools_clean_user_brief, help=Strings.admin_tools_clean_user_help)
   @commands.check(general_util.is_mod)
+  @commands.guild_only()
   async def clean_user(self, ctx: commands.Context, user: Union[disnake.Member, disnake.User, int], hours_back: float = 1.0):
     if hours_back <= 0:
       return await general_util.generate_error_message(ctx, Strings.admin_tools_invalid_hours_back)
-    delete_message_count = await self.delete_users_messages(user if isinstance(user, int) else user.id, hours_back)
+    delete_message_count = await self.delete_users_messages(user if isinstance(user, int) else user.id, ctx.guild.id, hours_back)
     await general_util.generate_success_message(ctx, f"User's messages cleaned\nDeleted `{delete_message_count}` messages")
 
   @commands.command(brief=Strings.admin_tools_destroy_user_brief, help=Strings.admin_tools_destroy_user_help)
   @commands.check(general_util.is_mod)
+  @commands.guild_only()
   async def destroy_user(self, ctx: commands.Context, user: Union[disnake.Member, disnake.User, int], hours_back: float = 1.0):
     delete_message_count = None
     if hours_back > 0:
-      delete_message_count = await self.delete_users_messages(user if isinstance(user, int) else user.id, hours_back)
+      delete_message_count = await self.delete_users_messages(user if isinstance(user, int) else user.id, ctx.guild.id, hours_back)
 
     await user.ban()
     await general_util.generate_success_message(ctx, "User destroyed" + (f"\nDeleted `{delete_message_count}` messages" if delete_message_count is not None else ""))
 
   @commands.command(brief=Strings.admin_tools_purge_brief, help=Strings.admin_tools_purge_help)
   @commands.check(general_util.is_mod)
+  @commands.guild_only()
   async def purge(self, ctx: commands.Context, hours_back: float=1.0):
     threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=hours_back)
     deleted_messages = await ctx.channel.purge(after=threshold)

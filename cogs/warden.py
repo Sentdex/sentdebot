@@ -100,7 +100,6 @@ class Warden(Base_Cog):
   async def on_message(self, message: disnake.Message):
     if message.author.bot: return
     if isinstance(message.channel, disnake.DMChannel): return
-    if message.guild.id != config.ids.main_guild: return
 
     channel = message.channel
     if isinstance(channel, disnake.Thread):
@@ -113,8 +112,6 @@ class Warden(Base_Cog):
   @commands.Cog.listener()
   async def on_raw_bulk_message_delete(self, payload: disnake.RawBulkMessageDeleteEvent):
     if payload.guild_id is None: return
-    if payload.guild_id != config.ids.main_guild: return
-    if payload.guild_id not in config.ids.warden_channels_to_look_for: return
 
     for message_id in payload.message_ids:
       if message_id in message_cache.keys():
@@ -123,8 +120,6 @@ class Warden(Base_Cog):
   @commands.Cog.listener()
   async def on_raw_message_delete(self, payload: disnake.RawMessageDeleteEvent):
     if payload.guild_id is None: return
-    if payload.guild_id != config.ids.main_guild: return
-    if payload.guild_id not in config.ids.warden_channels_to_look_for: return
 
     if payload.message_id in message_cache.keys():
       message_cache.pop(payload.message_id)

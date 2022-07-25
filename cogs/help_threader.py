@@ -133,7 +133,7 @@ class HelpThreader(Base_Cog):
       thread = await help_channel.create_thread(name=title, message=message, auto_archive_duration=1440, reason=f"Help request from {interaction.author}")
       await thread.add_user(interaction.author)
 
-      help_threads_repo.create_thread(thread.id, interaction.author.id, tags)
+      help_threads_repo.create_thread(thread.id, interaction.author, tags)
 
       await thread.send(Strings.help_threader_announcement)
     except disnake.HTTPException:
@@ -148,7 +148,6 @@ class HelpThreader(Base_Cog):
   @help_requests.sub_command(name="create", description=Strings.help_threader_request_create_brief)
   @cooldowns.huge_cooldown
   async def help_requests_create(self, inter: disnake.CommandInteraction):
-    users_repo.create_user_if_not_exist(inter.author)
     await inter.response.send_modal(HelpRequestModal(self.create_new_help_thread))
 
   @help_requests.sub_command(name="list", description=Strings.help_threader_list_requests_brief)

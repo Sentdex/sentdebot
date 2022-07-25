@@ -3,7 +3,7 @@
 import datetime
 import disnake
 from disnake.ext import commands
-from typing import Optional, Tuple
+from typing import Tuple, Dict
 import pandas as pd
 import numpy as np
 from collections import Counter
@@ -41,8 +41,8 @@ class Stats(Base_Cog):
   def __init__(self, bot: commands.Bot):
     super(Stats, self).__init__(bot, __file__)
 
-    self.user_activity_image: Optional[Tuple[io.BytesIO, datetime.datetime]] = None
-    self.community_report_image: Optional[Tuple[io.BytesIO, datetime.datetime]] = None
+    self.user_activity_image: Dict[int, Tuple[io.BytesIO, datetime.datetime]] = {}
+    self.community_report_image: Dict[int, Tuple[io.BytesIO, datetime.datetime]] = {}
 
   @commands.command(brief=Strings.stats_stats_brief)
   @cooldowns.default_cooldown
@@ -59,19 +59,19 @@ class Stats(Base_Cog):
     if main_guild is None:
       return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
 
-    if self.user_activity_image is not None and datetime.datetime.utcnow() - self.user_activity_image[1] < datetime.timedelta(minutes=config.stats.max_graph_minutes_age_for_regenerate):
+    if ctx.guild.id in self.user_activity_image.keys() and datetime.datetime.utcnow() - self.user_activity_image[ctx.guild.id][1] < datetime.timedelta(minutes=config.stats.max_graph_minutes_age_for_regenerate):
       logger.info("Taking user activity from cache")
 
-      self.user_activity_image[0].seek(0)
+      self.user_activity_image[ctx.guild.id][0].seek(0)
       embed = disnake.Embed(title="User activity", color=disnake.Color.dark_blue())
       general_util.add_author_footer(embed, ctx.author)
-      embed.set_image(file=disnake.File(self.user_activity_image[0], "user_activity.png"))
+      embed.set_image(file=disnake.File(self.user_activity_image[ctx.guild.id][0], "user_activity.png"))
       return await ctx.send(embed=embed)
 
     logger.info("Generating new user activity")
     all_channels = [channel.id for channel in main_guild.channels]
 
-    message_history = messages_repo.get_message_metrics(config.stats.days_back)
+    message_history = messages_repo.get_message_metrics(ctx.guild.id, config.stats.days_back)
     dataframe = pd.DataFrame.from_records(message_history, columns=["message_id", "timestamp", "author_id", "channel_id"])
     dataframe["date"] = pd.to_datetime(dataframe["timestamp"], unit="s")
     dataframe.set_index("date", inplace=True)
@@ -125,7 +125,7 @@ class Stats(Base_Cog):
     buf.seek(0)
     plt.clf()
 
-    self.user_activity_image = (buf, datetime.datetime.utcnow())
+    self.user_activity_image[ctx.guild.id] = (buf, datetime.datetime.utcnow())
 
     embed = disnake.Embed(title="User activity", color=disnake.Color.dark_blue())
     general_util.add_author_footer(embed, ctx.author)
@@ -141,20 +141,20 @@ class Stats(Base_Cog):
     if main_guild is None:
       return general_util.generate_error_message(ctx, Strings.stats_main_guild_not_set)
 
-    if self.community_report_image is not None and datetime.datetime.utcnow() - self.community_report_image[1] < datetime.timedelta(minutes=config.stats.max_graph_minutes_age_for_regenerate):
+    if ctx.guild.id in self.community_report_image.keys() and datetime.datetime.utcnow() - self.community_report_image[ctx.guild.id][1] < datetime.timedelta(minutes=config.stats.max_graph_minutes_age_for_regenerate):
       logger.info("Taking community report from cache")
 
-      self.community_report_image[0].seek(0)
+      self.community_report_image[ctx.guild.id][0].seek(0)
 
       online, idle, offline = general_util.get_user_stats(main_guild)
       embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
       general_util.add_author_footer(embed, ctx.author)
-      embed.set_image(file=disnake.File(self.community_report_image[0], "community_report.png"))
+      embed.set_image(file=disnake.File(self.community_report_image[ctx.guild.id][0], "community_report.png"))
       return await ctx.send(embed=embed)
 
     logger.info("Generating new community report")
 
-    message_history = messages_repo.get_message_metrics(config.stats.days_back)
+    message_history = messages_repo.get_message_metrics(ctx.guild.id, config.stats.days_back)
     message_df = pd.DataFrame.from_records(
       message_history,
       columns=["message_id", "timestamp", "author_id", "channel_id"]
@@ -166,7 +166,7 @@ class Stats(Base_Cog):
       .size()
     )
 
-    users_metrics = user_metrics_repo.get_user_metrics(config.stats.days_back)
+    users_metrics = user_metrics_repo.get_user_metrics(ctx.guild.id, config.stats.days_back)
     users_metrics_df = pd.DataFrame.from_records(
       users_metrics,
       columns=["timestamp", "online", "idle", "offline"]
@@ -233,7 +233,7 @@ class Stats(Base_Cog):
     buf.seek(0)
     plt.clf()
 
-    self.community_report_image = (buf, datetime.datetime.utcnow())
+    self.community_report_image[ctx.guild.id] = (buf, datetime.datetime.utcnow())
 
     online, idle, offline = general_util.get_user_stats(main_guild)
     embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
