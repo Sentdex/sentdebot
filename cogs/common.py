@@ -87,7 +87,7 @@ class Common(Base_Cog):
 
   @commands.slash_command(name="pet", description=Strings.common_pet_brief)
   @cooldowns.short_cooldown
-  async def pet(self, inter: disnake.ApplicationCommandInteraction, user: disnake.Member = commands.Param(default=None, description="User to pet")):
+  async def pet(self, inter: disnake.CommandInteraction, user: disnake.Member = commands.Param(default=None, description="User to pet")):
     if user is None:
       user = inter.author
 
@@ -135,14 +135,14 @@ class Common(Base_Cog):
     await inter.response.send_message(file=disnake.File(fp=image_binary, filename="pet.gif"))
 
   @pet.error
-  async def pet_error(self, inter: disnake.ApplicationCommandInteraction, error):
+  async def pet_error(self, inter: disnake.CommandInteraction, error):
     if isinstance(error, commands.MemberNotFound):
       await inter.response.send_message(Strings.common_pet_user_not_found)
       return True
 
   @commands.slash_command(name="vote", description=Strings.common_vote_brief)
   @cooldowns.long_cooldown
-  async def pet(self, inter: disnake.ApplicationCommandInteraction):
+  async def pet(self, inter: disnake.CommandInteraction):
     await inter.response.send_modal(VoteSetupModal())
 
 def setup(bot):

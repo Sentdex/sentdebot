@@ -45,12 +45,12 @@ class Strings(metaclass=formattable):
 
   # Errors
   error_command_syntax_error = "Unknown syntax of command"
-  error_unknown_command = f"Unknown command - use {config.base.command_prefix}help for help"
+  error_unknown_command = "Unknown command - use /help for help"
   error_command_on_cooldown = "This command is on cooldown. Please wait {remaining}s"
   error_missing_permission = "You do not have the permissions to use this command."
   error_missing_role = "You do not have {role} role to use this command"
   error_missing_argument = "Missing {argument} argument of command\n{signature}"
-  error_bad_argument = f"Some arguments of command missing or wrong, use {config.base.command_prefix}help to get more info"
+  error_bad_argument = "Some arguments of command missing or wrong, use /help to get more info"
   error_max_concurrency_reached = "Bot is busy, try it later"
   error_no_private_message = "This command can't be used in private channel"
   error_interaction_timeout = "Interaction took more than 3 seconds to be responded to. Try again later."
