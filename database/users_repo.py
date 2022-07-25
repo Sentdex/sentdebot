@@ -1,7 +1,7 @@
 import datetime
 
 import disnake
-from typing import Optional
+from typing import Optional, List
 
 from database import session
 from database.tables.users import User
@@ -25,3 +25,6 @@ def delete_left_users(days_after_left: int):
   threshold = datetime.datetime.utcnow() - datetime.timedelta(days=days_after_left)
   session.query(User).filter(User.left_at != None, User.left_at <= threshold).delete()
   session.commit()
+
+def joined_in_timeframe(from_date: datetime.datetime, to_date: datetime.datetime) -> List[User]:
+  return session.query(User).filter(User.joined_at >= from_date, User.joined_at <= to_date).order_by(User.joined_at.desc()).all()

@@ -48,6 +48,8 @@ class RandomRoleGiver(Base_Cog):
       try:
         await message.author.add_roles(selected_role, reason="Random role assigned by bot")
         logger.info(f"User {message.author.name} was awarded with {selected_role.name} role")
+      except disnake.Forbidden:
+        logger.error(f"Failed to give user {message.author.display_name} '{selected_role.name}' ({selected_role_id}) role - Missing permissions")
       except Exception as e:
         logger.error(f"Failed to give user {message.author.display_name} '{selected_role.name}' ({selected_role_id}) role\n{traceback.format_exc()}")
 

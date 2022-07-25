@@ -35,10 +35,10 @@ async def help_name_autocomplete(inter, string):
   everything.extend([com.name for com in get_all_commands(inter.bot, inter)])
 
   if string is None or string == "":
-    return everything
-  return [d for d in everything if string.lower() in d.lower()]
+    return everything[:25]
+  return [d for d in everything if string.lower() in d.lower()][:25]
 
-def add_command_help(embed, com):
+def generate_com_help(com):
   help_string = f"**Help**: " + com.help if com.help is not None else ""
   brief = f"**Brief**: {com.brief}" if com.brief is not None else ""
   aliases = ("**Aliases**: " + ", ".join(com.aliases)) + "" if com.aliases else ""
@@ -46,10 +46,11 @@ def add_command_help(embed, com):
   string_array = [it for it in [aliases, brief, help_string] if it != ""]
   output = "\n".join(string_array) if string_array else "*No description*"
 
-  if len(output) > 4096:
-    logger.warning(f"Description for command {com.name} is too long")
-  else:
-    embed.add_field(name=f"{config.base.command_prefix}{general_util.get_command_signature(com)}", value=output, inline=False)
+  return f"{config.base.command_prefix}{general_util.get_command_signature(com)}", general_util.truncate_string(output, 4000)
+
+def add_command_help(embed, com):
+  signature, description = generate_com_help(com)
+  embed.add_field(name=signature, value=description, inline=False)
 
 
 def generate_help_for_cog(cog: Base_Cog, ctx) -> Union[None, List[disnake.Embed]]:
@@ -59,36 +60,28 @@ def generate_help_for_cog(cog: Base_Cog, ctx) -> Union[None, List[disnake.Embed]
   number_of_coms = len(coms)
   if number_of_coms == 0: return None
 
-  pages = []
-  if number_of_coms > 10:
-    number_of_batches = math.ceil(number_of_coms / 10)
-    batches = [coms[i * 10: i * 10 + 10] for i in range(number_of_batches)]
+  coms = [generate_com_help(com) for com in coms]
 
-    for idx, batch in enumerate(batches):
-      emb = disnake.Embed(title=f'{str(cog.qualified_name).replace("_", " ")} {idx + 1} Help', colour=disnake.Color.green())
+  pages = []
+  title = f"{str(cog.qualified_name)} Help"
+  emb = disnake.Embed(title=title, colour=disnake.Color.green())
+  general_util.add_author_footer(emb, ctx.author)
+
+  while coms:
+    signature, description = coms.pop()
+    embed_len = len(emb)
+    added_length = len(signature) + len(description)
+
+    if embed_len + added_length > 5000:
+      pages.append(emb)
+      emb = disnake.Embed(title=title, colour=disnake.Color.green())
       general_util.add_author_footer(emb, ctx.author)
 
-      for com in batch:
-        add_command_help(emb, com)
+    emb.add_field(name=signature, value=description, inline=False)
 
-      if len(emb) > 6000:
-        logger.warning(f"Help for {cog.qualified_name} is too long")
-      else:
-        pages.append(emb)
-  else:
-    emb = disnake.Embed(title=f'{str(cog.qualified_name)} Help', colour=disnake.Color.green())
-    general_util.add_author_footer(emb, ctx.author)
-
-    for com in coms:
-      add_command_help(emb, com)
-
-    if len(emb) > 6000:
-      logger.warning(f"Help for {cog.qualified_name} is too long")
-    else:
-      pages.append(emb)
+  pages.append(emb)
 
   return pages
-
 
 class Help(Base_Cog):
   def __init__(self, bot: commands.Bot):
@@ -136,9 +129,7 @@ class Help(Base_Cog):
 
     pages = []
     while command_strings:
-      output, command_strings = general_util.add_string_until_length(command_strings, 4000, "\n\t")
-      output = "{" + f"\n\t{output}\n" + "}"
-      output = f"```py\n{output}\n```"
+      output, command_strings = general_util.add_string_until_length(command_strings, 4000, "\n")
       embed = disnake.Embed(title="Commands list", description=output, colour=disnake.Color.dark_blue())
       general_util.add_author_footer(embed, inter.author)
       pages.append(embed)

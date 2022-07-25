@@ -121,7 +121,7 @@ class Warden(Base_Cog):
       message_cache.pop(payload.message_id)
 
   async def check_for_duplicates(self, message: disnake.Message):
-    logger.info("Starting message duplicate check")
+    #logger.info("Starting message duplicate check")
     current_message = await generate_message_hash(message)
     all_messages: List[WardenMessageData] = list(message_cache.values())
 
@@ -141,7 +141,7 @@ class Warden(Base_Cog):
         continue
 
       content_similarity = ratio(current_message.content, message_item.content) * 100
-      logger.info(f"Content similarity: {content_similarity}")
+      # logger.info(f"Content similarity: {content_similarity}")
 
       if content_similarity > content_max_similarity:
         content_max_similarity = content_similarity
@@ -152,7 +152,7 @@ class Warden(Base_Cog):
           if cur_message_attachment_hash == message_attachment_hash:
             att_similar_object = message_item
 
-    logger.info("Duplicate check finished")
+    # logger.info("Duplicate check finished")
 
     if content_max_similarity >= CONTENT_MEDIUM_SIMILARITY or att_similar_object is not None:
       if message.author.id in self.strikes.keys():

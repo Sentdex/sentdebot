@@ -36,9 +36,9 @@ warden_report_channel = -1
 
 [cogs]
 # Cogs that will be loaded on startup and unable to be unloaded
-protected = ["system", "errors", "help", "listeners"]
+protected = ["system", "errors", "help", "listeners", "auditlog", "admin_tools"]
 # Cogs automatically loaded after start
-defaul_loaded = ["common", "code_execute", "projects", "random_role_giver", "stats", "auditlog", "help_threader", "bookmarks", "voice_channel_notifier", "questions_and_answers", "warden"]
+defaul_loaded = ["common", "code_execute", "projects", "random_role_giver", "stats", "help_threader", "bookmarks", "vc_notifier", "auto_help", "warden"]
 
 
 [random_role_giver]

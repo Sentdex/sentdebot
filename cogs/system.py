@@ -26,11 +26,11 @@ async def unloaded_cogs_autocomplete(_, search: str):
 
   if search is None or search == "":
     unloaded_cogs.append("all")
-    return unloaded_cogs
+    return unloaded_cogs[:25]
 
   ret = [cog for cog in unloaded_cogs if search.lower() in cog.lower()]
   ret.append("all")
-  return ret
+  return ret[:25]
 
 
 async def loaded_cogs_autocomplete(_, search: str):
@@ -38,11 +38,11 @@ async def loaded_cogs_autocomplete(_, search: str):
 
   if search is None or search == "":
     loaded_cogs.append("all")
-    return loaded_cogs
+    return loaded_cogs[:25]
 
   ret = [cog for cog in loaded_cogs if search.lower() in cog.lower()]
   ret.append("all")
-  return ret
+  return ret[:25]
 
 
 async def loaded_cogs_not_protected_autocomplete(_, search: str):
@@ -50,11 +50,11 @@ async def loaded_cogs_not_protected_autocomplete(_, search: str):
 
   if search is None or search == "":
     loaded_cogs.append("all")
-    return loaded_cogs
+    return loaded_cogs[:25]
 
   ret = [cog for cog in loaded_cogs if search.lower() in cog.lower()]
   ret.append("all")
-  return ret
+  return ret[:25]
 
 class System(Base_Cog):
   def __init__(self, bot: commands.Bot):

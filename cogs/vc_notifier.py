@@ -18,9 +18,9 @@ def generate_nick_string(members: List[disnake.Member]):
     return f"{output} and {members[-1].name}"
   return f"{members[0].name}"
 
-class VoiceChannelNotifier(Base_Cog):
+class VCNotifier(Base_Cog):
   def __init__(self, bot: commands.Bot):
-    super(VoiceChannelNotifier, self).__init__(bot, __file__)
+    super(VCNotifier, self).__init__(bot, __file__)
 
     self.voice_channel_ids = [channel for channel in config.voice_channel_notifier.vc_channel_ids]
     self.threshold_to_announce_role = {settings.user_threshold:settings.announce_role_id for settings in config.voice_channel_notifier.notification_settings}
@@ -231,4 +231,4 @@ class VoiceChannelNotifier(Base_Cog):
       self.voice_channel_members[after.channel.id][member.id] = datetime.datetime.utcnow()
 
 def setup(bot):
-  bot.add_cog(VoiceChannelNotifier(bot))
+  bot.add_cog(VCNotifier(bot))

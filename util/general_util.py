@@ -3,7 +3,7 @@
 import math
 import disnake
 from disnake.ext import commands
-from typing import Union, Iterable, List, Tuple
+from typing import Union, Iterable, List, Tuple, Optional
 import os
 from datetime import datetime, timezone
 
@@ -147,14 +147,27 @@ async def get_or_fetch_channel(source: Union[disnake.Guild, commands.Bot], chann
 
   return channel
 
-async def get_or_fetch_message(bot: commands.Bot, source: Union[disnake.TextChannel, disnake.Thread], message_id: int):
+async def get_or_fetch_message(bot: commands.Bot, source: Optional[Union[disnake.TextChannel, disnake.Thread]], message_id: int):
   message = bot.get_message(message_id)
-  if message is None:
+  if message is None and source is not None:
     try:
       message = await source.fetch_message(message_id)
     except:
       return None
   return message
+
+async def get_or_fetch_member(source: Union[disnake.Guild, commands.Bot], member_id: int):
+  if isinstance(source, disnake.Guild):
+    user = source.get_member(member_id)
+    if user is None:
+      try:
+        user = await source.fetch_member(member_id)
+      except:
+        return None
+  else:
+    users = source.get_all_members()
+    user = disnake.utils.get(users, id=member_id)
+  return user
 
 def get_avatar(user: Union[disnake.Member, disnake.User], size: int=256) -> disnake.Asset:
   if not user.avatar:

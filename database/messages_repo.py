@@ -22,6 +22,15 @@ def get_author_of_last_message_metric(channel_id: int, thread_id: Optional[int])
   user_id = session.query(Message.author_id).filter(Message.channel_id == str(channel_id), Message.thread_id == (str(thread_id) if thread_id is not None else None), Message.use_for_metrics == True).order_by(Message.created_at.desc()).first()
   return int(user_id[0]) if user_id is not None else None
 
+def get_messages_of_user(user_id: int, hours_back: float) -> List[Message]:
+  threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=hours_back)
+  return session.query(Message).filter(Message.author_id == str(user_id), Message.created_at > threshold).order_by(Message.created_at.desc()).all()
+
+def delete_message(message_id: int, commit: bool=True):
+  session.query(Message).filter(Message.message_id == str(message_id)).delete()
+  if commit:
+    session.commit()
+
 def delete_old_messages(days: int):
   threshold = datetime.datetime.utcnow() - datetime.timedelta(days=days)
   session.query(Message).filter(Message.created_at <= threshold).delete()

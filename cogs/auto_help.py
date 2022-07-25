@@ -33,9 +33,9 @@ def getApproximateAnswer(q):
     return ref_question, questions_and_answers_repo.get_answer_by_id(answer_id), max_score
   return None, None, None
 
-class QuestionsAndAnswers(Base_Cog):
+class AutoHelp(Base_Cog):
   def __init__(self, bot: commands.Bot):
-    super(QuestionsAndAnswers, self).__init__(bot, __file__)
+    super(AutoHelp, self).__init__(bot, __file__)
 
   @commands.Cog.listener()
   async def on_message(self, message: disnake.Message):
@@ -92,4 +92,4 @@ class QuestionsAndAnswers(Base_Cog):
       await inter.send(embed=embed, ephemeral=True)
 
 def setup(bot):
-  bot.add_cog(QuestionsAndAnswers(bot))
+  bot.add_cog(AutoHelp(bot))

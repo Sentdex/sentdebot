@@ -147,3 +147,20 @@ class Strings(metaclass=formattable):
   questions_and_answers_remove_removed = "Question removed from database"
 
   questions_and_answers_list_description = "List all questions and answers"
+
+  # Admin tools
+  admin_tools_destroy_user_brief = "Destroy user (ban and delete messages)"
+  admin_tools_destroy_user_help = "Hours back specifies how old messages will get deleted, if set to 0 then no messages will be deleted"
+
+  admin_tools_clean_user_brief = "Clean user's messages"
+  admin_tools_clean_user_help = "Hours back specifies how old messages will get deleted"
+
+  admin_tools_destroy_raid_brief = "Destroy raid (ban and delete messages)"
+  admin_tools_destroy_raid_help = "Select id of first and last join message and every user that joined in that join block will get banned\nHours back specifies how old messages will get deleted, if set to 0 then no messages will be deleted"
+  admin_tools_destroy_raid_messages_not_found = "Failed to get first or last message"
+
+  admin_tools_clean_raid_brief = "Clean raid spam messages"
+  admin_tools_clean_raid_help = "Select id of first and last join message and every user that joined in that join block will get banned\nHours back specifies how old messages will get deleted"
+  admin_tools_clean_raid_messages_not_found = "Failed to get first or last message"
+
+  admin_tools_invalid_hours_back = "Invalid value of hours back"
