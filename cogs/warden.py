@@ -81,7 +81,7 @@ class Warden(Base_Cog):
 
   @tasks.loop(minutes=config.warden.decrement_strikes_every_minutes)
   async def decrement_strikes_task(self):
-    keys = self.strikes.keys()
+    keys = list(self.strikes.keys())
     for key in keys:
       self.strikes[key] -= 1
       if self.strikes[key] <= 0:
@@ -92,7 +92,12 @@ class Warden(Base_Cog):
     if message.author.bot: return
     if isinstance(message.channel, disnake.DMChannel): return
     if message.guild.id != config.ids.main_guild: return
-    if message.channel.id not in config.ids.warden_channels_to_look_for: return
+
+    channel = message.channel
+    if isinstance(channel, disnake.Thread):
+      channel = channel.parent
+
+    if channel.id not in config.ids.warden_channels_to_look_for: return
 
     await self.check_for_duplicates(message)
 

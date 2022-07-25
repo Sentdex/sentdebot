@@ -151,7 +151,14 @@ async def get_or_fetch_message(bot: commands.Bot, source: Union[disnake.TextChan
   message = bot.get_message(message_id)
   if message is None:
     try:
-      message = source.fetch_message(message_id)
+      message = await source.fetch_message(message_id)
     except:
       return None
   return message
+
+def get_avatar(user: Union[disnake.Member, disnake.User], size: int=256) -> disnake.Asset:
+  if not user.avatar:
+    avatar = user.display_avatar.with_format('png').replace(size=size)
+  else:
+    avatar = user.display_avatar.with_format('jpg').replace(size=size)
+  return avatar
