@@ -80,21 +80,14 @@ class Auditlog(Base_Cog):
     after_attachments = [att.url for att in after.attachments]
 
     if before is not None:
-      if isinstance(before, disnake.Message):
-        if before.content == after.content and \
-          [att.url for att in before.attachments] == after_attachments:
-          return
-      else:
-        if before.content == after.content and before.attachments == after_attachments:
-          return
+      if before.content == after.content and [att.url for att in before.attachments] == after_attachments:
+        return
 
     await audit_log_repo.create_message_edited_log(self.bot, before, after)
 
     message_item.edited_at = after.edited_at
     message_item.content = after.content
-    message_item.attachments = after_attachments
-
-    messages_repo.session.commit()
+    messages_repo.update_attachments(message_item, after.attachments)
 
   @commands.Cog.listener()
   async def on_message_delete(self, message: disnake.Message):

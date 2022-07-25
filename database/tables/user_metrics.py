@@ -13,10 +13,9 @@ class UserMetrics(database.base):
   guild_id = Column(String, ForeignKey("guilds.id", ondelete="CASCADE"))
   timestamp = Column(DateTime, index=True)
   online = Column(BigIntegerType)
-  idle = Column(BigIntegerType)
   offline = Column(BigIntegerType)
 
   @classmethod
   def from_guild(cls, guild: disnake.Guild):
-    online, idle, offline = general_util.get_user_stats(guild)
-    return cls(guild_id=str(guild.id), timestamp=datetime.datetime.utcnow(), online=online, idle=idle, offline=offline)
+    online, offline = general_util.get_user_stats(guild)
+    return cls(guild_id=str(guild.id), timestamp=datetime.datetime.utcnow(), online=online, offline=offline)

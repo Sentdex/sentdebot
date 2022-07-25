@@ -146,7 +146,8 @@ class Stats(Base_Cog):
 
       self.community_report_image[ctx.guild.id][0].seek(0)
 
-      online, idle, offline = general_util.get_user_stats(main_guild)
+      online, offline = general_util.get_user_stats(main_guild)
+      idle = offline - online
       embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
       general_util.add_author_footer(embed, ctx.author)
       embed.set_image(file=disnake.File(self.community_report_image[ctx.guild.id][0], "community_report.png"))
@@ -235,7 +236,8 @@ class Stats(Base_Cog):
 
     self.community_report_image[ctx.guild.id] = (buf, datetime.datetime.utcnow())
 
-    online, idle, offline = general_util.get_user_stats(main_guild)
+    online, offline = general_util.get_user_stats(main_guild)
+    idle = offline - online
     embed = disnake.Embed(title="Community report", description=f"Online: {online}\nIdle/busy/dnd: {idle}\nOffline: {offline}", color=disnake.Color.dark_blue())
     general_util.add_author_footer(embed, ctx.author)
     embed.set_image(file=disnake.File(buf, "community_report.png"))

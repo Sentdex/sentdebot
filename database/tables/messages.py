@@ -1,10 +1,21 @@
 import disnake
 from disnake.ext import commands
 from typing import Optional
-from sqlalchemy import Column, DateTime, String, ForeignKey, Boolean, ARRAY
+from sqlalchemy import Column, DateTime, String, ForeignKey, Boolean
+from sqlalchemy.orm import relationship
 
 from database import database
 from util import general_util
+
+class MessageAttachment(database.base):
+  __tablename__ = "message_attachments"
+
+  id = Column(String, primary_key=True, unique=True)
+
+  message_id = Column(String, ForeignKey("messages.id", ondelete="CASCADE"), index=True, nullable=False)
+  url = Column(String, index=True, nullable=False)
+
+  message = relationship("Message", back_populates="attachments")
 
 class Message(database.base):
   __tablename__ = "messages"
@@ -20,7 +31,7 @@ class Message(database.base):
   thread_id = Column(String)
   content = Column(String)
 
-  attachments = Column(ARRAY(String, dimensions=1))
+  attachments = relationship("MessageAttachment", back_populates="message", uselist=True)
 
   use_for_metrics = Column(Boolean, nullable=False, default=False)
 
@@ -29,7 +40,7 @@ class Message(database.base):
     channel_is_thread = isinstance(message.channel, disnake.Thread)
     channel_id = message.channel.parent.id if channel_is_thread else message.channel.id
     thread_id = message.channel.id if channel_is_thread else None
-    return cls(id=str(message.id), author_id=str(message.author.id), guild_id=str(message.guild.id) if message.guild is not None else None, created_at=message.created_at, channel_id=str(channel_id), thread_id=str(thread_id) if thread_id is not None else None, content=message.content, attachments=[att.url for att in message.attachments])
+    return cls(id=str(message.id), author_id=str(message.author.id), guild_id=str(message.guild.id) if message.guild is not None else None, created_at=message.created_at, channel_id=str(channel_id), thread_id=str(thread_id) if thread_id is not None else None, content=message.content)
 
   async def to_object(self, bot: commands.Bot) -> Optional[disnake.Message]:
     message = await general_util.get_or_fetch_message(bot, None, int(self.message_id))

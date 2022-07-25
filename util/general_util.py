@@ -126,16 +126,14 @@ def truncate_string(string: str, limit: int, ellipsis :str="…", from_beginning
 def get_user_stats(guild):
   members = guild.members
 
-  online, idle, offline = 0, 0, 0
+  online, offline = 0, 0
   for member in members:
     if member.status == disnake.Status.online:
       online += 1
     elif member.status == disnake.Status.offline:
       offline += 1
-    else:
-      idle += 1
 
-  return online, idle, offline
+  return online, offline
 
 async def get_or_fetch_channel(source: Union[disnake.Guild, commands.Bot], channel_id: int):
   channel = source.get_channel(channel_id)
