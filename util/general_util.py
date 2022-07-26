@@ -132,6 +132,8 @@ def get_user_stats(guild) -> Tuple[int, int, int]:
       online += 1
     elif member.status == disnake.Status.offline:
       offline += 1
+    else:
+      idle += 1
 
   return online, idle, offline
 

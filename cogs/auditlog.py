@@ -3,10 +3,9 @@ import disnake
 from disnake.ext import commands, tasks
 from typing import Optional
 
-from util import general_util
 from util.logger import setup_custom_logger
 from config import config
-from database import messages_repo, audit_log_repo, users_repo, help_threads_repo, user_metrics_repo
+from database import messages_repo, audit_log_repo, users_repo, help_threads_repo, user_metrics_repo, guilds_repo
 from features.base_cog import Base_Cog
 
 logger = setup_custom_logger(__name__)
@@ -100,29 +99,31 @@ class Auditlog(Base_Cog):
 
   @commands.Cog.listener()
   async def on_member_update(self, before: disnake.Member, after: disnake.Member):
-    if after.bot: return
-
-    user_it = users_repo.get_user(after.id)
+    user_it = users_repo.get_member(after.id, after.guild.id)
     if user_it is not None:
       user_it.nick = after.display_name
       user_it.icon_url = after.display_avatar.url
+      user_it.premium = after.premium_since is not None
 
-    audit_log_repo.create_member_changed_log(before, after, commit=False)
-    users_repo.session.commit()
+    audit_log_repo.create_member_changed_log(before, after, commit=True)
 
   @commands.Cog.listener()
   async def on_member_join(self, member: disnake.Member):
-    if member.bot: return
     users_repo.get_or_create_member_if_not_exist(member)
 
   @commands.Cog.listener()
   async def on_member_remove(self, member: disnake.Member):
-    if member.bot: return
+    users_repo.set_member_left(member)
 
-    member_it = users_repo.get_member(member.id, member.guild.id)
-    if member_it is not None:
-      member_it.left_at = datetime.datetime.utcnow()
-      users_repo.session.commit()
+  @commands.Cog.listener()
+  async def on_guild_join(self, guild: disnake.Guild):
+    guilds_repo.get_or_create_guild_if_not_exist(guild)
+    for member in guild.members:
+      users_repo.get_or_create_member_if_not_exist(member)
+
+  @commands.Cog.listener()
+  async def on_guild_remove(self, guild: disnake.Guild):
+    guilds_repo.remove_guild(guild.id)
 
   @tasks.loop(hours=24)
   async def cleanup_taks(self):

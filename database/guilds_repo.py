@@ -14,3 +14,7 @@ def get_or_create_guild_if_not_exist(guild: disnake.Guild) -> Guild:
     session.add(guild_it)
     session.commit()
   return guild_it
+
+def remove_guild(guild_id: int):
+  session.query(Guild).filter(Guild.id == str(guild_id)).delete()
+  session.commit()

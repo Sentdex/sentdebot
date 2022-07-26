@@ -37,6 +37,10 @@ def get_or_create_member_if_not_exist(member: disnake.Member) -> Member:
     session.commit()
   return member_it
 
+def set_member_left(member: disnake.Member):
+  session.query(Member).filter(Member.id == str(member.id), Member.guild_id == str(member.guild.id)).update({Member.left_at: datetime.datetime.utcnow()})
+  session.commit()
+
 def delete_left_members(days_after_left: int):
   threshold = datetime.datetime.utcnow() - datetime.timedelta(days=days_after_left)
   session.query(Member).filter(Member.left_at != None, Member.left_at <= threshold).delete()

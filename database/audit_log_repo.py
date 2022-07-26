@@ -72,6 +72,9 @@ def create_member_changed_log(before: disnake.Member, after: disnake.Member, com
     data["avatar_url_before"] = before.display_avatar.url
     data["avatar_url_after"] = after.display_avatar.url
 
+  if before.premium_since != after.premium_since:
+    data["new_premium_state"] = after.premium_since is not None
+
   if data.keys():
     get_or_create_member_if_not_exist(after)
     item = AuditLog(user_id=str(after.id), guild_id=str(after.guild.id), log_type=AuditLogItemType.MEMBER_UPDATED, data=data)

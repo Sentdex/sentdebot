@@ -126,5 +126,16 @@ class AdminTools(Base_Cog):
     deleted_messages = await ctx.channel.purge(after=threshold)
     await general_util.generate_success_message(ctx, f"Deleted {len(deleted_messages)} message(s)")
 
+  @commands.slash_command(description="Get all members of server and save them to database")
+  @commands.check(general_util.is_administrator)
+  @commands.guild_only()
+  async def pull_members(self, inter: disnake.CommandInteraction):
+    await inter.send("**Pulling members...**", ephemeral=True)
+    members = inter.guild.fetch_members(limit=None)
+    async for member in members:
+      users_repo.get_or_create_member_if_not_exist(member)
+      await asyncio.sleep(0.05)
+    await inter.followup.send("**Pulling done**", ephemeral=True)
+
 def setup(bot):
   bot.add_cog(AdminTools(bot))

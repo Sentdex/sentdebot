@@ -1,7 +1,7 @@
 import disnake
 from disnake.ext import commands
 from typing import Union, Optional
-from sqlalchemy import Column, DateTime, String, PrimaryKeyConstraint, ForeignKey
+from sqlalchemy import Column, DateTime, String, PrimaryKeyConstraint, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 
 from util import general_util
@@ -13,11 +13,14 @@ class User(database.base):
   id = Column(String, primary_key=True, unique=True, index=True)
   created_at = Column(DateTime, nullable=False)
 
+  is_bot = Column(Boolean, nullable=False)
+  is_system = Column(Boolean, nullable=False)
+
   member_of = relationship("Member", back_populates="user")
 
   @classmethod
   def from_user(cls, user: Union[disnake.Member, disnake.User]):
-    return cls(id=str(user.id), created_at=user.created_at)
+    return cls(id=str(user.id), created_at=user.created_at, is_bot=user.bot, is_system=user.system)
 
   async def to_object(self, bot: commands.Bot) -> Optional[disnake.User]:
     user = bot.get_user(int(self.id))
@@ -37,6 +40,7 @@ class Member(database.base):
 
   nick = Column(String, nullable=False)
   icon_url = Column(String)
+  premium = Column(Boolean, nullable=False)
 
   user = relationship("User", back_populates="member_of")
   guild = relationship("Guild", back_populates="members")
@@ -49,7 +53,7 @@ class Member(database.base):
 
   @classmethod
   def from_member(cls, member: disnake.Member):
-    return cls(id=str(member.id), guild_id=str(member.guild.id), joined_at=member.joined_at, nick=member.display_name, icon_url=member.display_avatar.url)
+    return cls(id=str(member.id), guild_id=str(member.guild.id), joined_at=member.joined_at, nick=member.display_name, icon_url=member.display_avatar.url, premium=member.premium_since is not None)
 
   async def to_object(self, bot: commands.Bot) -> Optional[disnake.Member]:
     guild = await self.guild.to_object(bot)
