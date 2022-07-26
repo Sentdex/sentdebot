@@ -21,7 +21,7 @@ class Common(Base_Cog):
 
     self.pet_cache = cachetools.LRUCache(maxsize=20)
 
-  @commands.command(name="invite")
+  @commands.command(name="invite", brief="Send invite link")
   @cooldowns.long_cooldown
   async def invite_link(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
@@ -33,6 +33,7 @@ class Common(Base_Cog):
     try:
       if message.pinned:
         await message.unpin(reason=f"{inter.author} unpinned message")
+        await general_util.generate_success_message(inter, "Message pinned")
       else:
         await message.pin(reason=f"{inter.author} pinned message")
     except disnake.Forbidden:
