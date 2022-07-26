@@ -142,7 +142,7 @@ class Common(Base_Cog):
 
   @commands.slash_command(name="vote", description=Strings.common_vote_brief)
   @cooldowns.long_cooldown
-  async def pet(self, inter: disnake.CommandInteraction):
+  async def vote_command(self, inter: disnake.CommandInteraction):
     await inter.response.send_modal(VoteSetupModal())
 
 def setup(bot):
