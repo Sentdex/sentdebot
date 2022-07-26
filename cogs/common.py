@@ -25,7 +25,7 @@ class Common(Base_Cog):
   @cooldowns.long_cooldown
   async def invite_link(self, ctx: commands.Context):
     await general_util.delete_message(self.bot, ctx)
-    await ctx.send("https://discord.com/oauth2/authorize?client_id=998191988312657960&permissions=1634705341648&scope=bot")
+    await ctx.send("https://discord.com/oauth2/authorize?client_id=998191988312657960&permissions=1567096171606&scope=bot")
 
   @commands.message_command(name="Pin message")
   @commands.check(general_util.is_mod)
