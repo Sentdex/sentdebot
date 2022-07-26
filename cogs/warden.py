@@ -15,9 +15,6 @@ from util import general_util
 
 logger = setup_custom_logger(__name__)
 
-CONTENT_MEDIUM_SIMILARITY = 90
-CONTENT_HIGH_SIMILARITY = 95
-
 message_cache = cachetools.FIFOCache(config.warden.message_cache_size)
 
 @dataclasses.dataclass
@@ -158,14 +155,14 @@ class Warden(Base_Cog):
 
     # logger.info("Duplicate check finished")
 
-    if content_max_similarity >= CONTENT_MEDIUM_SIMILARITY or att_similar_object is not None:
+    if content_max_similarity >= config.warden.medium_similarity or att_similar_object is not None:
       if message.author.id in self.strikes.keys():
         self.strikes[message.author.id] += 1
       else:
         self.strikes[message.author.id] = 1
 
       if self.strikes[message.author.id] >= config.warden.strikes_to_notify:
-        if content_max_similarity >= CONTENT_MEDIUM_SIMILARITY:
+        if content_max_similarity >= config.warden.medium_similarity:
           await self.announce_content_duplicate(message, similar_object, content_max_similarity)
         if att_similar_object is not None and att_similar_object != similar_object:
           await self.announce_attachment_duplicate(message, att_similar_object)
@@ -184,7 +181,7 @@ class Warden(Base_Cog):
 
     original_message = await general_util.get_or_fetch_message(self.bot, original_message_channel, similar_object.message_id)
 
-    color = disnake.Color.orange() if content_similarity < CONTENT_HIGH_SIMILARITY else disnake.Color.red()
+    color = disnake.Color.orange() if content_similarity < config.warden.high_similarity else disnake.Color.red()
     embed = disnake.Embed(title="Message duplicate found", color=color, description=f"Content similarity: {content_similarity}%")
     embed.add_field(name="Author", value=f"Author: {original_message.author}", inline=False)
     embed.add_field(name="Original message", value=f"Channel: {original_message.channel.name}\n[Link]({original_message.jump_url})" if original_message is not None else "_??? (404)_")

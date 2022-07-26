@@ -16,7 +16,8 @@ class User(database.base):
   is_bot = Column(Boolean, nullable=False)
   is_system = Column(Boolean, nullable=False)
 
-  member_of = relationship("Member", back_populates="user")
+  members = relationship("Member", back_populates="user")
+  help_requests = relationship("HelpThread")
 
   @classmethod
   def from_user(cls, user: Union[disnake.Member, disnake.User]):
@@ -42,7 +43,7 @@ class Member(database.base):
   icon_url = Column(String)
   premium = Column(Boolean, nullable=False)
 
-  user = relationship("User", back_populates="member_of")
+  user = relationship("User", back_populates="members")
   guild = relationship("Guild", back_populates="members")
 
   joined_at = Column(DateTime, nullable=False, index=True)

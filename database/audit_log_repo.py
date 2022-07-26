@@ -84,7 +84,8 @@ def create_member_changed_log(before: disnake.Member, after: disnake.Member, com
     return item
   return None
 
-def delete_old_logs(days: int):
+def delete_old_logs(days: int, commit: bool=True):
   threshold = datetime.datetime.utcnow() - datetime.timedelta(days=days)
   session.query(AuditLog).filter(AuditLog.timestamp <= threshold).delete()
-  session.commit()
+  if commit:
+    session.commit()

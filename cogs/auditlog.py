@@ -129,11 +129,18 @@ class Auditlog(Base_Cog):
   async def cleanup_taks(self):
     logger.info("Starting cleanup")
     if config.essentials.delete_left_users_after_days > 0:
-      users_repo.delete_left_members(config.essentials.delete_left_users_after_days)
+      users_repo.delete_left_members(config.essentials.delete_left_users_after_days, commit=False)
     if config.essentials.delete_audit_logs_after_days > 0:
-      audit_log_repo.delete_old_logs(config.essentials.delete_audit_logs_after_days)
+      audit_log_repo.delete_old_logs(config.essentials.delete_audit_logs_after_days, commit=False)
     if config.essentials.delete_messages_after_days > 0:
-      messages_repo.delete_old_messages(config.essentials.delete_messages_after_days)
+      messages_repo.delete_old_messages(config.essentials.delete_messages_after_days, commit=False)
+
+    user_iterator = users_repo.get_all_users_iterator()
+    for user_it in user_iterator:
+      if len(user_it.members) == 0:
+        users_repo.session.delete(user_it)
+
+    users_repo.session.commit()
     logger.info("Cleanup finished")
 
 def setup(bot):

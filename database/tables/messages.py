@@ -40,7 +40,14 @@ class Message(database.base):
     channel_is_thread = isinstance(message.channel, disnake.Thread)
     channel_id = message.channel.parent.id if channel_is_thread else message.channel.id
     thread_id = message.channel.id if channel_is_thread else None
-    return cls(id=str(message.id), author_id=str(message.author.id), guild_id=str(message.guild.id) if message.guild is not None else None, created_at=message.created_at, channel_id=str(channel_id), thread_id=str(thread_id) if thread_id is not None else None, content=message.content)
+
+    return cls(id=str(message.id),
+               author_id=str(message.author.id),
+               guild_id=str(message.guild.id) if message.guild is not None else None,
+               created_at=message.created_at,
+               channel_id=str(channel_id),
+               thread_id=str(thread_id) if thread_id is not None else None,
+               content=message.content)
 
   async def to_object(self, bot: commands.Bot) -> Optional[disnake.Message]:
     message = await general_util.get_or_fetch_message(bot, None, int(self.message_id))

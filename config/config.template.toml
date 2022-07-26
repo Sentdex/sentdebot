@@ -95,7 +95,10 @@ score_limit = 40
 
 
 [warden]
-message_cache_size = 2000
+message_cache_size = 500
 expire_time_minutes = 5
 strikes_to_notify = 2
 decrement_strikes_every_minutes = 10
+
+medium_similarity = 90
+high_similarity = 95

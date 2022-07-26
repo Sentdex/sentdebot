@@ -62,7 +62,8 @@ def delete_message(message_id: int, commit: bool=True):
   if commit:
     session.commit()
 
-def delete_old_messages(days: int):
+def delete_old_messages(days: int, commit: bool=True):
   threshold = datetime.datetime.utcnow() - datetime.timedelta(days=days)
   session.query(Message).filter(Message.created_at <= threshold).delete()
-  session.commit()
+  if commit:
+    session.commit()

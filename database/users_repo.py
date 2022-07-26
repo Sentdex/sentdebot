@@ -2,6 +2,7 @@ import datetime
 
 import disnake
 from typing import Optional, List, Union
+import sqlalchemy.orm
 
 from database import session
 from database.tables.users import User, Member
@@ -16,6 +17,9 @@ def get_member(member_id: int, guild_id: int) -> Optional[Member]:
     member.left_at = None
     session.commit()
   return member
+
+def get_all_users_iterator() -> sqlalchemy.orm.Query:
+  return session.query(User)
 
 def get_or_create_user_if_not_exist(user: Union[disnake.Member, disnake.User]) -> User:
   user_it = get_user(user.id)
@@ -41,10 +45,11 @@ def set_member_left(member: disnake.Member):
   session.query(Member).filter(Member.id == str(member.id), Member.guild_id == str(member.guild.id)).update({Member.left_at: datetime.datetime.utcnow()})
   session.commit()
 
-def delete_left_members(days_after_left: int):
+def delete_left_members(days_after_left: int, commit: bool=True):
   threshold = datetime.datetime.utcnow() - datetime.timedelta(days=days_after_left)
   session.query(Member).filter(Member.left_at != None, Member.left_at <= threshold).delete()
-  session.commit()
+  if commit:
+    session.commit()
 
 def members_joined_in_timeframe(from_date: datetime.datetime, to_date: datetime.datetime, guild_id: int) -> List[Member]:
   return session.query(Member).filter(Member.joined_at >= from_date, Member.joined_at <= to_date, Member.guild_id == str(guild_id)).order_by(Member.joined_at.desc()).all()
